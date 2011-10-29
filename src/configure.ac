@@ -31,7 +31,7 @@ AC_FUNC_MALLOC
 AC_CHECK_LIB([ftdi],[ftdi_init],[],[echo "error: missing libftdi library" && exit],[])
 AC_CHECK_HEADERS([ftdi.h],[],[echo "error: missing libftdi header files" && exit])
 AC_CHECK_HEADERS([stdlib.h stdint.h string.h],[],[echo "error: missing standard header files" && exit])
-AC_CHECK_FUNCS([malloc memset],[],AC_MSG_ERROR(["Missing necessary function"]))
+AC_CHECK_FUNCS([malloc memset],[],AC_MSG_ERROR(["missing standard functions"]))
 
 if test -e $SWIG
 then
@@ -44,8 +44,6 @@ else
 	echo "error: swig was not found on the system"
 	exit 1
 fi
-
-cp confdefs.h config.h
 
 AC_SUBST(SWIG, $SWIG)
 AC_SUBST(PYDEV, $PYDEV)

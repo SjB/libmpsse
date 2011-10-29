@@ -10,10 +10,19 @@ int main(void)
 
 	if(MPSSE(I2C, FREQUENCY, MSB) == MPSSE_OK)
 	{
-		printf("Requested frequency: %d\nActual frequency: %d\n", FREQUENCY, mpsse.clock);
+		printf("I2C bus initialized at %dHz\n", mpsse.clock);
 		
 		Start();
-		Write((char *) &txdata, 1);
+
+		if(Write((char *) &txdata, sizeof(txdata)) == MPSSE_OK)
+		{
+			printf("Wrote %d bytes over I2C bus.\n", sizeof(txdata));
+		}
+		else
+		{
+			printf("Write failed: %s\n", ErrorString());
+		}
+
 		Stop();
 	}
 	else

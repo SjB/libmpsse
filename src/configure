@@ -3500,7 +3500,7 @@ eval as_val=\$$as_ac_var
 _ACEOF
 
 else
-  as_fn_error "\"Missing necessary function\"" "$LINENO" 5
+  as_fn_error "\"missing standard functions\"" "$LINENO" 5
 fi
 done
 
@@ -3516,8 +3516,6 @@ else
 	echo "error: swig was not found on the system"
 	exit 1
 fi
-
-cp confdefs.h config.h
 
 SWIG=$SWIG
 

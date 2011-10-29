@@ -20,10 +20,10 @@ $(TARGET): mpsse.o
 examples: spitest i2ctest
 
 spitest:
-	$(CC) $(CFLAGS) $(LDFLAGS) examples/spitest.c -o examples/spitest -lmpsse
+	$(CC) $(CFLAGS) examples/spitest.c -o examples/spitest -lmpsse
 
 i2ctest:
-	$(CC) $(CFLAGS) $(LDFLAGS) examples/i2ctest.c -o examples/i2ctest -lmpsse
+	$(CC) $(CFLAGS) examples/i2ctest.c -o examples/i2ctest -lmpsse
 
 mpsse.o: support.o
 	$(CC) $(CFLAGS) $(LDFLAGS) -c mpsse.c
@@ -51,7 +51,7 @@ uninstall:
 	rm -f $(INCDIR)/$(TARGET).h
 
 clean:
-	rm -f spitest i2ctest *.o *.so *.a $(TARGET).py* $(TARGET)_wrap.c
+	rm -f examples/spitest examples/i2ctest *.o *.so *.a $(TARGET).py* $(TARGET)_wrap.c
 
 cleanall: clean
 	rm -rf *.cache config.* Makefile
