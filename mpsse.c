@@ -2,7 +2,6 @@
  * LibMPSSE source.
  */
 
-#include <stdarg.h>
 #include <string.h>
 #include <stdint.h>
 #include <ftdi.h>

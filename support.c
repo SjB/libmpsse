@@ -3,8 +3,6 @@
  */
 
 #include <string.h>
-#include <time.h>
-#include <stdarg.h>
 #include <ftdi.h>
 #include "mpsse.h"
 #include "support.h"
@@ -71,21 +69,6 @@ void configure_default_settings(int endianess)
 	mpsse.pstart &= ~CS;
 
 	return;
-}
-
-/* Used by functions that take variable length arguments */
-int next_arg(va_list args, int def)
-{
-        int r = 0;
-
-        r = va_arg(args, int);
-	/* All valid arguments that we deal with are within this range */
-        if(r < 0 || r > 5)
-        {
-                r = def;
-        }
-
-        return r;
 }
 
 /* Builds a buffer of commands + data blocks */

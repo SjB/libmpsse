@@ -3,7 +3,6 @@
 
 #include <ftdi.h>
 #include <stdint.h>
-#include <stdarg.h>
 
 #define MPSSE_OK		0
 #define MPSSE_FAIL		1
@@ -91,7 +90,7 @@ struct globule
 
 int MPSSE(enum modes mode, int freq, int endianess);
 int Open(int vid, int pid, enum modes mode, int freq, int endianess);
-void Close();
+void Close(void);
 char *ErrorString(void);
 void SetTimeouts(int timeout);
 int SetMode(enum modes mode, int endianess);

@@ -1,7 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <time.h>
 #include "mpsse.h"
 
 #define FREQUENCY	30000000		// 30MHz
