@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "mpsse.h"
+#include <mpsse.h>
 
 #define FREQUENCY	30000000		// 30MHz
 #define CHIP_SIZE	0x100000		// 1MB

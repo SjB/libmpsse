@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "mpsse.h"
+#include <mpsse.h>
 
 #define FREQUENCY	200000	// 200KHz
 

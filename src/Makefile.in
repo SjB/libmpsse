@@ -7,6 +7,7 @@ CFLAGS=@CFLAGS@
 prefix=@prefix@
 exec_prefix=@exec_prefix@
 LIBDIR=@libdir@
+INCDIR=@includedir@
 INC=-I$(PYDEV)
 TARGET=mpsse
 
@@ -14,6 +15,7 @@ all: $(TARGET) swig
 
 $(TARGET): mpsse.o
 	gcc -shared -Wl,-soname,lib$(TARGET).so $(TARGET).o support.o -o lib$(TARGET).so $(LDFLAGS)
+	ar rcs lib$(TARGET).a $(TARGET).o support.o
 
 examples: spitest i2ctest
 
@@ -33,20 +35,23 @@ swig:
 	$(CC) $(CFLAGS) $(LDFLAGS) -DSWIGPYTHON -c support.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -DSWIGPYTHON -c mpsse.c
 	$(SWIG) -python $(TARGET).i
-	$(CC) $(CFLAGS) -c  $(TARGET)_wrap.c $(LDFLAGS) $(INC)
+	$(CC) -c  $(TARGET)_wrap.c  $(INC)
 	ld -shared $(TARGET)_wrap.o mpsse.o support.o -o _$(TARGET).so $(LDFLAGS) $(INC)
 
 install:
 	cp lib$(TARGET).so $(LIBDIR)/lib$(TARGET).so
+	cp lib$(TARGET).a $(LIBDIR)/lib$(TARGET).a
 	cp $(TARGET).py $(PYLIB)/$(TARGET).py
 	cp _$(TARGET).so $(PYLIB)/_$(TARGET).so
+	cp $(TARGET).h $(INCDIR)/$(TARGET).h
 
 uninstall:
-	rm -f $(LIBDIR)/lib$(TARGET).so
+	rm -f $(LIBDIR)/lib$(TARGET).so $(LIBDIR)/lib$(TARGET).a
 	rm -f $(PYLIB)/$(TARGET).py $(PYLIB)/_$(TARGET).so
+	rm -f $(INCDIR)/$(TARGET).h
 
 clean:
-	rm -f spitest i2ctest *.o *.so $(TARGET).py* $(TARGET)_wrap.c
+	rm -f spitest i2ctest *.o *.so *.a $(TARGET).py* $(TARGET)_wrap.c
 
 cleanall: clean
 	rm -rf *.cache config.* Makefile
