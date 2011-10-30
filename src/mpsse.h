@@ -16,14 +16,23 @@
 #define TIMEOUT_MS		10000
 #define TIMEOUT_DIVISOR		1000000
 
-#define SIX_MHZ			6000000
-#define TWELVE_MHZ		12000000
-#define SIXTY_MHZ		60000000
-
 #define BITMODE_RESET		0
 #define BITMODE_MPSSE		2
 
 #define CMD_SIZE		3
+
+/* Common clock rates */
+enum clock_rates
+{
+	ONE_HUNDRED_KHZ  = 100000,
+	TWO_HUNDRED_KHZ  = 200000,
+	FOUR_HUNDRED_KHZ = 400000,
+	ONE_MHZ 	 = 1000000,
+	SIX_MHZ 	 = 6000000,
+	TWELVE_MHZ 	 = 12000000,
+	THIRTY_MHZ 	 = 30000000,
+	SIXTY_MHZ 	 = 60000000
+};
 
 /* Supported MPSSE modes */
 enum modes
@@ -94,10 +103,11 @@ void Close(void);
 char *ErrorString(void);
 void SetTimeouts(int timeout);
 int SetMode(enum modes mode, int endianess);
-uint32_t SetClock(uint32_t freq);
+int SetClock(uint32_t freq);
+uint32_t GetClock(void);
 int SetLoopback(int enable);
 int Start(void);
-int Write(char *data, int size);
+int Write(char *data, uint32_t size);
 int Stop(void);
 
 #ifdef SWIGPYTHON
@@ -108,11 +118,11 @@ typedef struct swig_string_data
         char *data;
 } swig_string_data;
 
-swig_string_data Read(int size);
+swig_string_data Read(uint32_t size);
 
 #else
 
-char *Read(int size);
+char *Read(uint32_t size);
 
 #endif
 

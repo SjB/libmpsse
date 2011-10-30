@@ -1,0 +1,30 @@
+PREREQUISITES
+
+	Libmpsse requires swig as well as the libftdi and python development packages. 
+	These can typically be installed by your system's package manager, such as:
+
+		# apt-get install swig libftdi-dev python-dev
+
+BUILDING
+
+	With the required prerequisites installed, libmpsse can be built and installed
+	by running:
+
+		$ ./configure
+		$ make
+		# make install
+
+	Required paths, such as include and library directories, will typically be detected 
+	automatically by the configure script. To specify alternative directory paths, you 
+	may set the following environment variables:
+
+		SWIG   - Path to the swig binary
+		PYDEV  - Path to the python include directory where the python header files are located
+		PYLIB  - Path to the python library directory where python modules should be installed
+
+	Example:
+
+		$ PYDEV=/usr/local/include/python2.6/ ./configure
+		$ make
+		# make install
+	

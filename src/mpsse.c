@@ -80,8 +80,7 @@ int Open(int vid, int pid, enum modes mode, int freq, int endianess)
 
 			if(status == 0)
 			{
-				mpsse.clock = SetClock(freq);
-				if(mpsse.clock > 0)
+				if(SetClock(freq) == MPSSE_OK)
 				{
 					/* Set the read and write timeout periods */
 					SetTimeouts(TIMEOUT_MS / (freq/TIMEOUT_DIVISOR));
@@ -225,12 +224,13 @@ void SetTimeouts(int timeout)
  *
  * @freq - Desired clock frequency in hertz.
  *
- * Returns the actual clock frequency in hertz on success.
- * Returns 0 on failure.
+ * Returns MPSSE_OK on success.
+ * Returns MPSSE_FAIL on failure.
  */
-uint32_t SetClock(uint32_t freq)
+int SetClock(uint32_t freq)
 {
-	uint32_t nfreq = 0, system_clock = 0;
+	int retval = MPSSE_FAIL;
+	uint32_t system_clock = 0;
 	uint16_t divisor = 0;
 	char buf[3] = { 0 };
 
@@ -255,11 +255,22 @@ uint32_t SetClock(uint32_t freq)
 
 		if(raw_write((unsigned char *) &buf, 3) == MPSSE_OK)
 		{
-			nfreq = div2freq(system_clock, divisor);
+			mpsse.clock = div2freq(system_clock, divisor);
+			retval = MPSSE_OK;
 		}
 	}
 
-	return nfreq;
+	return retval;
+}
+
+/* 
+ * Gets the currently configured clock rate.
+ *
+ * Returns the existing clock rate.
+ */
+uint32_t GetClock(void)
+{
+	return mpsse.clock;
 }
 
 /* 
@@ -313,7 +324,7 @@ int Start(void)
  * Returns MPSSE_OK on success.
  * Returns MPSSE_FAIL on failure.
  */
-int Write(char *data, int size)
+int Write(char *data, uint32_t size)
 {
 	unsigned char *buf = NULL;
 	int retval = MPSSE_FAIL, buf_size = 0, txsize = 0, n = 0;
@@ -351,9 +362,9 @@ int Write(char *data, int size)
  * Returns NULL on failure.
  */
 #ifdef SWIGPYTHON
-swig_string_data Read(int size)
+swig_string_data Read(uint32_t size)
 #else
-char *Read(int size)
+char *Read(uint32_t size)
 #endif
 {
 	unsigned char *data = NULL, *buf = NULL;
