@@ -10,7 +10,7 @@ int main(void)
 
 	if(MPSSE(I2C, FREQUENCY, MSB) == MPSSE_OK)
 	{
-		printf("I2C bus initialized at %dHz\n", mpsse.clock);
+		printf("I2C bus initialized at %dHz\n", GetClock());
 		
 		Start();
 

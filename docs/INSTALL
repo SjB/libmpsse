@@ -5,7 +5,7 @@ PREREQUISITES
 
 		# apt-get install swig libftdi-dev python-dev
 
-BUILDING
+INSTALLATION
 
 	With the required prerequisites installed, libmpsse can be built and installed
 	by running:
@@ -27,4 +27,10 @@ BUILDING
 		$ PYDEV=/usr/local/include/python2.6/ ./configure
 		$ make
 		# make install
+
+BUILDING EXAMPLE CODE
+
+	After libmpsse has been installed, you can build the example programs by running:
+
+		$ make examples
 	

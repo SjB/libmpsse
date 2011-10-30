@@ -10,7 +10,7 @@ int main(void)
 
 	if(MPSSE(SPI3, FREQUENCY, MSB) == MPSSE_OK)
 	{
-		printf("SPI bus initialized at %dHz\n", mpsse.clock);
+		printf("SPI bus initialized at %dHz\n", GetClock());
 		
 		Start();
 
