@@ -13,6 +13,7 @@
 #define TRANSFER_SIZE		((64 * 1024) - 1)
 
 #define LATENCY_MS		2
+#define MAX_TIMEOUT_MS		5000
 #define TIMEOUT_MS		10000
 #define TIMEOUT_DIVISOR		1000000
 
@@ -107,7 +108,7 @@ int SetClock(uint32_t freq);
 uint32_t GetClock(void);
 int SetLoopback(int enable);
 int Start(void);
-int Write(char *data, uint32_t size);
+int Write(char *data, int size);
 int Stop(void);
 
 #ifdef SWIGPYTHON
@@ -118,11 +119,11 @@ typedef struct swig_string_data
         char *data;
 } swig_string_data;
 
-swig_string_data Read(uint32_t size);
+swig_string_data Read(int size);
 
 #else
 
-char *Read(uint32_t size);
+char *Read(int size);
 
 #endif
 

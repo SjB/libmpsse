@@ -56,7 +56,7 @@ int MPSSE(enum modes mode, int freq, int endianess)
  */
 int Open(int vid, int pid, enum modes mode, int freq, int endianess)
 {
-	int status = 0, retval = MPSSE_FAIL;
+	int status = 0, timeout = 0, retval = MPSSE_FAIL;
 
 	memset((void *) &mpsse, 0, sizeof(mpsse));
 
@@ -82,9 +82,15 @@ int Open(int vid, int pid, enum modes mode, int freq, int endianess)
 			{
 				if(SetClock(freq) == MPSSE_OK)
 				{
+					timeout = (int) ((float) TIMEOUT_MS / ((float) freq / (float) TIMEOUT_DIVISOR));
+					if(timeout > MAX_TIMEOUT_MS)
+					{
+						timeout = MAX_TIMEOUT_MS;
+					}
+
 					/* Set the read and write timeout periods */
-					SetTimeouts(TIMEOUT_MS / (freq/TIMEOUT_DIVISOR));
-					
+					SetTimeouts(timeout);
+
 					retval = SetMode(mode, endianess);
 				}
 			}
@@ -168,8 +174,10 @@ int SetMode(enum modes mode, int endianess)
 			break;
 		case I2C:
 			/* I2C propogates data on the falling clock edge and reads data on the rising clock edge */
-			mpsse.tx |= MPSSE_WRITE_NEG;
-			mpsse.rx &= ~MPSSE_READ_NEG;
+			//mpsse.tx |= MPSSE_WRITE_NEG;
+			//mpsse.rx &= ~MPSSE_READ_NEG;
+			mpsse.tx &= ~ MPSSE_WRITE_NEG;
+			mpsse.rx |= MPSSE_READ_NEG;
 			/* In I2C, both the clock and the data lines idle high */
 			mpsse.pidle |= DO;
 			/* I2C start bit == data line goes from high to low while clock line is high */
@@ -177,7 +185,7 @@ int SetMode(enum modes mode, int endianess)
 			/* I2C stop bit == data line goes from low to high while clock line is high - set data line low here, so the transition to the idle state triggers the stop condition. */
 			mpsse.pstop &= ~DO;
 			/* FTDI documentation indicates that I2C should have the 3-phase clock enabled, but this seems to not work properly */
-			//setup_commands[setup_commands_size++] = ENABLE_3_PHASE_CLOCK;
+			setup_commands[setup_commands_size++] = ENABLE_3_PHASE_CLOCK;
 			break;
 		default:
 			retval = MPSSE_FAIL;
@@ -324,7 +332,7 @@ int Start(void)
  * Returns MPSSE_OK on success.
  * Returns MPSSE_FAIL on failure.
  */
-int Write(char *data, uint32_t size)
+int Write(char *data, int size)
 {
 	unsigned char *buf = NULL;
 	int retval = MPSSE_FAIL, buf_size = 0, txsize = 0, n = 0;
@@ -362,9 +370,9 @@ int Write(char *data, uint32_t size)
  * Returns NULL on failure.
  */
 #ifdef SWIGPYTHON
-swig_string_data Read(uint32_t size)
+swig_string_data Read(int size)
 #else
-char *Read(uint32_t size)
+char *Read(int size)
 #endif
 {
 	unsigned char *data = NULL, *buf = NULL;

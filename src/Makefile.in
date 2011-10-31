@@ -47,7 +47,7 @@ install:
 
 uninstall:
 	rm -f $(LIBDIR)/lib$(TARGET).so $(LIBDIR)/lib$(TARGET).a
-	rm -f $(PYLIB)/$(TARGET).py $(PYLIB)/_$(TARGET).so
+	rm -f $(PYLIB)/$(TARGET).* $(PYLIB)/_$(TARGET).so
 	rm -f $(INCDIR)/$(TARGET).h
 
 clean:
