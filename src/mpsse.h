@@ -68,11 +68,7 @@ enum mpsse_commands
 	DISABLE_ADAPTIVE_CLOCK	= 0x97,
 	TCK_X5			= 0x8A,
 	TCK_D5			= 0x8B,
-	TOGGLE_CLOCK		= 0x8E,
-	WRITE_DATA_MSB		= 0x10,
-	READ_DATA_MSB		= 0x20,
-	WRITE_DATA_LSB		= 0x19,
-	READ_DATA_LSB		= 0x28
+	TOGGLE_CLOCK		= 0x8E
 };
 
 struct vid_pid
@@ -110,6 +106,7 @@ int SetLoopback(int enable);
 int Start(void);
 int Write(char *data, int size);
 int Stop(void);
+int ReadAck(void);
 
 #ifdef SWIGPYTHON
 

@@ -420,6 +420,33 @@ char *Read(int size)
 }
 
 /*
+ * Reads in one acknowlegement bit (I2C only).
+ *
+ * Returns the acknowledgement bit value read.
+ */
+int ReadAck(void)
+{
+	int ack = 0;
+	char buf[3] = { 0 };
+
+	buf[0] = mpsse.rx | MPSSE_BITMODE;
+	buf[1] = 0;
+	buf[2] = SEND_IMMEDIATE;
+
+	if(raw_write((unsigned char *) &buf, sizeof(buf)) == MPSSE_OK)
+	{
+		memset((char *) &buf, 0, sizeof(buf));
+
+		if(raw_read((unsigned char *) &buf, 1) == MPSSE_OK)
+		{
+			ack = (int) buf[0];
+		}
+	}
+
+	return ack;
+}
+
+/*
  * Send data stop condition.
  *
  * Returns MPSSE_OK on success.
