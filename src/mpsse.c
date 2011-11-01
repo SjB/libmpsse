@@ -174,10 +174,8 @@ int SetMode(enum modes mode, int endianess)
 			break;
 		case I2C:
 			/* I2C propogates data on the falling clock edge and reads data on the rising clock edge */
-			//mpsse.tx |= MPSSE_WRITE_NEG;
-			//mpsse.rx &= ~MPSSE_READ_NEG;
-			mpsse.tx &= ~ MPSSE_WRITE_NEG;
-			mpsse.rx |= MPSSE_READ_NEG;
+			mpsse.tx |= MPSSE_WRITE_NEG;
+			mpsse.rx &= ~MPSSE_READ_NEG;
 			/* In I2C, both the clock and the data lines idle high */
 			mpsse.pidle |= DO;
 			/* I2C start bit == data line goes from high to low while clock line is high */
@@ -185,7 +183,7 @@ int SetMode(enum modes mode, int endianess)
 			/* I2C stop bit == data line goes from low to high while clock line is high - set data line low here, so the transition to the idle state triggers the stop condition. */
 			mpsse.pstop &= ~DO;
 			/* FTDI documentation indicates that I2C should have the 3-phase clock enabled, but this seems to not work properly */
-			setup_commands[setup_commands_size++] = ENABLE_3_PHASE_CLOCK;
+			//setup_commands[setup_commands_size++] = ENABLE_3_PHASE_CLOCK;
 			break;
 		default:
 			retval = MPSSE_FAIL;
@@ -364,7 +362,7 @@ int Write(char *data, int size)
 /*
  * Reads data over the selected serial protocol.
  * 
- * @size  - Number of bytes to read, 1 - 65535.
+ * @size  - Number of bytes to read.
  *
  * Returns a pointer to the read data on success.
  * Returns NULL on failure.
