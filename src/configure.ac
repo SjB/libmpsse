@@ -42,7 +42,7 @@ if ! test $PYLIB
 then
 	dnl This is a hack to get a valid python library path
 	echo -ne "import sys\nfor path in sys.path: print path" > pylib.py
-	PYLIB="$(python pylib.py | grep -e 'packages$' | head -1)"
+	PYLIB="$(python pylib.py | grep -e '-packages$' | head -1)"
 	rm -f pylib.py
 fi
 
