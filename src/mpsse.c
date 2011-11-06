@@ -161,6 +161,7 @@ int SetMode(enum modes mode, int endianess)
 		case SPI0:
 			/* SPI mode 0 clock idles low */
 			mpsse.pidle &= ~SK;
+			mpsse.pstart &= ~SK;
 		case SPI3:
 			/* SPI modes 0 and 3 propogate data on the falling edge and read data on the rising edge of the clock */
 			mpsse.tx |= MPSSE_WRITE_NEG;
@@ -169,6 +170,7 @@ int SetMode(enum modes mode, int endianess)
 		case SPI1:
 			/* SPI mode 1 clock idles low */
 			mpsse.pidle &= ~SK;
+			mpsse.pstart &= ~SK;
 		case SPI2:
 			/* SPI modes 1 and 2 propogate data on the rising edge and read data on the falling edge of the clock; nothing to do here. */
 			break;
