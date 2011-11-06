@@ -1,3 +1,7 @@
+/* 
+ * Example code to initialize the SPI bus and write one byte.
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <mpsse.h>
@@ -6,21 +10,19 @@
 
 int main(void)
 {
-	unsigned char txdata[1] = "\xAA";
-
-	if(MPSSE(SPI3, FREQUENCY, MSB) == MPSSE_OK)
+	if(MPSSE(SPI0, FREQUENCY, MSB) == MPSSE_OK)
 	{
-		printf("SPI bus initialized at %dHz\n", GetClock());
+		printf("SPI bus initialized at %dHz (mode 0)\n", GetClock());
 		
 		Start();
 
-		if(Write((char *) &txdata, sizeof(txdata)) == MPSSE_OK)
+		if(Write("\xAA", 1) == MPSSE_OK)
 		{
-			printf("Wrote %d bytes over SPI bus.\n", sizeof(txdata));
+			printf("SPI write successful\n");
 		}
 		else
 		{
-			printf("Write failed: %s\n", ErrorString());
+			printf("SPI write failed: %s\n", ErrorString());
 		}
 
 		Stop();

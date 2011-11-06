@@ -141,16 +141,21 @@ int SetMode(enum modes mode, int endianess)
 	int retval = MPSSE_OK, i = 0, setup_commands_size = 0;
 	char buf[6] = { 0 };
 	char setup_commands[12] = { 0 };
-	/* 
-	 * Initialize default settings:
-	 *
-	 *	o Clock, data out and chip select pins are outputs; all others are inputs.
-	 *	o Data is protogated on the rising clock edge and read on the falling clock edge.
-	 *	o CS idles high and is brought low during reads and writes.
-	 *	o Clock idles high.
-	 * 	o FTDI internal loopback is disabled.
-	 */ 
-	configure_default_settings(endianess);
+
+	/* Read and write commands need to include endianess */
+	mpsse.tx = MPSSE_DO_WRITE | endianess;
+	mpsse.rx = MPSSE_DO_READ | endianess;
+
+	/* Clock, data out, chip select pins are outputs; all others are inputs. */
+	mpsse.tris = DEFAULT_TRIS;
+
+	/* Clock and chip select pins idle high; all others are low */
+	mpsse.pidle = mpsse.pstart = mpsse.pstop = DEFAULT_PORT;
+
+	/* During reads and writes the chip select pin is brought low */
+	mpsse.pstart &= ~CS;
+
+	/* Disable FTDI internal loopback */
         SetLoopback(0);
 
 	/* Ensure adaptive clock is disabled */
@@ -172,7 +177,9 @@ int SetMode(enum modes mode, int endianess)
 			mpsse.pidle &= ~SK;
 			mpsse.pstart &= ~SK;
 		case SPI2:
-			/* SPI modes 1 and 2 propogate data on the rising edge and read data on the falling edge of the clock; nothing to do here. */
+			/* SPI modes 1 and 2 propogate data on the rising edge and read data on the falling edge of the clock */
+			mpsse.tx &= ~MPSSE_WRITE_NEG;
+			mpsse.rx |= MPSSE_READ_NEG;
 			break;
 		case I2C:
 			/* I2C propogates data on the falling clock edge and reads data on the rising clock edge */

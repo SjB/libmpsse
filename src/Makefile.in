@@ -8,6 +8,7 @@ prefix=@prefix@
 exec_prefix=@exec_prefix@
 LIBDIR=@libdir@
 INCDIR=@includedir@
+LLIBDIR=/usr/lib
 INC=-I$(PYDEV)
 TARGET=mpsse
 
@@ -41,12 +42,15 @@ swig:
 install:
 	cp lib$(TARGET).so $(LIBDIR)/lib$(TARGET).so
 	cp lib$(TARGET).a $(LIBDIR)/lib$(TARGET).a
+	ln -s $(LIBDIR)/lib$(TARGET).so $(LLIBDIR)/lib$(TARGET).so
+	ln -s $(LIBDIR)/lib$(TARGET).a $(LLIBDIR)/lib$(TARGET).a
 	cp $(TARGET).h $(INCDIR)/$(TARGET).h
 	cp $(TARGET).py $(PYLIB)/$(TARGET).py
 	cp _$(TARGET).so $(PYLIB)/_$(TARGET).so
 
 uninstall:
 	rm -f $(LIBDIR)/lib$(TARGET).so $(LIBDIR)/lib$(TARGET).a
+	rm -f $(LLIBDIR)/lib$(TARGET).so $(LLIBDIR)/lib$(TARGET).a
 	rm -f $(PYLIB)/$(TARGET).* $(PYLIB)/_$(TARGET).so
 	rm -f $(INCDIR)/$(TARGET).h
 

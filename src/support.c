@@ -50,27 +50,6 @@ uint32_t div2freq(uint32_t system_clock, uint16_t div)
 	return (system_clock / ((1 + div) * 2));
 }
 
-/* Initialize the default configuration settings for the FTDI commands */
-void configure_default_settings(int endianess)
-{
-	/* Data propogated on rising clock edge */
-        mpsse.tx = MPSSE_DO_WRITE | endianess;
-
-        /* Data read on falling clock edge */
-        mpsse.rx = MPSSE_DO_READ | MPSSE_READ_NEG | endianess;
-
-        /* Clock, data out, chip select pins are outputs; all others are inputs. */
-        mpsse.tris = DEFAULT_TRIS;
-
-        /* Clock and chip select pins idle high; all others are low */
-        mpsse.pidle = mpsse.pstart = mpsse.pstop = DEFAULT_PORT;
-
-	/* During reads and writes the chip select pin is brought low */
-	mpsse.pstart &= ~CS;
-
-	return;
-}
-
 /* Builds a buffer of commands + data blocks */
 unsigned char *build_block_buffer(uint8_t cmd, unsigned char *data, int size, int *buf_size)
 {

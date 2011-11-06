@@ -5,9 +5,9 @@ from mpsse import *
 FREQ = 30000000			# SPI clock frequency: 30MHz
 SIZE = 0x100000			# Size of SPI flash device: 1MB
 RCMD = "\x03\x00\x00\x00"	# Standard SPI flash read command (0x03) followed by starting address (0x000000)
-FILE = "spi.dump"
+FILE = "flash.bin"		# Output file
 
-if MPSSE(SPI3, FREQ, MSB) == MPSSE_OK:
+if MPSSE(SPI0, FREQ, MSB) == MPSSE_OK:
 
 	print "Reading %d bytes from SPI flash chip..." % SIZE
 
