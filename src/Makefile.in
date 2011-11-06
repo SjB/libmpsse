@@ -42,8 +42,8 @@ install:
 	cp lib$(TARGET).so $(LIBDIR)/lib$(TARGET).so
 	cp lib$(TARGET).a $(LIBDIR)/lib$(TARGET).a
 	cp $(TARGET).h $(INCDIR)/$(TARGET).h
-#	cp $(TARGET).py $(PYLIB)/$(TARGET).py
-#	cp _$(TARGET).so $(PYLIB)/_$(TARGET).so
+	cp $(TARGET).py $(PYLIB)/$(TARGET).py
+	cp _$(TARGET).so $(PYLIB)/_$(TARGET).so
 
 uninstall:
 	rm -f $(LIBDIR)/lib$(TARGET).so $(LIBDIR)/lib$(TARGET).a
