@@ -3445,7 +3445,7 @@ _ACEOF
   LIBS="-lftdi $LIBS"
 
 else
-  echo "error: missing libftdi library" && exit
+  echo "error: missing libftdi library" && exit 1
 fi
 
 for ac_header in ftdi.h
@@ -3457,7 +3457,7 @@ if test "x$ac_cv_header_ftdi_h" = xyes; then :
 _ACEOF
 
 else
-  echo "error: missing libftdi header files" && exit
+  echo "error: missing libftdi header files" && exit 1
 fi
 
 done
@@ -3472,7 +3472,7 @@ if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
 _ACEOF
 
 else
-  echo "error: missing standard header files" && exit
+  echo "error: missing standard header files" && exit 1
 fi
 
 done
@@ -3523,7 +3523,7 @@ fi
 
 if ! test -d $PYLIB
 then
-	echo "error: could not locate valid python library path"
+	echo "error: could not locate python library path"
 	exit 1
 fi
 
