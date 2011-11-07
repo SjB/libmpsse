@@ -197,8 +197,8 @@ int SetMode(enum modes mode, int endianess)
 			mpsse.pstart &= ~DO;
 			/* I2C stop bit == data line goes from low to high while clock line is high - set data line low here, so the transition to the idle state triggers the stop condition. */
 			mpsse.pstop &= ~DO;
-			/* FTDI documentation indicates that I2C should have the 3-phase clock enabled, but this seems to not work properly */
-			//setup_commands[setup_commands_size++] = ENABLE_3_PHASE_CLOCK;
+			/* Enable three phase clock to ensure that I2C data is available on both the rising and falling clock edges */
+			setup_commands[setup_commands_size++] = ENABLE_3_PHASE_CLOCK;
 			break;
 		default:
 			retval = MPSSE_FAIL;
@@ -253,7 +253,7 @@ int SetClock(uint32_t freq)
 	int retval = MPSSE_FAIL;
 	uint32_t system_clock = 0;
 	uint16_t divisor = 0;
-	char buf[3] = { 0 };
+	char buf[CMD_SIZE] = { 0 };
 
 	if(freq > SIX_MHZ)
 	{
@@ -326,14 +326,21 @@ int SetLoopback(int enable)
  */
 int Start(void)
 {
-	char buf[3] = { 0 };
+	char buf[CMD_SIZE] = { 0 };
+	int status = MPSSE_OK, i = 0;
 
 	/* Send the start condition */
 	buf[0] = SET_BITS_LOW;
 	buf[1] = mpsse.pstart;
 	buf[2] = mpsse.tris;
 
-	return raw_write((unsigned char *) &buf, sizeof(buf));
+	/* Repeat the start condition to ensure that it is met */
+	for(i=0; i<SS_TX_COUNT; i++)
+	{
+		status |= raw_write((unsigned char *) &buf, sizeof(buf));
+	}
+
+	return status;
 }
 
 /*
@@ -437,23 +444,14 @@ char *Read(int size)
  *
  * Returns the acknowledgement bit value read.
  */
-int ReadAck(void)
+int ACK(void)
 {
 	int ack = 0;
-	char buf[3] = { 0 };
+	char buf[1] = { 0 };
 
-	buf[0] = mpsse.rx | MPSSE_BITMODE;
-	buf[1] = 0;
-	buf[2] = SEND_IMMEDIATE;
-
-	if(raw_write((unsigned char *) &buf, sizeof(buf)) == MPSSE_OK)
+	if(raw_read((unsigned char *) &buf, sizeof(buf)) == sizeof(buf))
 	{
-		memset((char *) &buf, 0, sizeof(buf));
-
-		if(raw_read((unsigned char *) &buf, 1) == MPSSE_OK)
-		{
-			ack = (int) buf[0];
-		}
+		ack = (int) buf[0];
 	}
 
 	return ack;
@@ -467,15 +465,21 @@ int ReadAck(void)
  */
 int Stop(void)
 {
-	char buf[3] = { 0 };
-	int retval = MPSSE_FAIL;
+	char buf[CMD_SIZE] = { 0 };
+	int i = 0, status = MPSSE_OK, retval = MPSSE_FAIL;
 
 	/* Send the stop condition */
 	buf[0] = SET_BITS_LOW;
 	buf[1] = mpsse.pstop;
 	buf[2] = mpsse.tris;
 
-	if(raw_write((unsigned char *) &buf, sizeof(buf)) == MPSSE_OK)
+	/* Repeat the stop condition to ensure that it is met */
+	for(i=0; i<SS_TX_COUNT; i++)
+	{
+		status |= raw_write((unsigned char *) &buf, sizeof(buf));
+	}
+
+	if(status == MPSSE_OK)
 	{
 		/* Restore the pins to their idle states */
 		buf[0] = SET_BITS_LOW;

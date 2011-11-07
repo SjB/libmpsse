@@ -21,6 +21,7 @@
 #define BITMODE_MPSSE		2
 
 #define CMD_SIZE		3
+#define SS_TX_COUNT		3
 
 /* Common clock rates */
 enum clock_rates
@@ -62,6 +63,7 @@ enum pins
 
 enum mpsse_commands
 {
+	I2C_READ_ACK		= 0x22,
 	INVALID_COMMAND		= 0xAB,
 	ENABLE_3_PHASE_CLOCK	= 0x8C,
 	DISABLE_3_PHASE_CLOCK	= 0x8D,
@@ -106,7 +108,7 @@ int SetLoopback(int enable);
 int Start(void);
 int Write(char *data, int size);
 int Stop(void);
-int ReadAck(void);
+int ACK(void);
 
 #ifdef SWIGPYTHON
 

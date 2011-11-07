@@ -54,17 +54,27 @@ uint32_t div2freq(uint32_t system_clock, uint16_t div)
 unsigned char *build_block_buffer(uint8_t cmd, unsigned char *data, int size, int *buf_size)
 {
 	unsigned char *buf = NULL;
-       	int i = 0, j = 0, k = 0, dsize = 0, num_blocks = 0, total_size = 0;
+       	int i = 0, j = 0, k = 0, dsize = 0, num_blocks = 0, total_size = 0, xfer_size = TRANSFER_SIZE;
  	uint16_t rsize = 0;
 
-	num_blocks = (size / TRANSFER_SIZE);
-	if(size % TRANSFER_SIZE)
+	if(mpsse.mode == I2C)
+	{
+		xfer_size = 1;
+	}
+
+	num_blocks = (size / xfer_size);
+	if(size % xfer_size)
 	{
 		num_blocks++;
 	}
 
 	/* The total size of the data will be the data size + the write command */
         total_size = size + (CMD_SIZE * num_blocks);
+
+	if(mpsse.mode == I2C)
+	{
+		total_size += (CMD_SIZE * 2 * num_blocks);
+	}
 
         buf = malloc(total_size);
         if(buf)
@@ -73,25 +83,42 @@ unsigned char *build_block_buffer(uint8_t cmd, unsigned char *data, int size, in
 
 		for(j=0; j<num_blocks; j++)
 		{
-			dsize = size - i;
-			if(dsize > TRANSFER_SIZE)
+			dsize = size - k;
+			if(dsize > xfer_size)
 			{
-				dsize = TRANSFER_SIZE;
+				dsize = xfer_size;
 			}
 
 			/* The reported size of this block is block size - 1 */
 			rsize = dsize - 1;
 
+			/* For I2C we need to ensure that the clock pin is set low prior to clocking out data */
+			if(mpsse.mode == I2C)
+			{
+				buf[i++] = SET_BITS_LOW;
+				buf[i++] = mpsse.pstart & ~SK;
+				buf[i++] = mpsse.tris;
+			}
+			
 			/* Copy in the command for this block */
 			buf[i++] = cmd;
 			buf[i++] = (rsize & 0xFF);
 			buf[i++] = ((rsize >> 8) & 0xFF);
-	
+
 			/* Copy the data block after the command*/
 			memcpy(buf+i, data+k, dsize);
 
+			/* i == offset into buf */
 			i += dsize;
+			/* k == offset into data */
 			k += dsize;
+
+			if(mpsse.mode == I2C)
+			{
+				buf[i++] = mpsse.rx | MPSSE_BITMODE;
+				buf[i++] = 0;
+				buf[i++] = SEND_IMMEDIATE;
+			}
 		}
 
 		*buf_size = total_size;
