@@ -103,15 +103,15 @@ char *ErrorString(void);
 void SetTimeouts(int timeout);
 int SetMode(enum modes mode, int endianess);
 int SetClock(uint32_t freq);
-uint32_t GetClock(void);
-uint32_t GetVid(void);
-uint32_t GetPid(void);
+int GetClock(void);
+int GetVid(void);
+int GetPid(void);
 char *GetDescription(void);
 int SetLoopback(int enable);
 int Start(void);
 int Write(char *data, int size);
 int Stop(void);
-int ACK(void);
+int ReadAck(void);
 
 #ifdef SWIGPYTHON
 

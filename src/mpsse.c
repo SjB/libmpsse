@@ -304,17 +304,17 @@ int SetClock(uint32_t freq)
  *
  * Returns the existing clock rate in hertz.
  */
-uint32_t GetClock(void)
+int GetClock(void)
 {
 	return mpsse.clock;
 }
 
-uint32_t GetVid(void)
+int GetVid(void)
 {
 	return mpsse.vid;
 }
 
-uint32_t GetPid(void)
+int GetPid(void)
 {
 	return mpsse.pid;
 }
@@ -387,24 +387,27 @@ int Write(char *data, int size)
 	unsigned char *buf = NULL;
 	int retval = MPSSE_FAIL, buf_size = 0, txsize = 0, n = 0;
 
-	while(n < size)
+	if(mpsse.mode)
 	{
-		txsize = size - n;
-		if(txsize > TRANSFER_SIZE)
+		while(n < size)
 		{
-			txsize = TRANSFER_SIZE;
-		}
+			txsize = size - n;
+			if(txsize > TRANSFER_SIZE)
+			{
+				txsize = TRANSFER_SIZE;
+			}
 
-		buf = build_block_buffer(mpsse.tx, (unsigned char *) data+n, txsize, &buf_size);
-		if(buf)
-		{	
-			retval = raw_write(buf, buf_size);
-			n += txsize;
-			free(buf);
-		}
-		else
-		{
-			break;
+			buf = build_block_buffer(mpsse.tx, (unsigned char *) data+n, txsize, &buf_size);
+			if(buf)
+			{	
+				retval = raw_write(buf, buf_size);
+				n += txsize;
+				free(buf);
+			}
+			else
+			{
+				break;
+			}
 		}
 	}
 
@@ -429,32 +432,35 @@ char *Read(int size)
 	char sbuf[TRANSFER_SIZE] = { 0 };
 	int n = 0, rxsize = 0, data_size = 0;
 
-	buf = malloc(size);
-	if(buf)
+	if(mpsse.mode)
 	{
-		memset(buf, 0, size);
-
-		while(n < size)
+		buf = malloc(size);
+		if(buf)
 		{
-			rxsize = size - n;
-			if(rxsize > TRANSFER_SIZE)
-			{
-				rxsize = TRANSFER_SIZE;
-			}
+			memset(buf, 0, size);
 
-			data = build_block_buffer(mpsse.rx, (unsigned char *) &sbuf, rxsize, &data_size);
-			if(data)
+			while(n < size)
 			{
-				if(raw_write(data, data_size) == MPSSE_OK)
+				rxsize = size - n;
+				if(rxsize > TRANSFER_SIZE)
 				{
-					n += raw_read(buf+n, rxsize);
+					rxsize = TRANSFER_SIZE;
 				}
-				
-				free(data);
-			}
-			else
-			{
-				break;
+
+				data = build_block_buffer(mpsse.rx, (unsigned char *) &sbuf, rxsize, &data_size);
+				if(data)
+				{
+					if(raw_write(data, data_size) == MPSSE_OK)
+					{
+						n += raw_read(buf+n, rxsize);
+					}
+					
+					free(data);
+				}
+				else
+				{
+					break;
+				}
 			}
 		}
 	}

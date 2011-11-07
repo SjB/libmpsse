@@ -10,7 +10,7 @@
 /* Write data to the FTDI chip */
 int raw_write(unsigned char *buf, int size)
 {
-        int retval = MPSSE_OK;
+        int retval = MPSSE_FAIL;
 
         if(mpsse.mode && ftdi_write_data(&mpsse.ftdi, buf, size) == size)
         {
