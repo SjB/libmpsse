@@ -113,6 +113,7 @@ unsigned char *build_block_buffer(uint8_t cmd, unsigned char *data, int size, in
 			/* k == offset into data */
 			k += dsize;
 
+			/* In I2C mode we need to clock in one ACK bit after each byte */
 			if(mpsse.mode == I2C)
 			{
 				buf[i++] = mpsse.rx | MPSSE_BITMODE;
