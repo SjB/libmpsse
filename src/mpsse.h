@@ -39,11 +39,11 @@ enum clock_rates
 /* Supported MPSSE modes */
 enum modes
 {
-	SPI0,
-	SPI1,
-	SPI2,
-	SPI3,
-	I2C
+	SPI0 = 1,
+	SPI1 = 2,
+	SPI2 = 3,
+	SPI3 = 4,
+	I2C  = 5
 };
 
 enum pins
@@ -104,6 +104,9 @@ void SetTimeouts(int timeout);
 int SetMode(enum modes mode, int endianess);
 int SetClock(uint32_t freq);
 uint32_t GetClock(void);
+uint32_t GetVid(void);
+uint32_t GetPid(void);
+char *GetDescription(void);
 int SetLoopback(int enable);
 int Start(void);
 int Write(char *data, int size);

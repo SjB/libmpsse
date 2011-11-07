@@ -8,10 +8,15 @@
 #include "mpsse.h"
 #include "support.h"
 
-/* List of known supported device VIDs / PIDs */
+/* List of known FT2232-based devices */
 struct vid_pid supported_devices[] = { 
-			{ 0x0403, 0x6010, "FT2232H Future Technology Devices International, Ltd" }, 
+			{ 0x0403, 0x6010, "FT2232 Future Technology Devices International, Ltd" }, 
 			{ 0x0403, 0x6014, "FT232H Future Technology Devices International, Ltd" },
+			{ 0x0403, 0x8878, "Bus Blaster v2 (channel A)" },
+			{ 0x0403, 0x8879, "Bus Blaster v2 (channel B)" },
+			{ 0x0403, 0xBDC8, "Turtelizer JTAG/RS232 Adapter A" },
+			{ 0x0403, 0xCFF8, "Amontec JTAGkey" },
+			{ 0x15BA, 0x0003, "Olimex Ltd. OpenOCD JTAG" },
 			{ 0x15BA, 0x0004, "Olimex Ltd. OpenOCD JTAG TINY" },
 			{ 0, 0, NULL }
 };
@@ -124,7 +129,14 @@ void Close(void)
  */
 char *ErrorString(void)
 {
-	return ftdi_get_error_string(&mpsse.ftdi);
+	char *str = NULL;
+
+	if(mpsse.mode)
+	{
+		str = ftdi_get_error_string(&mpsse.ftdi);
+	}
+
+	return str;
 }
 
 /*
@@ -236,8 +248,11 @@ int SetMode(enum modes mode, int endianess)
  */
 void SetTimeouts(int timeout)
 {
-        mpsse.ftdi.usb_read_timeout = timeout;
-        mpsse.ftdi.usb_write_timeout = timeout;
+	if(mpsse.mode)
+	{
+        	mpsse.ftdi.usb_read_timeout = timeout;
+        	mpsse.ftdi.usb_write_timeout = timeout;
+	}
 }
 
 /* 
@@ -287,11 +302,26 @@ int SetClock(uint32_t freq)
 /* 
  * Gets the currently configured clock rate.
  *
- * Returns the existing clock rate.
+ * Returns the existing clock rate in hertz.
  */
 uint32_t GetClock(void)
 {
 	return mpsse.clock;
+}
+
+uint32_t GetVid(void)
+{
+	return mpsse.vid;
+}
+
+uint32_t GetPid(void)
+{
+	return mpsse.pid;
+}
+
+char *GetDescription(void)
+{
+	return mpsse.description;
 }
 
 /* 
@@ -441,10 +471,13 @@ char *Read(int size)
 
 /*
  * Reads in one acknowlegement bit (I2C only).
- *
+ * This function does not need to be called in order to generate the I2C clock cycle for
+ * the slave ACK bit; that is done automatically by Read() and Write(). This function just
+ * reads the ACK result read by the FTDI chip for the last read/write.
+ * 
  * Returns the acknowledgement bit value read.
  */
-int ACK(void)
+int ReadAck(void)
 {
 	int ack = 0;
 	char buf[1] = { 0 };

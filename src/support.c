@@ -12,7 +12,7 @@ int raw_write(unsigned char *buf, int size)
 {
         int retval = MPSSE_OK;
 
-        if(ftdi_write_data(&mpsse.ftdi, buf, size) == size)
+        if(mpsse.mode && ftdi_write_data(&mpsse.ftdi, buf, size) == size)
         {
                 retval = MPSSE_OK;
         }
@@ -25,15 +25,18 @@ int raw_read(unsigned char *buf, int size)
 {
 	int n = 0, r = 0;
 
-	while(n < size)
+	if(mpsse.mode)
 	{
-		r = ftdi_read_data(&mpsse.ftdi, buf, size);
-		if(r < 0) break;
-		n += r;
-	}
+		while(n < size)
+		{
+			r = ftdi_read_data(&mpsse.ftdi, buf, size);
+			if(r < 0) break;
+			n += r;
+		}
 
-	/* Make sure the buffers are cleared after a read or subsequent reads may fail */
-	ftdi_usb_purge_rx_buffer(&mpsse.ftdi);
+		/* Make sure the buffers are cleared after a read or subsequent reads may fail */
+		ftdi_usb_purge_rx_buffer(&mpsse.ftdi);
+	}
 
 	return n;
 }
@@ -57,6 +60,7 @@ unsigned char *build_block_buffer(uint8_t cmd, unsigned char *data, int size, in
        	int i = 0, j = 0, k = 0, dsize = 0, num_blocks = 0, total_size = 0, xfer_size = TRANSFER_SIZE;
  	uint16_t rsize = 0;
 
+	/* Data block size is 1 in I2C */
 	if(mpsse.mode == I2C)
 	{
 		xfer_size = 1;
@@ -71,6 +75,7 @@ unsigned char *build_block_buffer(uint8_t cmd, unsigned char *data, int size, in
 	/* The total size of the data will be the data size + the write command */
         total_size = size + (CMD_SIZE * num_blocks);
 
+	/* In I2C we have to add 2 additional commands per data block */
 	if(mpsse.mode == I2C)
 	{
 		total_size += (CMD_SIZE * 2 * num_blocks);
