@@ -205,11 +205,11 @@ int SetMode(enum modes mode, int endianess)
 			mpsse.tx |= MPSSE_WRITE_NEG;
 			mpsse.rx &= ~MPSSE_READ_NEG;
 			/* In I2C, both the clock and the data lines idle high */
-			mpsse.pidle |= DO;
+			mpsse.pidle |= DO | DI;
 			/* I2C start bit == data line goes from high to low while clock line is high */
-			mpsse.pstart &= ~DO;
+			mpsse.pstart &= ~DO & ~DI;
 			/* I2C stop bit == data line goes from low to high while clock line is high - set data line low here, so the transition to the idle state triggers the stop condition. */
-			mpsse.pstop &= ~DO;
+			mpsse.pstop &= ~DO & ~DI;
 			/* Enable three phase clock to ensure that I2C data is available on both the rising and falling clock edges */
 			setup_commands[setup_commands_size++] = ENABLE_3_PHASE_CLOCK;
 			break;
@@ -360,12 +360,24 @@ int Start(void)
 	char buf[CMD_SIZE] = { 0 };
 	int status = MPSSE_OK, i = 0;
 
+	/* Set the default pin states while the clock is low in case this is an I2C repeated start condition */
+	buf[0] = SET_BITS_LOW;
+	buf[1] = mpsse.pidle & ~SK;
+	buf[2] = mpsse.tris;
+	status |= raw_write((unsigned char *) &buf, sizeof(buf));
+
+	/* Make sure the pins are in their default idle state */
+	buf[0] = SET_BITS_LOW;
+	buf[1] = mpsse.pidle;
+	buf[2] = mpsse.tris;
+	status |= raw_write((unsigned char *) &buf, sizeof(buf));
+	
 	/* Send the start condition */
 	buf[0] = SET_BITS_LOW;
 	buf[1] = mpsse.pstart;
 	buf[2] = mpsse.tris;
 
-	/* Repeat the start condition to ensure that it is met */
+	/* Repeat the start condition to ensure that any hold times are met */
 	for(i=0; i<SS_TX_COUNT; i++)
 	{
 		status |= raw_write((unsigned char *) &buf, sizeof(buf));
