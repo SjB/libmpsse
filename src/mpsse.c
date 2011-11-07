@@ -166,8 +166,11 @@ int SetMode(enum modes mode, int endianess)
 		case SPI0:
 			/* SPI mode 0 clock idles low */
 			mpsse.pidle &= ~SK;
-			mpsse.pstart &= ~SK;
+			/* Since this mode idles low, our "stop" condition should ensure that the clock is low */
+			mpsse.pstop &= ~SK;
 		case SPI3:
+			/* Even though the clock for mode 3 idles high, we need to set it low as part of our start condition, else the FTDI chip will generate clock glitches every 8 bits */
+			mpsse.pstart &= ~SK;
 			/* SPI modes 0 and 3 propogate data on the falling edge and read data on the rising edge of the clock */
 			mpsse.tx |= MPSSE_WRITE_NEG;
 			mpsse.rx &= ~MPSSE_READ_NEG;
@@ -175,8 +178,11 @@ int SetMode(enum modes mode, int endianess)
 		case SPI1:
 			/* SPI mode 1 clock idles low */
 			mpsse.pidle &= ~SK;
-			mpsse.pstart &= ~SK;
+			/* Since this mode idles low, our "stop" condition should ensure that the clock is low */
+			mpsse.pstop &= ~SK;
 		case SPI2:
+			/* Even though the clock for mode 2 idles high, we need to set it low as part of our start condition, else the FTDI chip will generate clock glitches every 8 bits */
+			mpsse.pstart &= ~SK;
 			/* SPI modes 1 and 2 propogate data on the rising edge and read data on the falling edge of the clock */
 			mpsse.tx &= ~MPSSE_WRITE_NEG;
 			mpsse.rx |= MPSSE_READ_NEG;

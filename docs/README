@@ -54,12 +54,6 @@ BUILDING APPLICATIONS
 
 KNOWN LIMITATIONS
 
-	Due to limitations in the FTDI chips, SPI modes 1 and 3 do not function properly. Specifically, they generate a single
-	clock glitch every 8 bits. Depending on the SPI slave device and the clock frequency, these modes may still function
-	properly. For example, SPI mode 3 works with some SPI flash chips when run at a 30MHz clock; at these speeds, the clock
-	glitches are too fast to be seen by the SPI flash chips and are ignored. However, these modes should be considered
-	unreliable at best and SPI modes 0 or 2 should be used instead.
-
 	Although some code has been implemented for I2C support, it is currently incomplete. I2C support is planned for future
 	releases.
 

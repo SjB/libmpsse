@@ -2,7 +2,7 @@
 
 from mpsse import *
 
-FREQ = 30000000			# SPI clock frequency: 30MHz
+FREQ = 100000			# SPI clock frequency: 30MHz
 SIZE = 0x100000			# Size of SPI flash device: 1MB
 RCMD = "\x03\x00\x00\x00"	# Standard SPI flash read command (0x03) followed by starting address (0x000000)
 FILE = "flash.bin"		# Output file
