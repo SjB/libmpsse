@@ -63,7 +63,6 @@ enum pins
 
 enum mpsse_commands
 {
-	I2C_READ_ACK		= 0x22,
 	INVALID_COMMAND		= 0xAB,
 	ENABLE_3_PHASE_CLOCK	= 0x8C,
 	DISABLE_3_PHASE_CLOCK	= 0x8D,

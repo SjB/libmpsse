@@ -152,15 +152,12 @@ char *ErrorString(void)
 int SetMode(enum modes mode, int endianess)
 {
 	int retval = MPSSE_OK, i = 0, setup_commands_size = 0;
-	char buf[6] = { 0 };
-	char setup_commands[12] = { 0 };
+	char buf[CMD_SIZE*2] = { 0 };
+	char setup_commands[CMD_SIZE*4] = { 0 };
 
 	/* Read and write commands need to include endianess */
 	mpsse.tx = MPSSE_DO_WRITE | endianess;
 	mpsse.rx = MPSSE_DO_READ | endianess;
-
-	/* When the ACK data bit is set (I2C only), clock should be low */
-	mpsse.ack = ~SK;
 
 	/* Clock, data out, chip select pins are outputs; all others are inputs. */
 	mpsse.tris = DEFAULT_TRIS;
@@ -173,6 +170,8 @@ int SetMode(enum modes mode, int endianess)
 
 	/* Disable FTDI internal loopback */
         SetLoopback(0);
+
+	SetAck(1);
 
 	/* Ensure adaptive clock is disabled */
 	setup_commands[setup_commands_size++] = DISABLE_ADAPTIVE_CLOCK;
@@ -204,8 +203,6 @@ int SetMode(enum modes mode, int endianess)
 			mpsse.rx |= MPSSE_READ_NEG;
 			break;
 		case I2C:
-			/* Set the data line high during an ack */
-			mpsse.ack |= DO | DI;
 			/* I2C propogates data on the falling clock edge and reads data on the rising clock edge */
 			mpsse.tx |= MPSSE_WRITE_NEG;
 			mpsse.rx &= ~MPSSE_READ_NEG;
@@ -506,12 +503,12 @@ char *Read(int size)
  */
 int GetAck(void)
 {
-	int ack = 0;
+	int ack = -1;
 	char buf[1] = { 0 };
 
-	if(raw_read((unsigned char *) &buf, sizeof(buf)) == sizeof(buf))
+	if(raw_read((unsigned char *) &buf, sizeof(buf)))
 	{
-		ack = (int) buf[0];
+		ack = (int) buf[0] & 0x01;
 	}
 
 	return ack;
@@ -521,11 +518,11 @@ void SetAck(int ack)
 {
 	if(ack)
 	{
-		mpsse.ack |= (DI | DO);
+		mpsse.ack = 0x80;
 	}
 	else
 	{
-		mpsse.ack &= (~DI & ~DO);
+		mpsse.ack = 0x00;
 	}
 
 	return;
