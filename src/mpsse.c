@@ -159,6 +159,9 @@ int SetMode(enum modes mode, int endianess)
 	mpsse.tx = MPSSE_DO_WRITE | endianess;
 	mpsse.rx = MPSSE_DO_READ | endianess;
 
+	/* When the ACK data bit is set (I2C only), clock should be low */
+	mpsse.ack = ~SK;
+
 	/* Clock, data out, chip select pins are outputs; all others are inputs. */
 	mpsse.tris = DEFAULT_TRIS;
 
@@ -201,6 +204,8 @@ int SetMode(enum modes mode, int endianess)
 			mpsse.rx |= MPSSE_READ_NEG;
 			break;
 		case I2C:
+			/* Set the data line high during an ack */
+			mpsse.ack |= DO | DI;
 			/* I2C propogates data on the falling clock edge and reads data on the rising clock edge */
 			mpsse.tx |= MPSSE_WRITE_NEG;
 			mpsse.rx &= ~MPSSE_READ_NEG;
@@ -360,11 +365,14 @@ int Start(void)
 	char buf[CMD_SIZE] = { 0 };
 	int status = MPSSE_OK, i = 0;
 
-	/* Set the default pin states while the clock is low in case this is an I2C repeated start condition */
-	buf[0] = SET_BITS_LOW;
-	buf[1] = mpsse.pidle & ~SK;
-	buf[2] = mpsse.tris;
-	status |= raw_write((unsigned char *) &buf, sizeof(buf));
+	if(mpsse.mode == I2C)
+	{
+		/* Set the default pin states while the clock is low in case this is an I2C repeated start condition */
+		buf[0] = SET_BITS_LOW;
+		buf[1] = mpsse.pidle & ~SK;
+		buf[2] = mpsse.tris;
+		status |= raw_write((unsigned char *) &buf, sizeof(buf));
+	}
 
 	/* Make sure the pins are in their default idle state */
 	buf[0] = SET_BITS_LOW;
@@ -496,7 +504,7 @@ char *Read(int size)
  * 
  * Returns the acknowledgement bit value read.
  */
-int ReadAck(void)
+int GetAck(void)
 {
 	int ack = 0;
 	char buf[1] = { 0 };
@@ -507,6 +515,20 @@ int ReadAck(void)
 	}
 
 	return ack;
+}
+
+void SetAck(int ack)
+{
+	if(ack)
+	{
+		mpsse.ack |= (DI | DO);
+	}
+	else
+	{
+		mpsse.ack &= (~DI & ~DO);
+	}
+
+	return;
 }
 
 /*

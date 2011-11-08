@@ -78,7 +78,7 @@ unsigned char *build_block_buffer(uint8_t cmd, unsigned char *data, int size, in
 	/* In I2C we have to add 2 additional commands per data block */
 	if(mpsse.mode == I2C)
 	{
-		total_size += (CMD_SIZE * 2 * num_blocks);
+		total_size += (CMD_SIZE * 3 * num_blocks);
 	}
 
         buf = malloc(total_size);
@@ -121,6 +121,12 @@ unsigned char *build_block_buffer(uint8_t cmd, unsigned char *data, int size, in
 			/* In I2C mode we need to clock in one ACK bit after each byte */
 			if(mpsse.mode == I2C)
 			{
+				/* Set the data line to ACK or NACK (default: ACK) */
+				buf[i++] = SET_BITS_LOW;
+				buf[i++] = mpsse.ack;
+				buf[i++] = mpsse.tris;
+
+				/* Read in one bit */
 				buf[i++] = mpsse.rx | MPSSE_BITMODE;
 				buf[i++] = 0;
 				buf[i++] = SEND_IMMEDIATE;

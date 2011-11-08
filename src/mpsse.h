@@ -92,6 +92,7 @@ struct globule
 	char pstart;
 	char pstop;
 	char pidle;
+	char ack;
 	uint8_t tx;
 	uint8_t rx;
 } mpsse;
@@ -111,7 +112,8 @@ int SetLoopback(int enable);
 int Start(void);
 int Write(char *data, int size);
 int Stop(void);
-int ReadAck(void);
+int GetAck(void);
+void SetAck(int ack);
 
 #ifdef SWIGPYTHON
 
