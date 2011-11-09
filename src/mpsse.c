@@ -415,12 +415,27 @@ int Write(char *data, int size)
 				txsize = TRANSFER_SIZE;
 			}
 
+			/* 
+			 * For I2C we need to send each byte individually so that we can 
+			 * read back each individual ACK bit, so set the transmit size to 1.
+			 */
+			if(mpsse.mode == I2C)
+			{
+				txsize = 1;
+			}
+
 			buf = build_block_buffer(mpsse.tx, (unsigned char *) data+n, txsize, &buf_size);
 			if(buf)
 			{	
 				retval = raw_write(buf, buf_size);
 				n += txsize;
 				free(buf);
+			
+				/* Read in the ACK bit and store it in mpsse.rack */
+				if(mpsse.mode == I2C)
+				{
+					raw_read((unsigned char *) &mpsse.rack, 1);
+				}
 			}
 			else
 			{
@@ -503,6 +518,8 @@ char *Read(int size)
  */
 int GetAck(void)
 {
+	return mpsse.rack;
+/*
 	int ack = -1;
 	char buf[1] = { 0 };
 
@@ -512,17 +529,18 @@ int GetAck(void)
 	}
 
 	return ack;
+*/
 }
 
 void SetAck(int ack)
 {
 	if(ack)
 	{
-		mpsse.ack = 0x80;
+		mpsse.tack = 0x80;
 	}
 	else
 	{
-		mpsse.ack = 0x00;
+		mpsse.tack = 0x00;
 	}
 
 	return;

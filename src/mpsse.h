@@ -91,9 +91,10 @@ struct globule
 	char pstart;
 	char pstop;
 	char pidle;
-	char ack;
 	uint8_t tx;
 	uint8_t rx;
+	uint8_t tack;
+	uint8_t rack;
 } mpsse;
 
 int MPSSE(enum modes mode, int freq, int endianess);

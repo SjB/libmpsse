@@ -121,10 +121,20 @@ unsigned char *build_block_buffer(uint8_t cmd, unsigned char *data, int size, in
 			/* In I2C mode we need to clock one ACK bit after each byte */
 			if(mpsse.mode == I2C)
 			{
-				/* Clock out an ACK */
-				buf[i++] = mpsse.tx | MPSSE_BITMODE;
-				buf[i++] = 0;
-				buf[i++] = mpsse.ack;
+				/* If we are receiving data, then we need to clock out an ACK for each byte */
+				if(cmd == mpsse.rx)
+				{
+					buf[i++] = mpsse.tx | MPSSE_BITMODE;
+					buf[i++] = 0;
+					buf[i++] = mpsse.tack;
+				}
+				/* If we are sending data, then we need to clock in an ACK for each byte */
+				else if(cmd == mpsse.tx)
+				{
+					buf[i++] = mpsse.rx | MPSSE_BITMODE;
+					buf[i++] = 0;
+					buf[i++] = SEND_IMMEDIATE;
+				}
 			}
 		}
 
