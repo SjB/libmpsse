@@ -312,16 +312,25 @@ int GetClock(void)
 	return mpsse.clock;
 }
 
+/*
+ * Returns the vendor ID of the FTDI chip.
+ */
 int GetVid(void)
 {
 	return mpsse.vid;
 }
 
+/*
+ * Returns the product ID of the FTDI chip.
+ */
 int GetPid(void)
 {
 	return mpsse.pid;
 }
 
+/*
+ * Returns the description of the FTDI chip, if any.
+ */
 char *GetDescription(void)
 {
 	return mpsse.description;
@@ -509,34 +518,23 @@ char *Read(int size)
 }
 
 /*
- * Reads in one acknowlegement bit (I2C only).
- * This function does not need to be called in order to generate the I2C clock cycle for
- * the slave ACK bit; that is done automatically by Read() and Write(). This function just
- * reads the ACK result read by the FTDI chip for the last read/write.
- * 
- * Returns the acknowledgement bit value read.
+ * Returns the last received ACK bit.
  */
 int GetAck(void)
 {
 	return mpsse.rack;
-/*
-	int ack = -1;
-	char buf[1] = { 0 };
-
-	if(raw_read((unsigned char *) &buf, sizeof(buf)))
-	{
-		ack = (int) buf[0] & 0x01;
-	}
-
-	return ack;
-*/
 }
 
+/*
+ * Sets the transmitted ACK bit.
+ *
+ * Returns void.
+ */
 void SetAck(int ack)
 {
 	if(ack)
 	{
-		mpsse.tack = 0x80;
+		mpsse.tack = 0xFF;
 	}
 	else
 	{
