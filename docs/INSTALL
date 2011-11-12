@@ -33,4 +33,10 @@ BUILDING EXAMPLE CODE
 	After libmpsse has been installed, you can build the example programs by running:
 
 		$ make examples
+
+UNINSTALLATION
+	
+	The mpsse library can be uninstalled by running:
+
+		# make uninstall
 	
