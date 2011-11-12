@@ -1,0 +1,31 @@
+Libmpsse supports configuring FTDI chips to operate as SPI master devices in order to communicate with SPI slave devices.
+
+There are four standard modes that an SPI bus can support (modes 0 and 3 are most common):
+
+	1) Mode 0 (SPI0)
+	2) Mode 1 (SPI1)
+	3) Mode 2 (SPI2)
+	4) Mode 3 (SPI3)
+
+When initializing libmpsse, you must specify:
+
+	1) The SPI mode to use
+	2) The SPI clock frequency
+	3) The data transfer endianess (MSB first or LSB first - MSB is most common)
+
+After initialization, you can communicate with any connected SPI slave device. A standard SPI transaction involves:
+
+	1) Starting the transaction (bringing the chip-select line low)
+	2) Reading / writing data to and from the slave device
+	3) Stopping the transaction (bringing the chip-select line high)
+
+Once you are finished talking to your SPI slave device, you must close the connection to the FTDI chip using Close().
+
+The following is a simple example of using SPI in Python:
+
+	MPSSE(SPI0, THIRTY_MHZ, MSB)	# Use SPI mode 0 with a 30MHz clock, send/receive data MSB first
+	Start()				# Bring chip-select low
+	Write("\x03\x00\x00\x00")	# Write 4 bytes of data to the slave device
+	data = Read(256)		# Read 256 bytes back from the slave device
+	Stop()				# Bring chip-select high
+	Close()				# Close connection to the FTDI chip

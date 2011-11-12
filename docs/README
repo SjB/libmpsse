@@ -4,37 +4,14 @@ ABOUT
 	chips. Based around the libftdi library, it is written in C and includes a Python wrapper courtesy of
 	swig.
 
-
-
 CODE EXAMPLES
 
-	Before you can send/receive data over the SPI/I2C bus, you must initialize the MPSSE interface first.
-	To do so, you need to specify what protocol you want (I2C, or SPI0-3), what frequency you want the bus
-	clock to operate at (specified in hertz) and whether to send data MSB first or LSB first:
+	There are SPI and I2C code examples for both C and Python in the src/examples directory. After installing
+	libmpsse, the C examples can be built by running:
 
-		MPSSE(SPI0, 10000000, MSB)
+		$ make examples
 
-	To start sending data, you must signal the start condition for the selected protocol (i.e., setting the
-	chip-select line low):
-
-		Start()
-
-	You can now read and write data on the serial bus:
-
-		Write("\xAA")
-		data = Read(3)
-
-	To signal the data stop condition for the selected protocol:
-
-		Stop()
-
-	Finally, when completely finished, you must close the MPSSE interface:
-
-		Close()
-
-	See the src/examples directory for example C/Python code.
-
-
+	There are more detailed descriptions of the SPI and I2C APIs in docs/README.SPI and docs/README.I2C files.
 
 BUILDING APPLICATIONS
 	
@@ -46,148 +23,13 @@ BUILDING APPLICATIONS
 
 		#include <mpsse.h>
 	
-	...and link your program against the libmpsse library:
+	...and also link your program against the libmpsse library:
 
 		gcc test.c -o test -lmpsse
 
-
-
 KNOWN LIMITATIONS
 
-	Although some code has been implemented for I2C support, it is currently incomplete. I2C support is planned for future
-	releases.
-
-
-
-API FUNCTIONS
-
-	int MPSSE(enum modes mode, int freq, int endianess)
-
-		Auto detects, opens and initializes the first FTDI device for the specified mode.
-	 
-		@mode      - Mode to open the device in. One of enum modes.
-		@freq      - Clock frequency to use for the specified mode.
-		@endianess - Specifies how data is clocked in/out (MSB, LSB).
-
-		Returns MPSSE_OK on success.
-		Returns MPSSE_FAIL on failure.
-
-
-	int Open(int vid, int pid, enum modes mode, int freq, int endianess)
-
-		Like MPSSE(), but opens the device matching the given vendor and product ID. 
-		Called internally by MPSSE().
-
-		@vid       - Device vendor ID.
-		@pid       - Device product ID.
-		@mode      - MPSSE mode, one of enum modes.
-		@freq      - Clock frequency to use for the specified mode.
-		@endianess - SPecifies how data is clocked in/out (MSB, LSB).
-
-		Returns MPSSE_OK on success.
-		Returns MPSSE_FAIL on failure.
-
-
-	void Close(void)
-	 
-		Closes the device and deinitializes libftdi.
-
-		Returns void.
-
-
-	char *ErrorString(void)
-
-		Retrieves the last error string from libftdi.
-
-		Returns a pointer to the last error string.
-
-
-	int SetMode(enum modes mode, int endianess)
-
-		Sets the appropriate transmit and receive commands based on the requested mode and byte order.
-		Called internally by Open().
-
-		@mode      - The desired mode, as listed in enum modes.
-		@endianess - MPSSE_MSB or MPSSE_LSB.
-
-		Returns MPSSE_OK on success.
-		Returns MPSSE_FAIL on failure.
-
-
-	void SetTimeouts(int timeout)
-
-		Sets the read and write timeout periods for bulk usb data transfers.
-		Shorter timeouts result in faster transfers, but timeouts that are too short will result in the timeout being reached before data can be read/written.
-		Called internally by Open().
-	
-		@timeout - Timeout period in milliseconds
-
-		Returns void.
-
-
-	int SetClock(uint32_t freq)
-
-		Sets the appropriate divisor for the desired clock frequency.
-
-		@freq - Desired clock frequency in hertz.
-
-		Returns MPSSE_OK on success.
-		Returns MPSSE_FAIL on failure.
-
-
-	uint32_t GetClock(void)
-
-		Gets the currently configured clock frequency.
-
-		Returns an unsigned 32 bit value representing the clock frequency.
-
-
-	int SetLoopback(int enable)
-
-		Enable / disable internal loopback.
-		Called internally by SetMode().
-	 
-		@enable - Zero to disable loopback, 1 to enable loopback.
-
-		Returns MPSSE_OK on success.
-		Returns MPSSE_FAIL on failure.
-
-
-	int Start(void)
-
-		Send the data start condition for the selected protocol.
-
-		Returns MPSSE_OK on success.
-		Returns MPSSE_FAIL on failure.
-
-
-	int Write(char *data, int size)
-
-		Send data out via the selected serial protocol.
-		Note that in Python the size field is not used.
-
-		@data - Buffer of data to send.
-		@size - Size of data (C only).
-
-		Returns MPSSE_OK on success.
-		Returns MPSSE_FAIL on failure.
-
-
-	char *Read(int size)
-
-		Reads data over the selected serial protocol.
-	 
-		@size  - Number of bytes to read.
-
-		Returns a pointer to the read data on success.
-		Returns NULL on failure.
-
-
-	int Stop(void)
-
-		Send the data stop condition for the selected serial protocol.
-
-		Returns MPSSE_OK on success.
-		Returns MPSSE_FAIL on failure.
+	Although some code has been implemented for I2C support, it is currently untested. I2C support is planned for 
+	future releases.
 
 
