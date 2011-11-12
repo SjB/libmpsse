@@ -18,10 +18,10 @@ $(TARGET): mpsse.o
 	gcc -shared -Wl,-soname,lib$(TARGET).so $(TARGET).o support.o -o lib$(TARGET).so $(LDFLAGS)
 	ar rcs lib$(TARGET).a $(TARGET).o support.o
 
-examples: spitest i2ctest
+examples: flashdump i2ctest
 
-spitest:
-	$(CC) $(CFLAGS) examples/spitest.c -o examples/spitest -lmpsse
+flashdump:
+	$(CC) $(CFLAGS) examples/flashdump.c -o examples/flashdump -lmpsse
 
 i2ctest:
 	$(CC) $(CFLAGS) examples/i2ctest.c -o examples/i2ctest -lmpsse
@@ -39,7 +39,7 @@ swig:
 	$(CC) -c  $(TARGET)_wrap.c  $(INC)
 	ld -shared $(TARGET)_wrap.o mpsse.o support.o -o _$(TARGET).so $(LDFLAGS) $(INC)
 
-install:
+install: uninstall
 	cp lib$(TARGET).so $(LIBDIR)/lib$(TARGET).so
 	cp lib$(TARGET).a $(LIBDIR)/lib$(TARGET).a
 	ln -s $(LIBDIR)/lib$(TARGET).so $(LLIBDIR)/lib$(TARGET).so
@@ -55,7 +55,7 @@ uninstall:
 	rm -f $(INCDIR)/$(TARGET).h
 
 clean:
-	rm -f examples/spitest examples/i2ctest *.o *.so *.a $(TARGET).py* $(TARGET)_wrap.c
+	rm -f examples/flashdump examples/i2ctest *.o *.so *.a $(TARGET).py* $(TARGET)_wrap.c
 
 cleanall: clean
 	rm -rf *.cache config.* Makefile

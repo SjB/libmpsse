@@ -130,14 +130,7 @@ void Close(void)
  */
 char *ErrorString(void)
 {
-	char *str = NULL;
-
-	if(mpsse.mode)
-	{
-		str = ftdi_get_error_string(&mpsse.ftdi);
-	}
-
-	return str;
+	return ftdi_get_error_string(&mpsse.ftdi);
 }
 
 /*
@@ -369,7 +362,7 @@ int SetLoopback(int enable)
 int Start(void)
 {
 	char buf[CMD_SIZE] = { 0 };
-	int status = MPSSE_OK, i = 0;
+	int status = MPSSE_OK;
 
 	if(mpsse.mode == I2C)
 	{
@@ -378,24 +371,19 @@ int Start(void)
 		buf[1] = mpsse.pidle & ~SK;
 		buf[2] = mpsse.tris;
 		status |= raw_write((unsigned char *) &buf, sizeof(buf));
-	}
 
-	/* Make sure the pins are in their default idle state */
-	buf[0] = SET_BITS_LOW;
-	buf[1] = mpsse.pidle;
-	buf[2] = mpsse.tris;
-	status |= raw_write((unsigned char *) &buf, sizeof(buf));
+		/* Make sure the pins are in their default idle state */
+		buf[0] = SET_BITS_LOW;
+		buf[1] = mpsse.pidle;
+		buf[2] = mpsse.tris;
+		status |= raw_write((unsigned char *) &buf, CMD_SIZE);
+	}
 	
-	/* Send the start condition */
+	/* Set the start condition */
 	buf[0] = SET_BITS_LOW;
 	buf[1] = mpsse.pstart;
 	buf[2] = mpsse.tris;
-
-	/* Repeat the start condition to ensure that any hold times are met */
-	for(i=0; i<SS_TX_COUNT; i++)
-	{
-		status |= raw_write((unsigned char *) &buf, sizeof(buf));
-	}
+	status |= raw_write((unsigned char *) &buf, sizeof(buf));
 
 	return status;
 }
@@ -439,6 +427,11 @@ int Write(char *data, int size)
 				retval = raw_write(buf, buf_size);
 				n += txsize;
 				free(buf);
+
+				if(retval == MPSSE_FAIL)
+				{
+					break;
+				}
 			
 				/* Read in the ACK bit and store it in mpsse.rack */
 				if(mpsse.mode == I2C)
@@ -495,6 +488,10 @@ char *Read(int size)
 					if(raw_write(data, data_size) == MPSSE_OK)
 					{
 						n += raw_read(buf+n, rxsize);
+					}
+					else
+					{
+						break;
 					}
 					
 					free(data);
@@ -553,20 +550,15 @@ void SetAck(int ack)
 int Stop(void)
 {
 	char buf[CMD_SIZE] = { 0 };
-	int i = 0, status = MPSSE_OK, retval = MPSSE_FAIL;
+	int retval = MPSSE_FAIL;
 
 	/* Send the stop condition */
 	buf[0] = SET_BITS_LOW;
 	buf[1] = mpsse.pstop;
 	buf[2] = mpsse.tris;
+	retval = raw_write((unsigned char *) &buf, sizeof(buf));
 
-	/* Repeat the stop condition to ensure that it is met */
-	for(i=0; i<SS_TX_COUNT; i++)
-	{
-		status |= raw_write((unsigned char *) &buf, sizeof(buf));
-	}
-
-	if(status == MPSSE_OK)
+	if(retval == MPSSE_OK)
 	{
 		/* Restore the pins to their idle states */
 		buf[0] = SET_BITS_LOW;

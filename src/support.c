@@ -16,7 +16,7 @@ int raw_write(unsigned char *buf, int size)
         {
                 retval = MPSSE_OK;
         }
-        
+
 	return retval;
 }
 
@@ -59,6 +59,8 @@ unsigned char *build_block_buffer(uint8_t cmd, unsigned char *data, int size, in
 	unsigned char *buf = NULL;
        	int i = 0, j = 0, k = 0, dsize = 0, num_blocks = 0, total_size = 0, xfer_size = TRANSFER_SIZE;
  	uint16_t rsize = 0;
+
+	*buf_size = 0;
 
 	/* Data block size is 1 in I2C */
 	if(mpsse.mode == I2C)
@@ -110,13 +112,16 @@ unsigned char *build_block_buffer(uint8_t cmd, unsigned char *data, int size, in
 			buf[i++] = (rsize & 0xFF);
 			buf[i++] = ((rsize >> 8) & 0xFF);
 
-			/* Copy the data block after the command*/
-			memcpy(buf+i, data+k, dsize);
+			/* On a write, copy the data to transmit after the command */
+			if(cmd == mpsse.tx)
+			{
+				memcpy(buf+i, data+k, dsize);
 
-			/* i == offset into buf */
-			i += dsize;
-			/* k == offset into data */
-			k += dsize;
+				/* i == offset into buf */
+				i += dsize;
+				/* k == offset into data */
+				k += dsize;
+			}
 
 			/* In I2C mode we need to clock one ACK bit after each byte */
 			if(mpsse.mode == I2C)
@@ -138,7 +143,7 @@ unsigned char *build_block_buffer(uint8_t cmd, unsigned char *data, int size, in
 			}
 		}
 
-		*buf_size = total_size;
+		*buf_size = i;
 	}
 
 	return buf;
