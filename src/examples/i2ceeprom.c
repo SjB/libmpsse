@@ -29,7 +29,7 @@ int main(void)
 		{
 			/* Send the EEPROM read command */
 			Start();
-			Write(READ, sizeof(READ) - 1);
+			Write(RCMD, sizeof(RCMD) - 1);
 
 			if(GetAck() == 0)
 			{

@@ -18,13 +18,13 @@ $(TARGET): mpsse.o
 	gcc -shared -Wl,-soname,lib$(TARGET).so $(TARGET).o support.o -o lib$(TARGET).so $(LDFLAGS)
 	ar rcs lib$(TARGET).a $(TARGET).o support.o
 
-examples: flashdump i2ctest
+examples: spiflash i2ceeprom
 
-flashdump:
-	$(CC) $(CFLAGS) examples/flashdump.c -o examples/flashdump -lmpsse
+spiflash:
+	$(CC) $(CFLAGS) examples/spiflash.c -o examples/spiflash -lmpsse
 
-i2ctest:
-	$(CC) $(CFLAGS) examples/i2ctest.c -o examples/i2ctest -lmpsse
+i2ceeprom:
+	$(CC) $(CFLAGS) examples/i2ceeprom.c -o examples/i2ceeprom -lmpsse
 
 mpsse.o: support.o
 	$(CC) $(CFLAGS) $(LDFLAGS) -c mpsse.c
