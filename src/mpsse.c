@@ -164,7 +164,7 @@ int SetMode(enum modes mode, int endianess)
 	/* Disable FTDI internal loopback */
         SetLoopback(0);
 
-	SetAck(1);
+	SetAck(0);
 
 	/* Ensure adaptive clock is disabled */
 	setup_commands[setup_commands_size++] = DISABLE_ADAPTIVE_CLOCK;
@@ -196,9 +196,9 @@ int SetMode(enum modes mode, int endianess)
 			mpsse.rx |= MPSSE_READ_NEG;
 			break;
 		case I2C:
-			/* I2C propogates data on the falling clock edge and reads data on the rising clock edge */
+			/* I2C propogates data on the falling clock edge and reads data on the falling (or rising) clock edge */
 			mpsse.tx |= MPSSE_WRITE_NEG;
-			mpsse.rx &= ~MPSSE_READ_NEG;
+			mpsse.rx |= MPSSE_READ_NEG;
 			/* In I2C, both the clock and the data lines idle high */
 			mpsse.pidle |= DO | DI;
 			/* I2C start bit == data line goes from high to low while clock line is high */
@@ -519,7 +519,7 @@ char *Read(int size)
  */
 int GetAck(void)
 {
-	return mpsse.rack;
+	return (mpsse.rack & 0x01);
 }
 
 /*

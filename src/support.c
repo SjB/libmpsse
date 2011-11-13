@@ -77,10 +77,10 @@ unsigned char *build_block_buffer(uint8_t cmd, unsigned char *data, int size, in
 	/* The total size of the data will be the data size + the write command */
         total_size = size + (CMD_SIZE * num_blocks);
 
-	/* In I2C we have to add 2 additional commands per data block */
+	/* In I2C we have to add 2-3 additional commands per data block */
 	if(mpsse.mode == I2C)
 	{
-		total_size += (CMD_SIZE * 2 * num_blocks);
+		total_size += (CMD_SIZE * 3 * num_blocks);
 	}
 
         buf = malloc(total_size);
@@ -136,6 +136,11 @@ unsigned char *build_block_buffer(uint8_t cmd, unsigned char *data, int size, in
 				/* If we are sending data, then we need to clock in an ACK for each byte */
 				else if(cmd == mpsse.tx)
 				{
+					/* Need to make data out an input to avoid contention on the bus when the slave sends an ACK */
+					buf[i++] = SET_BITS_LOW;
+					buf[i++] = mpsse.pstart & ~SK;
+					buf[i++] = mpsse.tris & ~DO;
+
 					buf[i++] = mpsse.rx | MPSSE_BITMODE;
 					buf[i++] = 0;
 					buf[i++] = SEND_IMMEDIATE;
