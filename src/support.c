@@ -77,7 +77,7 @@ unsigned char *build_block_buffer(uint8_t cmd, unsigned char *data, int size, in
 	/* The total size of the data will be the data size + the write command */
         total_size = size + (CMD_SIZE * num_blocks);
 
-	/* In I2C we have to add 2-3 additional commands per data block */
+	/* In I2C we have to add 3 additional commands per data block */
 	if(mpsse.mode == I2C)
 	{
 		total_size += (CMD_SIZE * 3 * num_blocks);
@@ -104,9 +104,18 @@ unsigned char *build_block_buffer(uint8_t cmd, unsigned char *data, int size, in
 			{
 				buf[i++] = SET_BITS_LOW;
 				buf[i++] = mpsse.pstart & ~SK;
-				buf[i++] = mpsse.tris;
+				
+				/* On receive, we need to ensure that the data out line is set as an input to avoid contention on the bus */
+				if(cmd == mpsse.rx)
+				{
+					buf[i++] = mpsse.tris & ~DO;
+				}
+				else
+				{
+					buf[i++] = mpsse.tris;
+				}
 			}
-			
+
 			/* Copy in the command for this block */
 			buf[i++] = cmd;
 			buf[i++] = (rsize & 0xFF);
@@ -129,6 +138,10 @@ unsigned char *build_block_buffer(uint8_t cmd, unsigned char *data, int size, in
 				/* If we are receiving data, then we need to clock out an ACK for each byte */
 				if(cmd == mpsse.rx)
 				{
+					buf[i++] = SET_BITS_LOW;
+					buf[i++] = mpsse.pstart & ~SK;
+					buf[i++] = mpsse.tris;
+
 					buf[i++] = mpsse.tx | MPSSE_BITMODE;
 					buf[i++] = 0;
 					buf[i++] = mpsse.tack;

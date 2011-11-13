@@ -198,7 +198,7 @@ int SetMode(enum modes mode, int endianess)
 		case I2C:
 			/* I2C propogates data on the falling clock edge and reads data on the falling (or rising) clock edge */
 			mpsse.tx |= MPSSE_WRITE_NEG;
-			mpsse.rx |= MPSSE_READ_NEG;
+			mpsse.rx &= ~MPSSE_READ_NEG;
 			/* In I2C, both the clock and the data lines idle high */
 			mpsse.pidle |= DO | DI;
 			/* I2C start bit == data line goes from high to low while clock line is high */
@@ -550,13 +550,22 @@ void SetAck(int ack)
 int Stop(void)
 {
 	char buf[CMD_SIZE] = { 0 };
-	int retval = MPSSE_FAIL;
+	int retval = MPSSE_OK;
+
+	/* In I2C mode, we need to ensure that the data line goes low while the clock line is low to avoid sending an inadvertent start condition */
+	if(mpsse.mode == I2C)
+	{
+		buf[0] = SET_BITS_LOW;
+		buf[1] = mpsse.pidle & ~DO & ~SK;
+		buf[2] = mpsse.tris;
+		retval |= raw_write((unsigned char *) &buf, sizeof(buf));
+	}
 
 	/* Send the stop condition */
 	buf[0] = SET_BITS_LOW;
 	buf[1] = mpsse.pstop;
 	buf[2] = mpsse.tris;
-	retval = raw_write((unsigned char *) &buf, sizeof(buf));
+	retval |= raw_write((unsigned char *) &buf, sizeof(buf));
 
 	if(retval == MPSSE_OK)
 	{
