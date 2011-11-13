@@ -57,7 +57,7 @@ uint32_t div2freq(uint32_t system_clock, uint16_t div)
 unsigned char *build_block_buffer(uint8_t cmd, unsigned char *data, int size, int *buf_size)
 {
 	unsigned char *buf = NULL;
-       	int i = 0, j = 0, k = 0, dsize = 0, num_blocks = 0, total_size = 0, xfer_size = TRANSFER_SIZE;
+       	int i = 0, j = 0, k = 0, dsize = 0, num_blocks = 0, total_size = 0, xfer_size = 0;
  	uint16_t rsize = 0;
 
 	*buf_size = 0;
@@ -66,6 +66,10 @@ unsigned char *build_block_buffer(uint8_t cmd, unsigned char *data, int size, in
 	if(mpsse.mode == I2C)
 	{
 		xfer_size = 1;
+	}
+	else
+	{
+		xfer_size = mpsse.xsize;
 	}
 
 	num_blocks = (size / xfer_size);

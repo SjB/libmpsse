@@ -75,11 +75,21 @@ int Open(int vid, int pid, enum modes mode, int freq, int endianess)
 		{
 			mpsse.mode = mode;
 
+			/* Set the appropriate transfer size for the requested protocol */
+			if(mpsse.mode == I2C)
+			{
+				mpsse.xsize = I2C_TRANSFER_SIZE;
+			}
+			else
+			{
+				mpsse.xsize = SPI_TRANSFER_SIZE;
+			}
+
 			status |= ftdi_set_interface(&mpsse.ftdi, INTERFACE_A);
 			status |= ftdi_usb_reset(&mpsse.ftdi);
 			status |= ftdi_set_latency_timer(&mpsse.ftdi, LATENCY_MS);
-			status |= ftdi_write_data_set_chunksize(&mpsse.ftdi, TRANSFER_SIZE);
-			status |= ftdi_read_data_set_chunksize(&mpsse.ftdi, TRANSFER_SIZE);
+			status |= ftdi_write_data_set_chunksize(&mpsse.ftdi, mpsse.xsize);
+			status |= ftdi_read_data_set_chunksize(&mpsse.ftdi, mpsse.xsize);
 			status |= ftdi_set_bitmode(&mpsse.ftdi, 0, BITMODE_RESET);
 			status |= ftdi_set_bitmode(&mpsse.ftdi, 0, BITMODE_MPSSE);
 			status |= ftdi_usb_purge_buffers(&mpsse.ftdi);
@@ -93,6 +103,7 @@ int Open(int vid, int pid, enum modes mode, int freq, int endianess)
 					{
 						timeout = MAX_TIMEOUT_MS;
 					}
+					timeout = 120000;
 
 					/* Set the read and write timeout periods */
 					SetTimeouts(timeout);
@@ -407,9 +418,9 @@ int Write(char *data, int size)
 		while(n < size)
 		{
 			txsize = size - n;
-			if(txsize > TRANSFER_SIZE)
+			if(txsize > mpsse.xsize)
 			{
-				txsize = TRANSFER_SIZE;
+				txsize = mpsse.xsize;
 			}
 
 			/* 
@@ -464,7 +475,7 @@ char *Read(int size)
 #endif
 {
 	unsigned char *data = NULL, *buf = NULL;
-	char sbuf[TRANSFER_SIZE] = { 0 };
+	char sbuf[SPI_TRANSFER_SIZE] = { 0 };
 	int n = 0, rxsize = 0, data_size = 0;
 
 	if(mpsse.mode)
@@ -477,9 +488,9 @@ char *Read(int size)
 			while(n < size)
 			{
 				rxsize = size - n;
-				if(rxsize > TRANSFER_SIZE)
+				if(rxsize > mpsse.xsize)
 				{
-					rxsize = TRANSFER_SIZE;
+					rxsize = mpsse.xsize;
 				}
 
 				data = build_block_buffer(mpsse.rx, (unsigned char *) &sbuf, rxsize, &data_size);

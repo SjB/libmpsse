@@ -10,11 +10,12 @@
 #define MSB			0x00
 #define LSB			0x08
 
-#define TRANSFER_SIZE		64 //(64 * 1024) - 1 
+#define SPI_TRANSFER_SIZE	(64 * 1024) - 1 
+#define I2C_TRANSFER_SIZE	64
 
 #define LATENCY_MS		2
-#define MAX_TIMEOUT_MS		30000
 #define TIMEOUT_MS		10000
+#define MAX_TIMEOUT_MS		25000
 #define TIMEOUT_DIVISOR		1000000
 
 #define BITMODE_RESET		0
@@ -27,7 +28,6 @@
 enum clock_rates
 {
 	ONE_HUNDRED_KHZ  = 100000,
-	TWO_HUNDRED_KHZ  = 200000,
 	FOUR_HUNDRED_KHZ = 400000,
 	ONE_MHZ 	 = 1000000,
 	SIX_MHZ 	 = 6000000,
@@ -87,6 +87,7 @@ struct globule
 	int vid;
 	int pid;
 	int clock;
+	int xsize;
 	char tris;
 	char pstart;
 	char pstop;

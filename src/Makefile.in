@@ -55,7 +55,7 @@ uninstall:
 	rm -f $(INCDIR)/$(TARGET).h
 
 clean:
-	rm -f examples/flashdump examples/i2ctest *.o *.so *.a $(TARGET).py* $(TARGET)_wrap.c
+	rm -f examples/spiflash examples/i2ceeprom *.o *.so *.a $(TARGET).py* $(TARGET)_wrap.c
 
 cleanall: clean
 	rm -rf *.cache config.* Makefile
