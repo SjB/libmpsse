@@ -8,7 +8,7 @@ FOUT = "flash.bin"		# Output file
 
 if MPSSE(SPI0, THIRTY_MHZ, MSB) == MPSSE_OK:
 
-	print "%s initialized at %dHz (SPI mode 0)" % GetDescription(), GetClock())
+	print "%s initialized at %dHz (SPI mode 0)" % (GetDescription(), GetClock())
 
 	Start()
 	Write(RCMD)

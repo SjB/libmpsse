@@ -6,10 +6,9 @@
 #include <stdlib.h>
 #include <mpsse.h>
 
-#define SIZE	32		// Size of EEPROM chip
-#define WRITE	"\xA0"		// EEPROM address + write bit
-#define READ	"\xA1"		// EEPROM address + read bit
-#define ADDR	"\x00\x00"	// Start address (0x0000)
+#define SIZE	0x8000		// Size of EEPROM chip (32KB)
+#define WCMD	"\xA0\x00\x00"	// Write start address command
+#define RCMD	"\xA1"		// Read command
 #define FOUT	"eeprom.bin"	// Output file
 
 int main(void)
@@ -24,8 +23,7 @@ int main(void)
 	
 		/* Write the EEPROM start address */	
 		Start();
-		Write(WRITE, sizeof(WRITE) - 1);
-		Write(ADDR,  sizeof(ADDR)  - 1);
+		Write(WCMD, sizeof(WCMD) - 1);
 
 		if(GetAck() == 0)
 		{

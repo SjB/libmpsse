@@ -10,10 +10,10 @@
 #define MSB			0x00
 #define LSB			0x08
 
-#define TRANSFER_SIZE		(64 * 1024) - 1 
+#define TRANSFER_SIZE		64 //(64 * 1024) - 1 
 
 #define LATENCY_MS		2
-#define MAX_TIMEOUT_MS		5000
+#define MAX_TIMEOUT_MS		30000
 #define TIMEOUT_MS		10000
 #define TIMEOUT_DIVISOR		1000000
 

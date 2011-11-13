@@ -89,7 +89,7 @@ int Open(int vid, int pid, enum modes mode, int freq, int endianess)
 				if(SetClock(freq) == MPSSE_OK)
 				{
 					timeout = (int) ((float) TIMEOUT_MS / ((float) freq / (float) TIMEOUT_DIVISOR));
-					if(timeout > MAX_TIMEOUT_MS)
+					if(timeout > MAX_TIMEOUT_MS || mpsse.mode == I2C)
 					{
 						timeout = MAX_TIMEOUT_MS;
 					}
