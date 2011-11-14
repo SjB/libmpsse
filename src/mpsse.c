@@ -14,12 +14,15 @@ struct vid_pid supported_devices[] = {
 			{ 0x0403, 0x6010, "FT2232 Future Technology Devices International, Ltd" }, 
 			{ 0x0403, 0x6011, "FT4232 Future Technology Devices International, Ltd" }, 
 			{ 0x0403, 0x6014, "FT232H Future Technology Devices International, Ltd" },
+
+			/* These devices are based on FT2232 chips, but have not been tested.
 			{ 0x0403, 0x8878, "Bus Blaster v2 (channel A)" },
 			{ 0x0403, 0x8879, "Bus Blaster v2 (channel B)" },
 			{ 0x0403, 0xBDC8, "Turtelizer JTAG/RS232 Adapter A" },
 			{ 0x0403, 0xCFF8, "Amontec JTAGkey" },
 			{ 0x15BA, 0x0003, "Olimex Ltd. OpenOCD JTAG" },
 			{ 0x15BA, 0x0004, "Olimex Ltd. OpenOCD JTAG TINY" },
+			*/
 			{ 0, 0, NULL }
 };
 
@@ -100,7 +103,7 @@ int Open(int vid, int pid, enum modes mode, int freq, int endianess)
 				if(SetClock(freq) == MPSSE_OK)
 				{
 					/* Set the read and write timeout periods */
-					SetTimeouts(USB_TIMEOUT);
+					set_timeouts(USB_TIMEOUT);
 
 					retval = SetMode(mode, endianess);
 				}
@@ -126,16 +129,6 @@ void Close(void)
 	}
 
 	return;
-}
-
-/* 
- * Retrieves the last error string from libftdi
- *
- * Returns a pointer to the last error string.
- */
-char *ErrorString(void)
-{
-	return ftdi_get_error_string(&mpsse.ftdi);
 }
 
 /*
@@ -241,22 +234,6 @@ int SetMode(enum modes mode, int endianess)
 }
 
 /* 
- * Sets the read and write timeout periods for bulk usb data transfers.
- *
- * @timeout - Timeout period in milliseconds
- *
- * Returns void.
- */
-void SetTimeouts(int timeout)
-{
-	if(mpsse.mode)
-	{
-        	mpsse.ftdi.usb_read_timeout = timeout;
-        	mpsse.ftdi.usb_write_timeout = timeout;
-	}
-}
-
-/* 
  * Sets the appropriate divisor for the desired clock frequency.
  *
  * @freq - Desired clock frequency in hertz.
@@ -298,6 +275,16 @@ int SetClock(uint32_t freq)
 	}
 
 	return retval;
+}
+
+/* 
+ * Retrieves the last error string from libftdi
+ *
+ * Returns a pointer to the last error string.
+ */
+char *ErrorString(void)
+{
+        return ftdi_get_error_string(&mpsse.ftdi);
 }
 
 /* 
@@ -449,6 +436,11 @@ int Write(char *data, int size)
 				break;
 			}
 		}
+	}
+
+	if(retval == MPSSE_OK && n == size)
+	{
+		retval = MPSSE_OK;
 	}
 
 	return retval;

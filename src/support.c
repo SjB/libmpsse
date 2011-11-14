@@ -44,6 +44,18 @@ int raw_read(unsigned char *buf, int size)
 	return n;
 }
 
+/* Sets the read and write timeout periods for bulk usb data transfers. */
+void set_timeouts(int timeout)
+{
+	if(mpsse.mode)
+        {
+                mpsse.ftdi.usb_read_timeout = timeout;
+                mpsse.ftdi.usb_write_timeout = timeout;
+        }
+
+	return;
+}
+
 /* Convert a frequency to a clock divisor */
 uint16_t freq2div(uint32_t system_clock, uint32_t freq)
 {

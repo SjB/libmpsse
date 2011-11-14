@@ -102,7 +102,6 @@ int MPSSE(enum modes mode, int freq, int endianess);
 int Open(int vid, int pid, enum modes mode, int freq, int endianess);
 void Close(void);
 char *ErrorString(void);
-void SetTimeouts(int timeout);
 int SetMode(enum modes mode, int endianess);
 int SetClock(uint32_t freq);
 int GetClock(void);
