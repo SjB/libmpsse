@@ -34,51 +34,111 @@ API FUNCTIONS
 		Returns void.
 
 
-	char *ErrorString(void)
+	int Start(void)
 
-		Retrieves the last error string from libftdi.
+                Send the start condition for the selected protocol.
 
-		Returns a pointer to the last error string. This data should not be freed by the caller.
-
-
-	int SetMode(enum modes mode, int endianess)
-
-		Sets the appropriate transmit and receive commands based on the requested mode and byte order.
-		Called internally by Open().
-
-		@mode      - The desired mode, as listed in enum modes.
-		@endianess - MPSSE_MSB or MPSSE_LSB.
-
-		Returns MPSSE_OK on success.
-		Returns MPSSE_FAIL on failure.
+                Returns MPSSE_OK on success.
+                Returns MPSSE_FAIL on failure.
 
 
-	void SetTimeouts(int timeout)
+	int Stop(void)
 
-		Sets the read and write timeout periods for bulk usb data transfers.
-		Shorter timeouts result in faster transfers, but timeouts that are too short will result in the timeout being reached before data can be read/written.
-		Called internally by Open().
-	
-		@timeout - Timeout period in milliseconds
+                Send the data stop condition for the selected serial protocol.
+
+                Returns MPSSE_OK on success.
+                Returns MPSSE_FAIL on failure.
+
+
+	char *Read(int size)
+
+                Reads data over the selected serial protocol.
+
+                @size  - Number of bytes to read.
+
+                Returns a pointer to the read data on success.
+                Returns NULL on failure.
+
+
+        int Write(char *data, int size)
+
+                Send data out via the selected serial protocol.
+                Note that in Python the size field is not used.
+
+                @data - Buffer of data to send.
+                @size - Size of data (C only).
+
+                Returns MPSSE_OK on success.
+                Returns MPSSE_FAIL on failure.
+
+
+	int GetAck(void)
+
+		Return the status of the last received acknolwedgement bit (I2C only).
+
+		Returns 0 if an ACK was received.
+		Returns 1 if a NACK was received.
+
+
+	void SetAck(int ack)
+
+		Set the ACK bit to send when Read() receives a byte from the I2C slave device (I2C only).
+
+		@ack - Set to 0 to send ACKs (default).
+		       Set to 1 to send NACKs.
 
 		Returns void.
 
 
-	int SetClock(uint32_t freq)
+	char *ErrorString(void)
 
-		Sets the appropriate divisor for the desired clock frequency. Called internally by Open().
-
-		@freq - Desired clock frequency in hertz.
-
-		Returns MPSSE_OK on success.
-		Returns MPSSE_FAIL on failure.
+                Returns the last error string as reported by libftdi. This data should not be freed by the caller.
 
 
-	uint32_t GetClock(void)
+	int GetVid(void)
+
+		Returns the USB vendor ID of the connected FTDI device.
+
+
+	int GetPid(void)
+
+		Returns the USB product ID of the connected FTDI device.
+
+
+	char *GetDescription(void)
+
+		Returns the description, as listed in the internal supported_devices structure, of the connected FTDI device.
+		The caller must not free the return value.
+
+	
+	int GetClock(void)
 
 		Gets the currently configured clock frequency.
 
 		Returns an unsigned 32 bit value representing the clock frequency.
+
+
+	int SetClock(int freq)
+
+                Sets the appropriate divisor for the desired clock frequency.
+		Called internally by Open().
+
+                @freq - Desired clock frequency in hertz.
+
+                Returns MPSSE_OK on success.
+                Returns MPSSE_FAIL on failure.
+
+
+	int SetMode(enum modes mode, int endianess)
+
+                Sets the appropriate transmit and receive commands based on the requested mode and byte order.
+                Called internally by Open().
+
+                @mode      - The desired mode, as listed in enum modes.
+                @endianess - MPSSE_MSB or MPSSE_LSB.
+
+                Returns MPSSE_OK on success.
+                Returns MPSSE_FAIL on failure.
 
 
 	int SetLoopback(int enable)
@@ -90,43 +150,3 @@ API FUNCTIONS
 
 		Returns MPSSE_OK on success.
 		Returns MPSSE_FAIL on failure.
-
-
-	int Start(void)
-
-		Send the start condition for the selected protocol.
-
-		Returns MPSSE_OK on success.
-		Returns MPSSE_FAIL on failure.
-
-
-	int Write(char *data, int size)
-
-		Send data out via the selected serial protocol.
-		Note that in Python the size field is not used.
-
-		@data - Buffer of data to send.
-		@size - Size of data (C only).
-
-		Returns MPSSE_OK on success.
-		Returns MPSSE_FAIL on failure.
-
-
-	char *Read(int size)
-
-		Reads data over the selected serial protocol.
-	 
-		@size  - Number of bytes to read.
-
-		Returns a pointer to the read data on success.
-		Returns NULL on failure.
-
-
-	int Stop(void)
-
-		Send the data stop condition for the selected serial protocol.
-
-		Returns MPSSE_OK on success.
-		Returns MPSSE_FAIL on failure.
-
-

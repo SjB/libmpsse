@@ -1,66 +1,42 @@
 Libmpsse supports configuring FTDI chips as I2C master devices in order to communicate with I2C slave devices.
 
-In order to initialize libmpsse for I2C communications, you must specify the I2C mode, the I2C clock frequency (commonly 100kHz or 400kHz), and the data transfer endianess (always MSB for I2C):
+When initializing libmpsse, you must specify:
 
-	MPSSE(I2C, ONE_HUNDRED_KHZ, MSB)
+	1) That you wish to use the I2C mode
+	2) The I2C clock frequency
+	3) The data transfer endianess (I2C is always MSB first)
 
-To start I2C communications, you must send the I2C start condition (data line pulled low while clock line remains high):
+After initialization, you can communicate with any connected I2C slave device. A standard I2C transaction involves:
 
-	Start()
+	1) Sending a start condition to indicate the beginning of a transaction
+        2) Reading / writing data to and from the slave device
+	3) Sending a re-start condition, if necessary
+	4) Sending and recieving ACK/NACK bits
+        5) Sending a stop condition to indicate the end of a transaction
 
-Data can be read/written on the I2C bus using the Read() and Write() functions:
+Finally, once you are finished talking to your I2C slave device you must close the connection to the FTDI chip.
 
-	Write("\xA0")		# Write one byte to the I2C slave
-	data = Read(1)		# Read one byte from the I2C slave
+The following is a simple example of using I2C in Python:
 
-The I2C protocol mandates that an ACK/NACK bit be sent or received for every byte transferred. A value of 0 is an ACK; a value of 1 is a NACK. These ACK/NACK bits are handled automatically by the Read() and Write() functions. 
+	MPSSE(I2C, FOUR_HUNDRED_KHZ, MSB)	# Initialize libmpsse for I2C operations at 400kHz
+	Start()					# Send the start condition
+	Write("\xA0")				# Write one byte to the I2C slave
+	if GetAck() == 0:			# Make sure the last written byte was acknowledged
+		Start()				# Send a re-start condition
+		data = Read(1)			# Read one byte from the I2C slave
+		SetAck(1)			# Respond with a NACK for all subsequent reads
+		data += Read(1)			# Read one last byte from the I2C slave
+	Stop()					# Send I2C stop condition
+	Close()					# Deinitialize libmpsse
 
-When writing data to a slave device, the slave will send an ACK/NACK back to the FTDI chip. To get the value of the ACK from the last byte written to the slave, use GetAck():
+A few notes regarding the above code:
 
-	Write("\xA0")
+	1) Acknowledge bits are read/sent automatically by the Read and Write functions. The GetAck() function does not
+	   need to be called in order to generate or read acknowledgement bits; it simply returns the state of the last
+	   received acknowledgement bit (0 == ACK, 1 == NACK).
 
-	if GetAck() == 0:
-		print "Got an ACK!"
-	else:
-		print "Got a NACK!"
+	2) By default, Read will acknowledge all bytes that it receives. You can instruct Read to not acknowledge received
+	   bytes by using the SetAck function, as shown in the example above. Setting SetAck to 1 will send NACKs; setting
+	   SetAck to 0 will send ACKs. The default is 0 (send ACKs).
 
-When receiving data from a slave device, the FTDI chip will send a ACK/NACK back to the slave. By default an ACK is sent, but this can be controlled by the SetAck() function:
-
-	print "Reading data and sending an ACK"
-	SetAck(0)
-	data = Read(1)
-
-	print "Reading data and sending a NACK"
-	SetAck(1)
-	data = Read(1)
-
-When talking to some I2C slave devices, you may need to send a "reapeated start condition". To do so, just call the Start() function again. You may send as many repeated start conditions as necessary:
-
-	Start()		# Send start condition
-	Write("\xA0")	# Write a byte
-	Start()		# Send repeated start condition
-	Write("\xA0")	# Write another byte
-
-To stop an I2C transaction, you must send the stop condition (data line pulled high while clock line is high). This is done with the Stop() function:
-
-	Start()		# Start I2C transaction
-	Write("\xA0")	# Write a byte
-	data = Read(1)	# Read a byte
-	Stop()		# Stop I2C transaction
-
-When you are complete done talking to the I2C slave, you must close the connection to the FTDI chip with the Close() function:
-
-	Close()
-
-The following example code reads one byte from an I2C EEPROM chip:
-
-	MPSSE(I2C, FOUR_HUNDRED_KHZ, MSB)		# Initialize libmpsse for I2C ad 400kHz, MSB first
-	Start()						# Send I2C start condition
-	Write("\xA1")					# Write the EEPROM slave address with the read bit set
-	if GetAck() == 0:				# Make sure the EEPROM chip acknowledged our read request
-		SetAck(1)				# Need to send a NACK after reading the last byte (only reading 1 byte)
-		data = Read(1)				# Read a byte
-		print "Read byte:", hex(ord(data))	
-	Stop()						# Send I2C stop condition
-	Close()						# Deinitialize libmpsse
-
+	3) Repeated start conditions are generated the same way that the first start condition was generated: by calling Start.

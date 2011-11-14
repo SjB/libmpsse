@@ -30,7 +30,7 @@ INSTALLATION
 
 BUILDING EXAMPLE CODE
 
-	After libmpsse has been installed, you can build the example programs by running:
+	After libmpsse has been installed, you can build the example C programs by running:
 
 		$ make examples
 

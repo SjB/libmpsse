@@ -27,9 +27,12 @@ BUILDING APPLICATIONS
 
 		gcc test.c -o test -lmpsse
 
-KNOWN LIMITATIONS
+PHYSICAL CONNECTIONS
 
-	Although some code has been implemented for I2C support, it is currently untested. I2C support is planned for 
-	future releases.
+	In order to speak to SPI or I2C devices, you must establish the proper physical connections between the target
+	device and your FTDI chip. The exact pin out of your target device and FTDI chip will differ based on the chips
+	in question, and the appropriate data sheets for each device should be referenced for this information.
 
-
+	Included in the docs directory is the FTDI MPSSE Basics application note (AN 135). Section 2 of this document
+	covers all of the pin configurations for each FTDI chip, as well as example diagrams regarding the physical
+	connections between the FTDI chip and your target device.
