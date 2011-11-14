@@ -12,9 +12,12 @@ int raw_write(unsigned char *buf, int size)
 {
         int retval = MPSSE_FAIL;
 
-        if(mpsse.mode && ftdi_write_data(&mpsse.ftdi, buf, size) == size)
-        {
-                retval = MPSSE_OK;
+        if(mpsse.mode)
+	{
+		if(ftdi_write_data(&mpsse.ftdi, buf, size) == size)
+        	{
+                	retval = MPSSE_OK;
+		}
         }
 
 	return retval;

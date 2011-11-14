@@ -10,13 +10,13 @@
 #define MSB			0x00
 #define LSB			0x08
 
-#define SPI_TRANSFER_SIZE	(64 * 1024) - 1 
+#define CHUNK_SIZE		65535
+#define SPI_TRANSFER_SIZE	(63 * 1024) 
 #define I2C_TRANSFER_SIZE	64
 
 #define LATENCY_MS		2
-#define TIMEOUT_MS		10000
-#define MAX_TIMEOUT_MS		25000
 #define TIMEOUT_DIVISOR		1000000
+#define USB_TIMEOUT		120000
 
 #define BITMODE_RESET		0
 #define BITMODE_MPSSE		2

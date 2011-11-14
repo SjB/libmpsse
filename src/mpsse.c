@@ -4,6 +4,7 @@
 
 #include <string.h>
 #include <stdint.h>
+#include <unistd.h>
 #include <ftdi.h>
 #include "mpsse.h"
 #include "support.h"
@@ -62,7 +63,7 @@ int MPSSE(enum modes mode, int freq, int endianess)
  */
 int Open(int vid, int pid, enum modes mode, int freq, int endianess)
 {
-	int status = 0, timeout = 0, retval = MPSSE_FAIL;
+	int status = 0, retval = MPSSE_FAIL;
 
 	memset((void *) &mpsse, 0, sizeof(mpsse));
 
@@ -88,8 +89,8 @@ int Open(int vid, int pid, enum modes mode, int freq, int endianess)
 			status |= ftdi_set_interface(&mpsse.ftdi, INTERFACE_A);
 			status |= ftdi_usb_reset(&mpsse.ftdi);
 			status |= ftdi_set_latency_timer(&mpsse.ftdi, LATENCY_MS);
-			status |= ftdi_write_data_set_chunksize(&mpsse.ftdi, mpsse.xsize);
-			status |= ftdi_read_data_set_chunksize(&mpsse.ftdi, mpsse.xsize);
+			status |= ftdi_write_data_set_chunksize(&mpsse.ftdi, CHUNK_SIZE);
+			status |= ftdi_read_data_set_chunksize(&mpsse.ftdi, CHUNK_SIZE);
 			status |= ftdi_set_bitmode(&mpsse.ftdi, 0, BITMODE_RESET);
 			status |= ftdi_set_bitmode(&mpsse.ftdi, 0, BITMODE_MPSSE);
 			status |= ftdi_usb_purge_buffers(&mpsse.ftdi);
@@ -98,15 +99,8 @@ int Open(int vid, int pid, enum modes mode, int freq, int endianess)
 			{
 				if(SetClock(freq) == MPSSE_OK)
 				{
-					timeout = (int) ((float) TIMEOUT_MS / ((float) freq / (float) TIMEOUT_DIVISOR));
-					if(timeout > MAX_TIMEOUT_MS || mpsse.mode == I2C)
-					{
-						timeout = MAX_TIMEOUT_MS;
-					}
-					timeout = 120000;
-
 					/* Set the read and write timeout periods */
-					SetTimeouts(timeout);
+					SetTimeouts(USB_TIMEOUT);
 
 					retval = SetMode(mode, endianess);
 				}
