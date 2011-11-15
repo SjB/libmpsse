@@ -15,14 +15,14 @@ struct vid_pid supported_devices[] = {
 			{ 0x0403, 0x6011, "FT4232 Future Technology Devices International, Ltd" }, 
 			{ 0x0403, 0x6014, "FT232H Future Technology Devices International, Ltd" },
 
-			/* These devices are based on FT2232 chips, but have not been tested.
+			/* These devices are based on FT2232 chips, but have not been tested. */
 			{ 0x0403, 0x8878, "Bus Blaster v2 (channel A)" },
 			{ 0x0403, 0x8879, "Bus Blaster v2 (channel B)" },
 			{ 0x0403, 0xBDC8, "Turtelizer JTAG/RS232 Adapter A" },
 			{ 0x0403, 0xCFF8, "Amontec JTAGkey" },
 			{ 0x15BA, 0x0003, "Olimex Ltd. OpenOCD JTAG" },
 			{ 0x15BA, 0x0004, "Olimex Ltd. OpenOCD JTAG TINY" },
-			*/
+			
 			{ 0, 0, NULL }
 };
 
@@ -174,22 +174,41 @@ int SetMode(enum modes mode, int endianess)
 			mpsse.pidle &= ~SK;
 			/* Since this mode idles low, our "stop" condition should ensure that the clock is low */
 			mpsse.pstop &= ~SK;
+			/* SPI mode 0 propogates data on the falling edge and read data on the rising edge of the clock */
+			mpsse.tx |= MPSSE_WRITE_NEG;
+			mpsse.rx &= ~MPSSE_READ_NEG;
+			break;
 		case SPI3:
-			/* Even though the clock for mode 3 idles high, we need to set it low as part of our start condition, else the FTDI chip will generate clock glitches every 8 bits */
-			mpsse.pstart &= ~SK;
-			/* SPI modes 0 and 3 propogate data on the falling edge and read data on the rising edge of the clock */
+			/* SPI mode 3 clock idles high */
+			mpsse.pidle |= SK;
+			/* Keep the clock low while the CS pin is brought high to ensure we don't accidentally clock out an extra bit */
+			mpsse.pstop &= ~SK;
+			/* SPI mode 3 propogates data on the falling edge and read data on the rising edge of the clock */
 			mpsse.tx |= MPSSE_WRITE_NEG;
 			mpsse.rx &= ~MPSSE_READ_NEG;
 			break;
 		case SPI1:
 			/* SPI mode 1 clock idles low */
 			mpsse.pidle &= ~SK;
-			/* Since this mode idles low, our "stop" condition should ensure that the clock is low */
+			/* Since this mode idles low, the start and stop conditions should ensure that the clock is low */
 			mpsse.pstop &= ~SK;
-		case SPI2:
-			/* Even though the clock for mode 2 idles high, we need to set it low as part of our start condition, else the FTDI chip will generate clock glitches every 8 bits */
 			mpsse.pstart &= ~SK;
-			/* SPI modes 1 and 2 propogate data on the rising edge and read data on the falling edge of the clock */
+			/* Data read on falling clock edge */
+			mpsse.rx |= MPSSE_READ_NEG;
+			mpsse.tx &= ~MPSSE_WRITE_NEG;
+			break;
+		case SPI2:
+			/* SPI 2 clock idles high */
+			mpsse.pidle |= SK;
+			mpsse.pstop |= SK;
+			/* 
+			 * Even though the clock for mode 2 idles high, we need to set it low as part of our start condition, 
+			 * else the FTDI chip will generate clock glitches every 8 bits. However, since mode 2 samples data on
+			 * the falling clock edge and expects the clock to idle high, this may or may not work with the target
+			 * SPI slave. Unfortunately it's a limitation of the FT2232, not much to be done about it.
+			 */
+			mpsse.pstart &= ~SK;
+			/* Data read on falling clock edge */
 			mpsse.tx &= ~MPSSE_WRITE_NEG;
 			mpsse.rx |= MPSSE_READ_NEG;
 			break;
@@ -376,6 +395,19 @@ int Start(void)
 	buf[1] = mpsse.pstart;
 	buf[2] = mpsse.tris;
 	status |= raw_write((unsigned char *) &buf, sizeof(buf));
+
+	/* 
+	 * Hackish work around to properly support SPI mode 3.
+	 * SPI3 clock idles high, but needs to be set low before sending out 
+	 * data to prevent unintenteded clock glitches from the FT2232.
+	 */
+	if(mpsse.mode == SPI3)
+        {
+                buf[0] = SET_BITS_LOW;
+                buf[1] = mpsse.pstart & ~SK;
+                buf[2] = mpsse.tris;
+                status |= raw_write((unsigned char *) &buf, CMD_SIZE);
+        }
 
 	return status;
 }
