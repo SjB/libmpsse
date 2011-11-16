@@ -172,7 +172,7 @@ int SetMode(enum modes mode, int endianess)
 		case SPI0:
 			/* SPI mode 0 clock idles low */
 			mpsse.pidle &= ~SK;
-			/* Since this mode idles low, our "stop" condition should ensure that the clock is low */
+			mpsse.pstart &= ~SK;
 			mpsse.pstop &= ~SK;
 			/* SPI mode 0 propogates data on the falling edge and read data on the rising edge of the clock */
 			mpsse.tx |= MPSSE_WRITE_NEG;
@@ -181,6 +181,7 @@ int SetMode(enum modes mode, int endianess)
 		case SPI3:
 			/* SPI mode 3 clock idles high */
 			mpsse.pidle |= SK;
+			mpsse.pstart |= SK;
 			/* Keep the clock low while the CS pin is brought high to ensure we don't accidentally clock out an extra bit */
 			mpsse.pstop &= ~SK;
 			/* SPI mode 3 propogates data on the falling edge and read data on the rising edge of the clock */
@@ -190,9 +191,13 @@ int SetMode(enum modes mode, int endianess)
 		case SPI1:
 			/* SPI mode 1 clock idles low */
 			mpsse.pidle &= ~SK;
-			/* Since this mode idles low, the start and stop conditions should ensure that the clock is low */
-			mpsse.pstop &= ~SK;
+			/* Since this mode idles low, the start condition should ensure that the clock is low */
 			mpsse.pstart &= ~SK;
+			/* Even though we idle low in this mode, we need to keep the clock line high when we set the CS pin high to prevent
+			 * an unintended clock cycle from being sent by the FT2232. This way, the clock goes high, but does not go low until
+			 * after the CS pin goes high.
+			 */
+			mpsse.pstop |= SK;
 			/* Data read on falling clock edge */
 			mpsse.rx |= MPSSE_READ_NEG;
 			mpsse.tx &= ~MPSSE_WRITE_NEG;
@@ -200,14 +205,8 @@ int SetMode(enum modes mode, int endianess)
 		case SPI2:
 			/* SPI 2 clock idles high */
 			mpsse.pidle |= SK;
+			mpsse.pstart |= SK;
 			mpsse.pstop |= SK;
-			/* 
-			 * Even though the clock for mode 2 idles high, we need to set it low as part of our start condition, 
-			 * else the FTDI chip will generate clock glitches every 8 bits. However, since mode 2 samples data on
-			 * the falling clock edge and expects the clock to idle high, this may or may not work with the target
-			 * SPI slave. Unfortunately it's a limitation of the FT2232, not much to be done about it.
-			 */
-			mpsse.pstart &= ~SK;
 			/* Data read on falling clock edge */
 			mpsse.tx &= ~MPSSE_WRITE_NEG;
 			mpsse.rx |= MPSSE_READ_NEG;
@@ -389,7 +388,7 @@ int Start(void)
 		buf[2] = mpsse.tris;
 		status |= raw_write((unsigned char *) &buf, CMD_SIZE);
 	}
-	
+
 	/* Set the start condition */
 	buf[0] = SET_BITS_LOW;
 	buf[1] = mpsse.pstart;
@@ -408,6 +407,18 @@ int Start(void)
                 buf[2] = mpsse.tris;
                 status |= raw_write((unsigned char *) &buf, CMD_SIZE);
         }
+	/*
+	 * Hackish work around to properly support SPI mode 1.
+	 * SPI1 clock idles low, but needs to be set high before sending out
+	 * data to preven unintended clock glitches from the FT2232.
+	 */
+	else if(mpsse.mode == SPI1)
+	{
+		buf[0] = SET_BITS_LOW;
+		buf[1] = mpsse.pstart | SK;
+		buf[2] = mpsse.tris;
+                status |= raw_write((unsigned char *) &buf, CMD_SIZE);
+	}
 
 	return status;
 }
