@@ -243,9 +243,12 @@ int SetMode(enum modes mode, int endianess)
                 buf[i++] = mpsse.tris;
 
 		/* All GPIO pins are inputs, pulled low */
+		mpsse.trish = 0xFF;
+		mpsse.gpioh = 0x00;
+
                 buf[i++] = SET_BITS_HIGH;
-                buf[i++] = 0;
-                buf[i++] = 0;
+                buf[i++] = mpsse.gpioh;
+                buf[i++] = mpsse.trish;
 
 		retval = raw_write((unsigned char *) &buf, i);
 	}

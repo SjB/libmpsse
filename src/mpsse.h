@@ -26,7 +26,7 @@
 
 #define LOW			0
 #define HIGH			1
-#define NUM_GPIO_PINS		4
+#define NUM_GPIOL_PINS		4
 
 /* Common clock rates */
 enum clock_rates
@@ -96,6 +96,8 @@ struct globule
 	uint8_t pstart;
 	uint8_t pstop;
 	uint8_t pidle;
+	uint8_t gpioh;
+	uint8_t trish;
 	uint8_t tx;
 	uint8_t rx;
 	uint8_t tack;

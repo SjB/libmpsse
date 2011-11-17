@@ -191,25 +191,46 @@ int gpio_write(int pin, int direction)
 {
         char buf[CMD_SIZE] = { 0 };
 
-	/* Convert pin number (0-3) to the corresponding pidle bit */
-	pin = (GPIO0 << pin);
+	if(pin < NUM_GPIOL_PINS)
+	{
+		/* Convert pin number (0-3) to the corresponding pin bit */
+		pin = (GPIO0 << pin);
 
-        if(direction == HIGH)
-        {
-                mpsse.pstart |= pin;
-                mpsse.pidle |= pin;
-                mpsse.pstop |= pin;
-        }
-        else
-        {
-                mpsse.pstart &= ~pin;
-                mpsse.pidle &= ~pin;
-                mpsse.pstop &= ~pin;
-        }
+        	if(direction == HIGH)
+        	{
+        	        mpsse.pstart |= pin;
+        	        mpsse.pidle |= pin;
+        	        mpsse.pstop |= pin;
+        	}
+        	else
+        	{
+        	        mpsse.pstart &= ~pin;
+        	        mpsse.pidle &= ~pin;
+        	        mpsse.pstop &= ~pin;
+        	}
 
-        buf[0] = SET_BITS_LOW;
-        buf[1] = mpsse.pidle;
-        buf[2] = mpsse.tris;
+        	buf[0] = SET_BITS_LOW;
+        	buf[1] = mpsse.pidle;
+        	buf[2] = mpsse.tris;
+	}
+	else
+	{
+		/* Convert pin number (4 - 11) to the corresponding pin bit */
+		pin -= NUM_GPIOL_PINS;
+
+		if(direction == HIGH)
+		{
+			mpsse.gpioh |= (1 << pin);
+		}
+		else
+		{
+			mpsse.gpioh &= ~(1 << pin);
+		}
+
+		buf[0] = SET_BITS_HIGH;
+		buf[1] = mpsse.gpioh;
+		buf[2] = mpsse.trish;
+	}
 
         return raw_write((unsigned char *) &buf, sizeof(buf));
 }
