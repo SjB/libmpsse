@@ -620,4 +620,42 @@ int Stop(void)
 	return retval;
 }
 
+int PinMode(int pin, int direction)
+{
+	char buf[CMD_SIZE] = { 0 };
 
+	if(direction == OUTPUT)
+	{
+		mpsse.gpdir |= (1 << pin);
+	}
+	else
+	{
+		mpsse.gpdir &= ~(1 << pin);
+	}
+
+	buf[0] = SET_BITS_HIGH;
+	buf[1] = 0;
+	buf[2] = mpsse.gpdir;
+
+	return raw_write((unsigned char *) &buf, sizeof(buf));
+}
+
+int GPIOWrite(int pin, int direction)
+{
+	char buf[CMD_SIZE] = { 0 };
+
+	if(direction == HIGH)
+	{
+		mpsse.gpio |= (1 << pin);
+	}
+	else
+	{
+		mpsse.gpio &= ~(1 << pin);
+	}
+
+	buf[0] = SET_BITS_HIGH;
+	buf[1] = mpsse.gpio;
+	buf[2] = mpsse.gpdir;
+
+	return raw_write((unsigned char *) &buf, sizeof(buf));
+}

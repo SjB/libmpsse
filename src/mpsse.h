@@ -24,6 +24,12 @@
 #define CMD_SIZE		3
 #define SS_TX_COUNT		3
 
+#define INPUT			0
+#define OUTPUT			1
+
+#define LOW			0
+#define HIGH			1
+
 /* Common clock rates */
 enum clock_rates
 {
@@ -88,10 +94,12 @@ struct globule
 	int pid;
 	int clock;
 	int xsize;
-	char tris;
-	char pstart;
-	char pstop;
-	char pidle;
+	uint8_t gpio;
+	uint8_t gpdir;
+	uint8_t tris;
+	uint8_t pstart;
+	uint8_t pstop;
+	uint8_t pidle;
 	uint8_t tx;
 	uint8_t rx;
 	uint8_t tack;
@@ -114,6 +122,8 @@ int Write(char *data, int size);
 int Stop(void);
 int GetAck(void);
 void SetAck(int ack);
+int PinMode(int pin, int direction);
+int GPIOWrite(int pin, int direction);
 
 #ifdef SWIGPYTHON
 
