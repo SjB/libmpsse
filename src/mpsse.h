@@ -24,11 +24,9 @@
 #define CMD_SIZE		3
 #define SS_TX_COUNT		3
 
-#define INPUT			0
-#define OUTPUT			1
-
 #define LOW			0
 #define HIGH			1
+#define NUM_GPIO_PINS		4
 
 /* Common clock rates */
 enum clock_rates
@@ -64,8 +62,8 @@ enum pins
 	GPIO3	= 128
 };
 
-#define DEFAULT_TRIS            (SK | DO | CS)  /* SK/DO/CS are outputs, all others inputs */
-#define DEFAULT_PORT            (SK | CS)       /* SK and CS are high, all others low */
+#define DEFAULT_TRIS            (SK | DO | CS | GPIO0 | GPIO1 | GPIO2 | GPIO3)  /* SK/DO/CS and GPIOs are outputs, DI is an input */
+#define DEFAULT_PORT            (SK | CS)       				/* SK and CS are high, all others low */
 
 enum mpsse_commands
 {
@@ -94,8 +92,6 @@ struct globule
 	int pid;
 	int clock;
 	int xsize;
-	uint8_t gpio;
-	uint8_t gpdir;
 	uint8_t tris;
 	uint8_t pstart;
 	uint8_t pstop;
@@ -122,8 +118,8 @@ int Write(char *data, int size);
 int Stop(void);
 int GetAck(void);
 void SetAck(int ack);
-int PinMode(int pin, int direction);
-int GPIOWrite(int pin, int direction);
+int PinHigh(int pin);
+int PinLow(int pin);
 
 #ifdef SWIGPYTHON
 
