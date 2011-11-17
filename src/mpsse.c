@@ -225,6 +225,8 @@ int SetMode(enum modes mode, int endianess)
 			/* Enable three phase clock to ensure that I2C data is available on both the rising and falling clock edges */
 			setup_commands[setup_commands_size++] = ENABLE_3_PHASE_CLOCK;
 			break;
+		case GPIO:
+			break;
 		default:
 			retval = MPSSE_FAIL;
 	}
@@ -284,7 +286,14 @@ int SetClock(uint32_t freq)
 	
 	if(raw_write((unsigned char *) &buf, 1) == MPSSE_OK)
 	{
-		divisor = freq2div(system_clock, freq);
+		if(freq <= 0)
+		{
+			divisor = 0xFFFF;
+		}
+		else
+		{
+			divisor = freq2div(system_clock, freq);
+		}
 
 		buf[0] = TCK_DIVISOR;
 		buf[1] = (divisor & 0xFF);

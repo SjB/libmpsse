@@ -47,7 +47,8 @@ enum modes
 	SPI1 = 2,
 	SPI2 = 3,
 	SPI3 = 4,
-	I2C  = 5
+	I2C  = 5,
+	GPIO = 6
 };
 
 enum pins
