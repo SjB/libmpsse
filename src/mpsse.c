@@ -144,7 +144,7 @@ void Close(void)
 int SetMode(enum modes mode, int endianess)
 {
 	int retval = MPSSE_OK, i = 0, setup_commands_size = 0;
-	char buf[CMD_SIZE*2] = { 0 };
+	char buf[CMD_SIZE] = { 0 };
 	char setup_commands[CMD_SIZE*4] = { 0 };
 
 	/* Read and write commands need to include endianess */
@@ -240,9 +240,7 @@ int SetMode(enum modes mode, int endianess)
 	if(retval == MPSSE_OK)
 	{
 		/* Set the idle pin states */
-		buf[i++] = SET_BITS_LOW;
-                buf[i++] = mpsse.pidle; 
-                buf[i++] = mpsse.tris;
+		set_bits_low(mpsse.pidle);
 
 		/* All GPIO pins are inputs, pulled low */
 		mpsse.trish = 0xFF;
@@ -385,29 +383,19 @@ int SetLoopback(int enable)
  */
 int Start(void)
 {
-	char buf[CMD_SIZE] = { 0 };
 	int status = MPSSE_OK;
 
 	if(mpsse.mode == I2C)
 	{
 		/* Set the default pin states while the clock is low in case this is an I2C repeated start condition */
-		buf[0] = SET_BITS_LOW;
-		buf[1] = mpsse.pidle & ~SK;
-		buf[2] = mpsse.tris;
-		status |= raw_write((unsigned char *) &buf, sizeof(buf));
+		status |= set_bits_low((mpsse.pidle & ~SK));
 
 		/* Make sure the pins are in their default idle state */
-		buf[0] = SET_BITS_LOW;
-		buf[1] = mpsse.pidle;
-		buf[2] = mpsse.tris;
-		status |= raw_write((unsigned char *) &buf, CMD_SIZE);
+		status |= set_bits_low(mpsse.pidle);
 	}
 
 	/* Set the start condition */
-	buf[0] = SET_BITS_LOW;
-	buf[1] = mpsse.pstart;
-	buf[2] = mpsse.tris;
-	status |= raw_write((unsigned char *) &buf, sizeof(buf));
+	status |= set_bits_low(mpsse.pstart);
 
 	/* 
 	 * Hackish work around to properly support SPI mode 3.
@@ -416,10 +404,7 @@ int Start(void)
 	 */
 	if(mpsse.mode == SPI3)
         {
-                buf[0] = SET_BITS_LOW;
-                buf[1] = mpsse.pstart & ~SK;
-                buf[2] = mpsse.tris;
-                status |= raw_write((unsigned char *) &buf, CMD_SIZE);
+		status |= set_bits_low((mpsse.pstart & ~SK));
         }
 	/*
 	 * Hackish work around to properly support SPI mode 1.
@@ -428,10 +413,7 @@ int Start(void)
 	 */
 	else if(mpsse.mode == SPI1)
 	{
-		buf[0] = SET_BITS_LOW;
-		buf[1] = mpsse.pstart | SK;
-		buf[2] = mpsse.tris;
-                status |= raw_write((unsigned char *) &buf, CMD_SIZE);
+		status |= set_bits_low((mpsse.pstart | SK));
 	}
 
 	return status;
@@ -603,32 +585,21 @@ void SetAck(int ack)
  */
 int Stop(void)
 {
-	char buf[CMD_SIZE] = { 0 };
 	int retval = MPSSE_OK;
 
 	/* In I2C mode, we need to ensure that the data line goes low while the clock line is low to avoid sending an inadvertent start condition */
 	if(mpsse.mode == I2C)
 	{
-		buf[0] = SET_BITS_LOW;
-		buf[1] = mpsse.pidle & ~DO & ~SK;
-		buf[2] = mpsse.tris;
-		retval |= raw_write((unsigned char *) &buf, sizeof(buf));
+		retval |= set_bits_low((mpsse.pidle & ~DO & ~SK));
 	}
 
 	/* Send the stop condition */
-	buf[0] = SET_BITS_LOW;
-	buf[1] = mpsse.pstop;
-	buf[2] = mpsse.tris;
-	retval |= raw_write((unsigned char *) &buf, sizeof(buf));
+	retval |= set_bits_low(mpsse.pstop);
 
 	if(retval == MPSSE_OK)
 	{
 		/* Restore the pins to their idle states */
-		buf[0] = SET_BITS_LOW;
-		buf[1] = mpsse.pidle;
-		buf[2] = mpsse.tris;
-
-		retval = raw_write((unsigned char *) &buf, sizeof(buf));
+		retval |= set_bits_low(mpsse.pidle);
 	}
 
 	return retval;

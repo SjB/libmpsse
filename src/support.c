@@ -186,10 +186,34 @@ unsigned char *build_block_buffer(uint8_t cmd, unsigned char *data, int size, in
 	return buf;
 }
 
+/* Set the low bit pins high/low */
+int set_bits_low(int port)
+{
+	char buf[CMD_SIZE] = { 0 };
+
+	buf[0] = SET_BITS_LOW;
+	buf[1] = port;
+	buf[2] = mpsse.tris;
+
+	return raw_write((unsigned char *) &buf, sizeof(buf));
+}
+
+/* Set the high bit pins high/low */
+int set_bits_high(int port)
+{
+	char buf[CMD_SIZE] = { 0 };
+
+	buf[0] = SET_BITS_HIGH;
+	buf[1] = port;
+	buf[2] = mpsse.trish;
+
+	return raw_write((unsigned char *) &buf, sizeof(buf));
+}
+
 /* Set the GPIO pins high/low */
 int gpio_write(int pin, int direction)
 {
-        char buf[CMD_SIZE] = { 0 };
+	int retval = MPSSE_FAIL;
 
 	if(pin < NUM_GPIOL_PINS)
 	{
@@ -209,9 +233,7 @@ int gpio_write(int pin, int direction)
         	        mpsse.pstop &= ~pin;
         	}
 
-        	buf[0] = SET_BITS_LOW;
-        	buf[1] = mpsse.pidle;
-        	buf[2] = mpsse.tris;
+		retval = set_bits_low(mpsse.pstart);
 	}
 	else
 	{
@@ -227,11 +249,9 @@ int gpio_write(int pin, int direction)
 			mpsse.gpioh &= ~(1 << pin);
 		}
 
-		buf[0] = SET_BITS_HIGH;
-		buf[1] = mpsse.gpioh;
-		buf[2] = mpsse.trish;
+		retval = set_bits_high(mpsse.gpioh);	
 	}
 
-        return raw_write((unsigned char *) &buf, sizeof(buf));
+	return retval;
 }
 

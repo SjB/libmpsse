@@ -150,3 +150,23 @@ API FUNCTIONS
 
 		Returns MPSSE_OK on success.
 		Returns MPSSE_FAIL on failure.
+
+
+	int PinHigh(int pin)
+
+		Set the specified GPIO pin high (1).
+
+		@pin - Pin number, one of: 0 - 11.
+
+		Returns MPSSE_OK on success.
+		Returns MPSSE_FAIL on failure.
+
+
+	int PinLow(int pin)
+
+		Set the specified GPIO pin low (0).
+
+		@pin - Pin number, one of: 0 - 11.
+
+		Returns MPSSE_OK on success.
+		Returns MPSSE_FAIL on failure.
