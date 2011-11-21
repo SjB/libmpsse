@@ -5,11 +5,17 @@ AC_CONFIG_SRCDIR([mpsse.c])
 AC_PROG_CC
 AC_LANG(C)
 
-LDFLAGS="-lftdi $LDFLAGS"
-CFLAGS="-Wall $CFLAGS"
-
 AC_TYPE_SIZE_T
 AC_FUNC_MALLOC
+
+LDFLAGS="-lftdi $LDFLAGS"
+CFLAGS="-Wall -fno-strict-aliasing $CFLAGS"
+
+dnl 64 bit machines need the -fPIC flag
+if test $(uname -m) == "x86_64"
+then
+	CFLAGS="-fPIC $CFLAGS"
+fi
 
 AC_CHECK_LIB([ftdi],[ftdi_init],[],[echo "error: missing libftdi library" && exit 1],[])
 AC_CHECK_HEADERS([ftdi.h],[],[echo "error: missing libftdi header files" && exit 1])

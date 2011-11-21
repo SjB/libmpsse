@@ -2914,9 +2914,6 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
-LDFLAGS="-lftdi $LDFLAGS"
-CFLAGS="-Wall $CFLAGS"
-
 
 ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
@@ -3394,6 +3391,14 @@ $as_echo "#define malloc rpl_malloc" >>confdefs.h
 fi
 
 
+
+LDFLAGS="-lftdi $LDFLAGS"
+CFLAGS="-Wall -fno-strict-aliasing $CFLAGS"
+
+if test $(uname -m) == "x86_64"
+then
+	CFLAGS="-fPIC $CFLAGS"
+fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ftdi_init in -lftdi" >&5
 $as_echo_n "checking for ftdi_init in -lftdi... " >&6; }
