@@ -215,7 +215,8 @@ int gpio_write(int pin, int direction)
 {
 	int retval = MPSSE_FAIL;
 
-	if(pin < NUM_GPIOL_PINS)
+	/* The first four pins can't be changed unless we are in a stopped status */
+	if(pin < NUM_GPIOL_PINS && mpsse.status == STOPPED)
 	{
 		/* Convert pin number (0-3) to the corresponding pin bit */
 		pin = (GPIO0 << pin);
@@ -235,7 +236,7 @@ int gpio_write(int pin, int direction)
 
 		retval = set_bits_low(mpsse.pstart);
 	}
-	else
+	else if(pin >= NUM_GPIOL_PINS && pin < NUM_GPIO_PINS)
 	{
 		/* Convert pin number (4 - 11) to the corresponding pin bit */
 		pin -= NUM_GPIOL_PINS;

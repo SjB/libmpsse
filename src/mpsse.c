@@ -78,6 +78,7 @@ int Open(int vid, int pid, enum modes mode, int freq, int endianess)
 		if(ftdi_usb_open(&mpsse.ftdi, vid, pid) == 0)
 		{
 			mpsse.mode = mode;
+			mpsse.status = STOPPED;
 
 			/* Set the appropriate transfer size for the requested protocol */
 			if(mpsse.mode == I2C)
@@ -385,6 +386,8 @@ int Start(void)
 {
 	int status = MPSSE_OK;
 
+	mpsse.status = STARTED;
+
 	if(mpsse.mode == I2C)
 	{
 		/* Set the default pin states while the clock is low in case this is an I2C repeated start condition */
@@ -586,6 +589,8 @@ void SetAck(int ack)
 int Stop(void)
 {
 	int retval = MPSSE_OK;
+
+	mpsse.status = STOPPED;
 
 	/* In I2C mode, we need to ensure that the data line goes low while the clock line is low to avoid sending an inadvertent start condition */
 	if(mpsse.mode == I2C)

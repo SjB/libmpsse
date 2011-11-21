@@ -27,6 +27,7 @@
 #define LOW			0
 #define HIGH			1
 #define NUM_GPIOL_PINS		4
+#define NUM_GPIO_PINS		12
 
 /* Common clock rates */
 enum clock_rates
@@ -77,6 +78,12 @@ enum mpsse_commands
 	TOGGLE_CLOCK		= 0x8E
 };
 
+enum low_bits_status
+{
+	STARTED,
+	STOPPED
+};
+
 struct vid_pid
 {
 	int vid;
@@ -88,6 +95,7 @@ struct globule
 {
 	char *description;
 	enum modes mode;
+	enum low_bits_status status;
 	struct ftdi_context ftdi;
 	int vid;
 	int pid;
