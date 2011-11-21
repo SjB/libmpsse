@@ -36,7 +36,7 @@ swig:
 	$(CC) $(CFLAGS) $(LDFLAGS) -DSWIGPYTHON -c support.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -DSWIGPYTHON -c mpsse.c
 	$(SWIG) -python $(TARGET).i
-	$(CC) -c  $(TARGET)_wrap.c  $(INC)
+	$(CC) $(CFLAGS) -c  $(TARGET)_wrap.c  $(INC)
 	ld -shared $(TARGET)_wrap.o mpsse.o support.o -o _$(TARGET).so $(LDFLAGS) $(INC)
 
 install: uninstall
