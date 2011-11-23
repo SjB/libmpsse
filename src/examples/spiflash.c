@@ -12,7 +12,7 @@ int main(void)
 	char *data = NULL;
 	int retval = EXIT_FAILURE;
 	
-	if(MPSSE(SPI0, THIRTY_MHZ, MSB) == MPSSE_OK)
+	if(MPSSE(SPI0, TWELVE_MHZ, MSB) == MPSSE_OK)
 	{
 		printf("%s initialized at %dHz (SPI mode 0)\n", GetDescription(), GetClock());
 		
