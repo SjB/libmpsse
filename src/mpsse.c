@@ -79,6 +79,8 @@ int Open(int vid, int pid, int interface, enum modes mode, int freq, int endiane
 		if(ftdi_usb_open(&mpsse.ftdi, vid, pid) == 0)
 		{
 			mpsse.mode = mode;
+			mpsse.vid = vid;
+			mpsse.pid = pid;
 			mpsse.status = STOPPED;
 
 			/* Set the appropriate transfer size for the requested protocol */
