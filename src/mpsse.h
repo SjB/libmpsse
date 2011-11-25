@@ -29,6 +29,16 @@
 #define NUM_GPIOL_PINS		4
 #define NUM_GPIO_PINS		12
 
+/* FTDI interfaces */
+enum interface
+{
+	IFACE_ANY	= INTERFACE_ANY,
+	IFACE_A 	= INTERFACE_A,
+	IFACE_B		= INTERFACE_B,
+	IFACE_C		= INTERFACE_C,
+	IFACE_D		= INTERFACE_D
+};
+
 /* Common clock rates */
 enum clock_rates
 {
@@ -117,7 +127,7 @@ struct globule
 } mpsse;
 
 int MPSSE(enum modes mode, int freq, int endianess);
-int Open(int vid, int pid, enum modes mode, int freq, int endianess);
+int Open(int vid, int pid, int interface, enum modes mode, int freq, int endianess);
 void Close(void);
 char *ErrorString(void);
 int SetMode(enum modes mode, int endianess);
@@ -127,6 +137,7 @@ int GetVid(void);
 int GetPid(void);
 char *GetDescription(void);
 int SetLoopback(int enable);
+void SetCSIdle(int idle);
 int Start(void);
 int Write(char *data, int size);
 int Stop(void);

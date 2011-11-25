@@ -1,6 +1,6 @@
 ABOUT
 
-	Libmpsse is a library for interfacing with SPI/I2C devices via FTDI's FT2232 family of USB to serial
+	Libmpsse is a library for interfacing with SPI/I2C devices via FTDI's FT-2232 family of USB to serial
 	chips. Based around the libftdi library, it is written in C and includes a Python wrapper courtesy of
 	swig.
 

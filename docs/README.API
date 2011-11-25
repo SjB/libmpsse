@@ -12,13 +12,14 @@ API FUNCTIONS
 		Returns MPSSE_FAIL on failure.
 
 
-	int Open(int vid, int pid, enum modes mode, int freq, int endianess)
+	int Open(int vid, int pid, int interface, enum modes mode, int freq, int endianess)
 
 		Like MPSSE(), but opens the device matching the given vendor and product ID. 
 		Called internally by MPSSE().
 
 		@vid       - Device vendor ID.
 		@pid       - Device product ID.
+		@interface - FTDI interface to use, one of: IFACE_ANY, IFACE_A - IFACE_D
 		@mode      - MPSSE mode, one of: SPI0, SPI1, SPI2, SPI3, I2C.
 		@freq      - Clock frequency to use for the specified mode.
 		@endianess - SPecifies how data is clocked in/out (MSB, LSB).
@@ -135,7 +136,7 @@ API FUNCTIONS
                 Called internally by Open().
 
                 @mode      - The desired mode, as listed in enum modes.
-                @endianess - MPSSE_MSB or MPSSE_LSB.
+                @endianess - Most or least significant byte first (MSB / LSB).
 
                 Returns MPSSE_OK on success.
                 Returns MPSSE_FAIL on failure.
@@ -152,9 +153,20 @@ API FUNCTIONS
 		Returns MPSSE_FAIL on failure.
 
 
+	void SetCSIdle(int idle)
+
+		Set the idle state of the chip select pin. CS idles high by default.
+
+		@idle - Set to 1 to idle high, 0 to idle low.
+
+		Returns void.
+
+
 	int PinHigh(int pin)
 
 		Set the specified GPIO pin high (1).
+		Note that the state of GPIO pins 0-3 can only be changed prior to a Start()
+		or after a Stop() condition is sent. 
 
 		@pin - Pin number, one of: 0 - 11.
 
@@ -165,6 +177,8 @@ API FUNCTIONS
 	int PinLow(int pin)
 
 		Set the specified GPIO pin low (0).
+		Note that the state of GPIO pins 0-3 can only be changed prior to a Start()
+		or after a Stop() condition is sent. 
 
 		@pin - Pin number, one of: 0 - 11.
 

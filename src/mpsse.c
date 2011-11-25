@@ -43,7 +43,7 @@ int MPSSE(enum modes mode, int freq, int endianess)
 
 	for(i=0; ((supported_devices[i].vid != 0) && (retval == MPSSE_FAIL)); i++)
 	{
-		if((retval = Open(supported_devices[i].vid, supported_devices[i].pid, mode, freq, endianess)) == MPSSE_OK)
+		if((retval = Open(supported_devices[i].vid, supported_devices[i].pid, IFACE_A, mode, freq, endianess)) == MPSSE_OK)
 		{
 			mpsse.description = supported_devices[i].description;
 		}
@@ -57,6 +57,7 @@ int MPSSE(enum modes mode, int freq, int endianess)
  *
  * @vid       - Device vendor ID.
  * @pid       - Device product ID.
+ * @interface - FTDI interface to use (IFACE_A - IFACE_D)
  * @mode      - MPSSE mode, one of enum modes.
  * @freq      - Clock frequency to use for the specified mode.
  * @endianess - SPecifies how data is clocked in/out (MSB, LSB).
@@ -64,7 +65,7 @@ int MPSSE(enum modes mode, int freq, int endianess)
  * Returns MPSSE_OK on success.
  * Returns MPSSE_FAIL on failure.
  */
-int Open(int vid, int pid, enum modes mode, int freq, int endianess)
+int Open(int vid, int pid, int interface, enum modes mode, int freq, int endianess)
 {
 	int status = 0, retval = MPSSE_FAIL;
 
@@ -90,7 +91,7 @@ int Open(int vid, int pid, enum modes mode, int freq, int endianess)
 				mpsse.xsize = SPI_TRANSFER_SIZE;
 			}
 
-			status |= ftdi_set_interface(&mpsse.ftdi, INTERFACE_A);
+			status |= ftdi_set_interface(&mpsse.ftdi, interface);
 			status |= ftdi_usb_reset(&mpsse.ftdi);
 			status |= ftdi_set_latency_timer(&mpsse.ftdi, LATENCY_MS);
 			status |= ftdi_write_data_set_chunksize(&mpsse.ftdi, CHUNK_SIZE);
@@ -374,6 +375,33 @@ int SetLoopback(int enable)
 	}
 
 	return raw_write((unsigned char *) &buf, 1);
+}
+
+/*
+ * Sets the idle state of the chip select pin. CS idles high by default.
+ *
+ * @idle - Set to 1 to idle high, 0 to idle low.
+ *
+ * Returns void.
+ */
+void SetCSIdle(int idle)
+{
+	if(idle > 0)
+	{
+		/* Chip select idles high, active low */
+		mpsse.pidle |= CS;
+		mpsse.pstop |= CS;
+		mpsse.pstart &= ~CS;
+	}
+	else
+	{
+		/* Chip select idles low, active high */
+		mpsse.pidle &= ~CS;
+		mpsse.pstop &= ~CS;
+		mpsse.pstart |= CS;
+	}
+
+	return;
 }
 
 /*

@@ -1,5 +1,7 @@
 PREREQUISITES
 
+	Libmpsse is currently only support on the Linux platform.
+
 	Libmpsse requires swig as well as the libftdi and python development packages. 
 	These can typically be installed by your system's package manager, such as:
 
@@ -7,8 +9,7 @@ PREREQUISITES
 
 INSTALLATION
 
-	With the required prerequisites installed, libmpsse can be built and installed
-	by running:
+	With the required prerequisites installed, libmpsse can be built and installed:
 
 		$ ./configure
 		$ make
