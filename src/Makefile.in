@@ -15,7 +15,7 @@ TARGET=mpsse
 all: $(TARGET) swig
 
 $(TARGET): mpsse.o
-	gcc -shared -Wl,-soname,lib$(TARGET).so $(TARGET).o support.o -o lib$(TARGET).so $(LDFLAGS)
+	$(CC) $(CFLAGS) -shared -Wl,-soname,lib$(TARGET).so $(TARGET).o support.o -o lib$(TARGET).so $(LDFLAGS)
 	ar rcs lib$(TARGET).a $(TARGET).o support.o
 
 examples: spiflash i2ceeprom
