@@ -11,10 +11,10 @@ AC_FUNC_MALLOC
 LDFLAGS="-lftdi $LDFLAGS"
 CFLAGS="-Wall -fPIC -fno-strict-aliasing $CFLAGS"
 
-AC_CHECK_LIB([ftdi],[ftdi_init],[],[echo "error: missing libftdi library" && exit 1],[])
-AC_CHECK_HEADERS([ftdi.h],[],[echo "error: missing libftdi header files" && exit 1])
-AC_CHECK_HEADERS([stdlib.h stdint.h string.h],[],[echo "error: missing standard header files" && exit 1])
 AC_CHECK_FUNCS([malloc memset],[],AC_MSG_ERROR(["missing standard functions"]))
+AC_CHECK_LIB([ftdi],[ftdi_init],[],[echo "error: missing libftdi library" && exit 1],[])
+AC_CHECK_HEADERS([stdlib.h stdint.h string.h],[],[echo "error: missing standard header files" && exit 1])
+AC_CHECK_HEADERS([ftdi.h],[],[echo "error: missing libftdi header files" && exit 1])
 
 if ! test $SWIG
 then
@@ -32,11 +32,7 @@ then
 	PYDEV="/usr/include/python$(python --version 2>&1 | awk '{print $2}' | cut -d'.' -f1,2)"
 fi
 
-if ! test -d $PYDEV
-then
-	echo "error: could not locate python development headers"
-	exit 1
-fi
+AC_CHECK_HEADERS([$PYDEV/Python.h],[],[echo "error: missing python header files" && exit 1])
 
 if ! test $PYLIB
 then

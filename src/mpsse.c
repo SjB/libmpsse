@@ -574,7 +574,7 @@ char *Read(int size)
 	}
 
 #ifdef SWIGPYTHON
-	swig_string_data sdata= { 0 };
+	swig_string_data sdata = { 0 };
 	sdata.size = n;
 	sdata.data = (char *) buf;
 	return sdata;

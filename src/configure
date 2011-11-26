@@ -3401,6 +3401,20 @@ fi
 LDFLAGS="-lftdi $LDFLAGS"
 CFLAGS="-Wall -fPIC -fno-strict-aliasing $CFLAGS"
 
+for ac_func in malloc memset
+do :
+  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
+ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
+if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
+_ACEOF
+
+else
+  as_fn_error $? "\"missing standard functions\"" "$LINENO" 5
+fi
+done
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ftdi_init in -lftdi" >&5
 $as_echo_n "checking for ftdi_init in -lftdi... " >&6; }
 if ${ac_cv_lib_ftdi_ftdi_init+:} false; then :
@@ -3448,20 +3462,6 @@ else
   echo "error: missing libftdi library" && exit 1
 fi
 
-for ac_header in ftdi.h
-do :
-  ac_fn_c_check_header_mongrel "$LINENO" "ftdi.h" "ac_cv_header_ftdi_h" "$ac_includes_default"
-if test "x$ac_cv_header_ftdi_h" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_FTDI_H 1
-_ACEOF
-
-else
-  echo "error: missing libftdi header files" && exit 1
-fi
-
-done
-
 for ac_header in stdlib.h stdint.h string.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
@@ -3477,18 +3477,18 @@ fi
 
 done
 
-for ac_func in malloc memset
+for ac_header in ftdi.h
 do :
-  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
-ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
-if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
+  ac_fn_c_check_header_mongrel "$LINENO" "ftdi.h" "ac_cv_header_ftdi_h" "$ac_includes_default"
+if test "x$ac_cv_header_ftdi_h" = xyes; then :
   cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
+#define HAVE_FTDI_H 1
 _ACEOF
 
 else
-  as_fn_error $? "\"missing standard functions\"" "$LINENO" 5
+  echo "error: missing libftdi header files" && exit 1
 fi
+
 done
 
 
@@ -3508,11 +3508,21 @@ then
 	PYDEV="/usr/include/python$(python --version 2>&1 | awk '{print $2}' | cut -d'.' -f1,2)"
 fi
 
-if ! test -d $PYDEV
-then
-	echo "error: could not locate python development headers"
-	exit 1
+for ac_header in $PYDEV/Python.h
+do :
+  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
+ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
+if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+_ACEOF
+
+else
+  echo "error: missing python header files" && exit 1
 fi
+
+done
+
 
 if ! test $PYLIB
 then
