@@ -640,11 +640,13 @@ int Stop(void)
 	return retval;
 }
 
+/* Sets the specified pin high */
 int PinHigh(int pin)
 {
 	return gpio_write(pin, HIGH);
 }
 
+/* Sets the specified pin low */
 int PinLow(int pin)
 {
 	return gpio_write(pin, LOW);

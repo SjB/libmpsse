@@ -1,5 +1,5 @@
 AC_PREREQ([2.65])
-AC_INIT([libmpsse],[0.3],[http://libmpsse.googlecode.com])
+AC_INIT([libmpsse],[0.4],[http://libmpsse.googlecode.com])
 AC_CONFIG_SRCDIR([mpsse.c])
 
 AC_PROG_CC
