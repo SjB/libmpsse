@@ -19,6 +19,10 @@ After initialization, you can communicate with any connected SPI slave device. A
 	2) Reading / writing data to and from the slave device
 	3) Sending a stop condition to indicate the end of a transaction
 
+By default, CS idles high; you may specify an idle-low CS state with the SetCSIdle function:
+
+	SetCSIdle(0)
+
 Finally, once you are finished talking to your SPI slave device you must close the connection to the FTDI chip.
 
 The following is a simple example of using SPI in Python:
