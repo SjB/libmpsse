@@ -2,6 +2,8 @@ CC=@CC@
 SWIG=@SWIG@
 PYDEV=@PYDEV@
 PYLIB=@PYLIB@
+SONAME=@SONAME@
+FRAMEWORK=@FRAMEWORK@
 LDFLAGS=@LDFLAGS@
 CFLAGS=@CFLAGS@
 prefix=@prefix@
@@ -15,7 +17,7 @@ TARGET=mpsse
 all: $(TARGET) swig
 
 $(TARGET): mpsse.o
-	$(CC) $(CFLAGS) -shared -Wl,-soname,lib$(TARGET).so $(TARGET).o support.o -o lib$(TARGET).so $(LDFLAGS)
+	$(CC) $(CFLAGS) -shared -Wl,$(SONAME),lib$(TARGET).so $(TARGET).o support.o -o lib$(TARGET).so $(LDFLAGS)
 	ar rcs lib$(TARGET).a $(TARGET).o support.o
 
 examples: spiflash i2ceeprom ds1305
@@ -40,7 +42,7 @@ swig:
 	$(CC) $(CFLAGS) $(LDFLAGS) -DSWIGPYTHON -c mpsse.c
 	$(SWIG) -python $(TARGET).i
 	$(CC) $(CFLAGS) -c  $(TARGET)_wrap.c  $(INC)
-	$(CC) $(CFLAGS) -shared $(TARGET)_wrap.o mpsse.o support.o -o _$(TARGET).so $(LDFLAGS) $(INC)
+	$(CC) $(CFLAGS) -shared $(FRAMEWORK) $(TARGET)_wrap.o mpsse.o support.o -o _$(TARGET).so $(LDFLAGS) $(INC)
 
 install: uninstall
 	cp lib$(TARGET).so $(LIBDIR)/lib$(TARGET).so
@@ -58,7 +60,7 @@ uninstall:
 	rm -f $(INCDIR)/$(TARGET).h
 
 clean:
-	rm -f examples/spiflash examples/i2ceeprom examples/ds1305 *.o *.so *.a $(TARGET).py* $(TARGET)_wrap.c
+	rm -rf examples/*.dSYM examples/spiflash examples/i2ceeprom examples/ds1305 *.o *.so *.a $(TARGET).py* $(TARGET)_wrap.c
 
 cleanall: clean
 	rm -rf *.cache config.* Makefile
