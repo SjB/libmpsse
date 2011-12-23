@@ -1,11 +1,14 @@
 PREREQUISITES
 
-	Libmpsse is currently only support on the Linux platform.
+	Libmpsse is currently supported on the Linux and OSX platforms.
 
 	Libmpsse requires swig as well as the libftdi and python development packages. 
-	These can typically be installed by your system's package manager, such as:
+	These can typically be installed by your Linux distro's package manager, such as:
 
 		# apt-get install swig libftdi-dev python-dev
+
+	For OSX, you will likely need to at least install libftdi from source. Note that
+	libftdi also requires the libusb-0.1 (not libusb-1.0) library.
 
 INSTALLATION
 
