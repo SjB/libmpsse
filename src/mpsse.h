@@ -5,7 +5,7 @@
 #include <stdint.h>
 
 #define MPSSE_OK		0
-#define MPSSE_FAIL		1
+#define MPSSE_FAIL		-1
 
 #define MSB			0x00
 #define LSB			0x08
@@ -28,6 +28,8 @@
 #define HIGH			1
 #define NUM_GPIOL_PINS		4
 #define NUM_GPIO_PINS		12
+
+#define MAX_FTDI_CONNECTIONS	512
 
 /* FTDI interfaces */
 enum interface
@@ -107,13 +109,14 @@ struct vid_pid
 struct globule
 {
 	char *description;
+	struct ftdi_context ftdi;
 	enum modes mode;
 	enum low_bits_status status;
-	struct ftdi_context ftdi;
 	int vid;
 	int pid;
 	int clock;
 	int xsize;
+	int index;
 	uint8_t tris;
 	uint8_t pstart;
 	uint8_t pstop;
@@ -124,27 +127,29 @@ struct globule
 	uint8_t rx;
 	uint8_t tack;
 	uint8_t rack;
-} mpsse;
+};
+
+struct globule mpsse[MAX_FTDI_CONNECTIONS];
 
 int MPSSE(enum modes mode, int freq, int endianess);
 int Open(int vid, int pid, int interface, enum modes mode, int freq, int endianess);
-void Close(void);
-char *ErrorString(void);
-int SetMode(enum modes mode, int endianess);
-int SetClock(uint32_t freq);
-int GetClock(void);
-int GetVid(void);
-int GetPid(void);
-char *GetDescription(void);
-int SetLoopback(int enable);
-void SetCSIdle(int idle);
-int Start(void);
-int Write(char *data, int size);
-int Stop(void);
-int GetAck(void);
-void SetAck(int ack);
-int PinHigh(int pin);
-int PinLow(int pin);
+void Close(int index);
+char *ErrorString(int index);
+int SetMode(int index, enum modes mode, int endianess);
+int SetClock(int index, uint32_t freq);
+int GetClock(int index);
+int GetVid(int index);
+int GetPid(int index);
+char *GetDescription(int index);
+int SetLoopback(int index, int enable);
+void SetCSIdle(int index, int idle);
+int Start(int index);
+int Write(int index, char *data, int size);
+int Stop(int index);
+int GetAck(int index);
+void SetAck(int index, int ack);
+int PinHigh(int index, int pin);
+int PinLow(int index, int pin);
 
 #ifdef SWIGPYTHON
 
@@ -154,11 +159,11 @@ typedef struct swig_string_data
         char *data;
 } swig_string_data;
 
-swig_string_data Read(int size);
+swig_string_data Read(int index, int size);
 
 #else
 
-char *Read(int size);
+char *Read(int index, int size);
 
 #endif
 

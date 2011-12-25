@@ -43,6 +43,7 @@ swig:
 	$(SWIG) -python $(TARGET).i
 	$(CC) $(CFLAGS) -c  $(TARGET)_wrap.c  $(INC)
 	$(CC) $(CFLAGS) -shared $(FRAMEWORK) $(TARGET)_wrap.o mpsse.o support.o -o _$(TARGET).so $(LDFLAGS) $(INC)
+	mv mpsse.py _mpsse.py
 
 install: uninstall
 	cp lib$(TARGET).so $(LIBDIR)/lib$(TARGET).so
@@ -50,17 +51,18 @@ install: uninstall
 	ln -s $(LIBDIR)/lib$(TARGET).so $(LLIBDIR)/lib$(TARGET).so
 	ln -s $(LIBDIR)/lib$(TARGET).a $(LLIBDIR)/lib$(TARGET).a
 	cp $(TARGET).h $(INCDIR)/$(TARGET).h
-	cp $(TARGET).py $(PYLIB)/$(TARGET).py
+	cp _$(TARGET).py $(PYLIB)/_$(TARGET).py
+	cp main.py $(PYLIB)/$(TARGET).py
 	cp _$(TARGET).so $(PYLIB)/_$(TARGET).so
 
 uninstall:
 	rm -f $(LIBDIR)/lib$(TARGET).so $(LIBDIR)/lib$(TARGET).a
 	rm -f $(LLIBDIR)/lib$(TARGET).so $(LLIBDIR)/lib$(TARGET).a
-	rm -f $(PYLIB)/$(TARGET).* $(PYLIB)/_$(TARGET).so
+	rm -f $(PYLIB)/$(TARGET).* $(PYLIB)/_$(TARGET).*
 	rm -f $(INCDIR)/$(TARGET).h
 
 clean:
-	rm -rf examples/*.dSYM examples/spiflash examples/i2ceeprom examples/ds1305 *.o *.so *.a $(TARGET).py* $(TARGET)_wrap.c
+	rm -rf examples/*.dSYM examples/spiflash examples/i2ceeprom examples/ds1305 *.o *.so *.a _$(TARGET).py* $(TARGET)_wrap.c *.pyc
 
 cleanall: clean
 	rm -rf *.cache config.* Makefile
