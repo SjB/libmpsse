@@ -31,69 +31,69 @@ THIRY_MHZ = _mpsse.THIRTY_MHZ
 class MPSSE:
 
 	def __init__(self, mode=None, frequency=None, endianess=MSB):
-		self.fd = MPSSE_FAIL
+		self.context = None
 		if mode is not None and frequency is not None:
-			self.fd = _mpsse.MPSSE(mode, frequency, endianess)
-			if self.fd == MPSSE_FAIL:
-				raise Exception, self.ErrorString(MPSSE_FAIL)
+			self.context = _mpsse.MPSSE(mode, frequency, endianess)
+			if self.context == MPSSE_FAIL:
+				raise Exception, self.ErrorString()
 
 	def Open(self, vid, pid, interface, mode, frequency, endianess):
-		self.fd = _mpsse.Open(vid, pid, interface, mode, frequency, endianess)
-		if self.fd == MPSSE_FAIL:
-			raise Exception, self.ErrorString(MPSSE_FAIL)
+		self.context = _mpsse.Open(vid, pid, interface, mode, frequency, endianess)
+		if self.context == MPSSE_FAIL:
+			raise Exception, self.ErrorString()
 		return MPSSE_OK
 
 	def Close(self):
-		return _mpsse.Close(self.fd)
+		return _mpsse.Close(self.context)
 	
 	def ErrorString(self):
-		return _mpsse.ErrorString(self.fd)
+		return _mpsse.ErrorString(self.context)
 
 	def SetMode(self, mode, endianess):
-		return _mpsse.SetMode(self.fd, mode, endianess)
+		return _mpsse.SetMode(self.context, mode, endianess)
 
 	def SetClock(self, frequency):
-		return _mpsse.SetClock(self.fd, frequency)
+		return _mpsse.SetClock(self.context, frequency)
 
 	def GetClock(self):
-		return _mpsse.GetClock(self.fd)
+		return _mpsse.GetClock(self.context)
 
 	def GetVid(self):
-		return _mpsse.GetVid(self.fd)
+		return _mpsse.GetVid(self.context)
 
 	def GetPid(self):
-		return _mpsse.GetPid(self.fd)
+		return _mpsse.GetPid(self.context)
 
 	def GetDescription(self):
-		return _mpsse.GetDescription(self.fd)
+		return _mpsse.GetDescription(self.context)
 
 	def SetLoopback(self, enable):
-		return _mpsse.SetLoopback(self.fd, enable)
+		return _mpsse.SetLoopback(self.context, enable)
 
 	def SetCSIdle(self, idle):
-		return _mpsse.SetCSIdle(self.fd, idle)
+		return _mpsse.SetCSIdle(self.context, idle)
 
 	def Start(self):
-		return _mpsse.Start(self.fd)
+		return _mpsse.Start(self.context)
 
 	def Stop(self):
-		return _mpsse.Stop(self.fd)
+		return _mpsse.Stop(self.context)
 
 	def Write(self, data):
-		return _mpsse.Write(self.fd, data)
+		return _mpsse.Write(self.context, data)
 
 	def Read(self, size):
-		return _mpsse.Read(self.fd, size)
+		return _mpsse.Read(self.context, size)
 
 	def SetAck(self, ack):
-		return _mpsse.SetAck(self.fd, ack)
+		return _mpsse.SetAck(self.context, ack)
 
 	def GetAck(self):
-		return _mpsse.GetAck(self.fd)
+		return _mpsse.GetAck(self.context)
 
 	def PinHigh(self, pin):
-		return _mpsse.PinHigh(self.fd, pin)
+		return _mpsse.PinHigh(self.context, pin)
 
 	def PinLow(self, pin):
-		return _mpsse.PinLow(self.fd, pin)
+		return _mpsse.PinLow(self.context, pin)
 

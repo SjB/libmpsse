@@ -29,7 +29,7 @@
 #define NUM_GPIOL_PINS		4
 #define NUM_GPIO_PINS		12
 
-#define MAX_FTDI_CONNECTIONS	512
+#define NULL_CONTEXT_ERROR_MSG	"NULL MPSSE context pointer!"
 
 /* FTDI interfaces */
 enum interface
@@ -106,7 +106,7 @@ struct vid_pid
 	char *description;
 };
 
-struct globule
+struct mpsse_context
 {
 	char *description;
 	struct ftdi_context ftdi;
@@ -116,7 +116,7 @@ struct globule
 	int pid;
 	int clock;
 	int xsize;
-	int index;
+	int open;
 	uint8_t tris;
 	uint8_t pstart;
 	uint8_t pstop;
@@ -129,27 +129,25 @@ struct globule
 	uint8_t rack;
 };
 
-struct globule mpsse[MAX_FTDI_CONNECTIONS];
-
-int MPSSE(enum modes mode, int freq, int endianess);
-int Open(int vid, int pid, int interface, enum modes mode, int freq, int endianess);
-void Close(int index);
-char *ErrorString(int index);
-int SetMode(int index, enum modes mode, int endianess);
-int SetClock(int index, uint32_t freq);
-int GetClock(int index);
-int GetVid(int index);
-int GetPid(int index);
-char *GetDescription(int index);
-int SetLoopback(int index, int enable);
-void SetCSIdle(int index, int idle);
-int Start(int index);
-int Write(int index, char *data, int size);
-int Stop(int index);
-int GetAck(int index);
-void SetAck(int index, int ack);
-int PinHigh(int index, int pin);
-int PinLow(int index, int pin);
+struct mpsse_context *MPSSE(enum modes mode, int freq, int endianess);
+struct mpsse_context *Open(int vid, int pid, const char *serial, int interface, enum modes mode, int freq, int endianess);
+void Close(struct mpsse_context *mpsse);
+char *ErrorString(struct mpsse_context *mpsse);
+int SetMode(struct mpsse_context *mpsse, enum modes mode, int endianess);
+int SetClock(struct mpsse_context *mpsse, uint32_t freq);
+int GetClock(struct mpsse_context *mpsse);
+int GetVid(struct mpsse_context *mpsse);
+int GetPid(struct mpsse_context *mpsse);
+char *GetDescription(struct mpsse_context *mpsse);
+int SetLoopback(struct mpsse_context *mpsse, int enable);
+void SetCSIdle(struct mpsse_context *mpsse, int idle);
+int Start(struct mpsse_context *mpsse);
+int Write(struct mpsse_context *mpsse, char *data, int size);
+int Stop(struct mpsse_context *mpsse);
+int GetAck(struct mpsse_context *mpsse);
+void SetAck(struct mpsse_context *mpsse, int ack);
+int PinHigh(struct mpsse_context *mpsse, int pin);
+int PinLow(struct mpsse_context *mpsse, int pin);
 
 #ifdef SWIGPYTHON
 
@@ -159,11 +157,11 @@ typedef struct swig_string_data
         char *data;
 } swig_string_data;
 
-swig_string_data Read(int index, int size);
+swig_string_data Read(struct mpsse_context *mpsse, int size);
 
 #else
 
-char *Read(int index, int size);
+char *Read(struct mpsse_context *mpsse, int size);
 
 #endif
 
