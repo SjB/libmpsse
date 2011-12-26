@@ -1,4 +1,4 @@
-import _mpsse
+import pylibmpsse as _mpsse
 
 MPSSE_OK = _mpsse.MPSSE_OK
 MPSSE_FAIL = _mpsse.MPSSE_FAIL
@@ -35,12 +35,12 @@ class MPSSE:
 		if mode is not None and frequency is not None:
 			self.fd = _mpsse.MPSSE(mode, frequency, endianess)
 			if self.fd == MPSSE_FAIL:
-				raise Exception, _mpsse.ErrorString(MPSSE_FAIL)
+				raise Exception, self.ErrorString(MPSSE_FAIL)
 
 	def Open(self, vid, pid, interface, mode, frequency, endianess):
 		self.fd = _mpsse.Open(vid, pid, interface, mode, frequency, endianess)
 		if self.fd == MPSSE_FAIL:
-			raise Exception, _mpsse.ErrorString(MPSSE_FAIL)
+			raise Exception, self.ErrorString(MPSSE_FAIL)
 		return MPSSE_OK
 
 	def Close(self):
