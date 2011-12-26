@@ -1,4 +1,4 @@
-%module mpsse
+%module pylibmpsse
 %{
 #include "mpsse.h"
 %}

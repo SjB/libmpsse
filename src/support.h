@@ -10,5 +10,6 @@ unsigned char *build_block_buffer(int index, uint8_t cmd, unsigned char *data, i
 int set_bits_high(int index, int port);
 int set_bits_low(int index, int port);
 int gpio_write(int index, int pin, int direction);
+int is_valid_index(int index);
 
 #endif

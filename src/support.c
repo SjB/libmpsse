@@ -256,3 +256,15 @@ int gpio_write(int index, int pin, int direction)
 	return retval;
 }
 
+/* Checks if a given MPSSE descriptor is within the valid range of descroptor values. */
+int is_valid_index(int index)
+{
+	int retval = 0;
+
+	if(index >= 0 && index < MAX_FTDI_CONNECTIONS)
+	{
+		retval = 1;
+	}
+
+	return retval;
+}

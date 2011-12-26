@@ -51,7 +51,7 @@ int MPSSE(enum modes mode, int freq, int endianess)
 			start_index = index + 1;
 		}
 	}
-	
+
 	return index;
 }
 
@@ -163,111 +163,118 @@ int SetMode(int index, enum modes mode, int endianess)
 	char buf[CMD_SIZE] = { 0 };
 	char setup_commands[CMD_SIZE*4] = { 0 };
 
-	/* Read and write commands need to include endianess */
-	mpsse[index].tx = MPSSE_DO_WRITE | endianess;
-	mpsse[index].rx = MPSSE_DO_READ | endianess;
-
-	/* Clock, data out, chip select pins are outputs; all others are inputs. */
-	mpsse[index].tris = DEFAULT_TRIS;
-
-	/* Clock and chip select pins idle high; all others are low */
-	mpsse[index].pidle = mpsse[index].pstart = mpsse[index].pstop = DEFAULT_PORT;
-
-	/* During reads and writes the chip select pin is brought low */
-	mpsse[index].pstart &= ~CS;
-
-	/* Disable FTDI internal loopback */
-        SetLoopback(index, 0);
-
-	SetAck(index, 0);
-
-	/* Ensure adaptive clock is disabled */
-	setup_commands[setup_commands_size++] = DISABLE_ADAPTIVE_CLOCK;
-
-	switch(mode)
+	if(is_valid_index(index))
 	{
-		case SPI0:
-			/* SPI mode 0 clock idles low */
-			mpsse[index].pidle &= ~SK;
-			mpsse[index].pstart &= ~SK;
-			mpsse[index].pstop &= ~SK;
-			/* SPI mode 0 propogates data on the falling edge and read data on the rising edge of the clock */
-			mpsse[index].tx |= MPSSE_WRITE_NEG;
-			mpsse[index].rx &= ~MPSSE_READ_NEG;
-			break;
-		case SPI3:
-			/* SPI mode 3 clock idles high */
-			mpsse[index].pidle |= SK;
-			mpsse[index].pstart |= SK;
-			/* Keep the clock low while the CS pin is brought high to ensure we don't accidentally clock out an extra bit */
-			mpsse[index].pstop &= ~SK;
-			/* SPI mode 3 propogates data on the falling edge and read data on the rising edge of the clock */
-			mpsse[index].tx |= MPSSE_WRITE_NEG;
-			mpsse[index].rx &= ~MPSSE_READ_NEG;
-			break;
-		case SPI1:
-			/* SPI mode 1 clock idles low */
-			mpsse[index].pidle &= ~SK;
-			/* Since this mode idles low, the start condition should ensure that the clock is low */
-			mpsse[index].pstart &= ~SK;
-			/* Even though we idle low in this mode, we need to keep the clock line high when we set the CS pin high to prevent
-			 * an unintended clock cycle from being sent by the FT2232. This way, the clock goes high, but does not go low until
-			 * after the CS pin goes high.
-			 */
-			mpsse[index].pstop |= SK;
-			/* Data read on falling clock edge */
-			mpsse[index].rx |= MPSSE_READ_NEG;
-			mpsse[index].tx &= ~MPSSE_WRITE_NEG;
-			break;
-		case SPI2:
-			/* SPI 2 clock idles high */
-			mpsse[index].pidle |= SK;
-			mpsse[index].pstart |= SK;
-			mpsse[index].pstop |= SK;
-			/* Data read on falling clock edge */
-			mpsse[index].tx &= ~MPSSE_WRITE_NEG;
-			mpsse[index].rx |= MPSSE_READ_NEG;
-			break;
-		case I2C:
-			/* I2C propogates data on the falling clock edge and reads data on the falling (or rising) clock edge */
-			mpsse[index].tx |= MPSSE_WRITE_NEG;
-			mpsse[index].rx &= ~MPSSE_READ_NEG;
-			/* In I2C, both the clock and the data lines idle high */
-			mpsse[index].pidle |= DO | DI;
-			/* I2C start bit == data line goes from high to low while clock line is high */
-			mpsse[index].pstart &= ~DO & ~DI;
-			/* I2C stop bit == data line goes from low to high while clock line is high - set data line low here, so the transition to the idle state triggers the stop condition. */
-			mpsse[index].pstop &= ~DO & ~DI;
-			/* Enable three phase clock to ensure that I2C data is available on both the rising and falling clock edges */
-			setup_commands[setup_commands_size++] = ENABLE_3_PHASE_CLOCK;
-			break;
-		case GPIO:
-			break;
-		default:
-			retval = MPSSE_FAIL;
-	}
+		/* Read and write commands need to include endianess */
+		mpsse[index].tx = MPSSE_DO_WRITE | endianess;
+		mpsse[index].rx = MPSSE_DO_READ | endianess;
 
-	/* Send any setup commands to the chip */
-	if(retval == MPSSE_OK && setup_commands_size > 0)
+		/* Clock, data out, chip select pins are outputs; all others are inputs. */
+		mpsse[index].tris = DEFAULT_TRIS;
+
+		/* Clock and chip select pins idle high; all others are low */
+		mpsse[index].pidle = mpsse[index].pstart = mpsse[index].pstop = DEFAULT_PORT;
+
+		/* During reads and writes the chip select pin is brought low */
+		mpsse[index].pstart &= ~CS;
+
+		/* Disable FTDI internal loopback */
+	        SetLoopback(index, 0);
+
+		SetAck(index, 0);
+
+		/* Ensure adaptive clock is disabled */
+		setup_commands[setup_commands_size++] = DISABLE_ADAPTIVE_CLOCK;
+
+		switch(mode)
+		{
+			case SPI0:
+				/* SPI mode 0 clock idles low */
+				mpsse[index].pidle &= ~SK;
+				mpsse[index].pstart &= ~SK;
+				mpsse[index].pstop &= ~SK;
+				/* SPI mode 0 propogates data on the falling edge and read data on the rising edge of the clock */
+				mpsse[index].tx |= MPSSE_WRITE_NEG;
+				mpsse[index].rx &= ~MPSSE_READ_NEG;
+				break;
+			case SPI3:
+				/* SPI mode 3 clock idles high */
+				mpsse[index].pidle |= SK;
+				mpsse[index].pstart |= SK;
+				/* Keep the clock low while the CS pin is brought high to ensure we don't accidentally clock out an extra bit */
+				mpsse[index].pstop &= ~SK;
+				/* SPI mode 3 propogates data on the falling edge and read data on the rising edge of the clock */
+				mpsse[index].tx |= MPSSE_WRITE_NEG;
+				mpsse[index].rx &= ~MPSSE_READ_NEG;
+				break;
+			case SPI1:
+				/* SPI mode 1 clock idles low */
+				mpsse[index].pidle &= ~SK;
+				/* Since this mode idles low, the start condition should ensure that the clock is low */
+				mpsse[index].pstart &= ~SK;
+				/* Even though we idle low in this mode, we need to keep the clock line high when we set the CS pin high to prevent
+				 * an unintended clock cycle from being sent by the FT2232. This way, the clock goes high, but does not go low until
+				 * after the CS pin goes high.
+				 */
+				mpsse[index].pstop |= SK;
+				/* Data read on falling clock edge */
+				mpsse[index].rx |= MPSSE_READ_NEG;
+				mpsse[index].tx &= ~MPSSE_WRITE_NEG;
+				break;
+			case SPI2:
+				/* SPI 2 clock idles high */
+				mpsse[index].pidle |= SK;
+				mpsse[index].pstart |= SK;
+				mpsse[index].pstop |= SK;
+				/* Data read on falling clock edge */
+				mpsse[index].tx &= ~MPSSE_WRITE_NEG;
+				mpsse[index].rx |= MPSSE_READ_NEG;
+				break;
+			case I2C:
+				/* I2C propogates data on the falling clock edge and reads data on the falling (or rising) clock edge */
+				mpsse[index].tx |= MPSSE_WRITE_NEG;
+				mpsse[index].rx &= ~MPSSE_READ_NEG;
+				/* In I2C, both the clock and the data lines idle high */
+				mpsse[index].pidle |= DO | DI;
+				/* I2C start bit == data line goes from high to low while clock line is high */
+				mpsse[index].pstart &= ~DO & ~DI;
+				/* I2C stop bit == data line goes from low to high while clock line is high - set data line low here, so the transition to the idle state triggers the stop condition. */
+				mpsse[index].pstop &= ~DO & ~DI;
+				/* Enable three phase clock to ensure that I2C data is available on both the rising and falling clock edges */
+				setup_commands[setup_commands_size++] = ENABLE_3_PHASE_CLOCK;
+				break;
+			case GPIO:
+				break;
+			default:
+				retval = MPSSE_FAIL;
+		}
+	
+		/* Send any setup commands to the chip */
+		if(retval == MPSSE_OK && setup_commands_size > 0)
+		{
+			retval = raw_write(index, (unsigned char *) &setup_commands, setup_commands_size);
+		}
+	
+		if(retval == MPSSE_OK)
+		{
+			/* Set the idle pin states */
+			set_bits_low(index, mpsse[index].pidle);
+	
+			/* All GPIO pins are inputs, pulled low */
+			mpsse[index].trish = 0xFF;
+			mpsse[index].gpioh = 0x00;
+	
+	                buf[i++] = SET_BITS_HIGH;
+	                buf[i++] = mpsse[index].gpioh;
+	                buf[i++] = mpsse[index].trish;
+	
+			retval = raw_write(index, (unsigned char *) &buf, i);
+		}
+	}
+	else
 	{
-		retval = raw_write(index, (unsigned char *) &setup_commands, setup_commands_size);
-	}
-
-	if(retval == MPSSE_OK)
-	{
-		/* Set the idle pin states */
-		set_bits_low(index, mpsse[index].pidle);
-
-		/* All GPIO pins are inputs, pulled low */
-		mpsse[index].trish = 0xFF;
-		mpsse[index].gpioh = 0x00;
-
-                buf[i++] = SET_BITS_HIGH;
-                buf[i++] = mpsse[index].gpioh;
-                buf[i++] = mpsse[index].trish;
-
-		retval = raw_write(index, (unsigned char *) &buf, i);
-	}
+		retval = MPSSE_FAIL;
+	}	
 
 	return retval;
 }
@@ -287,39 +294,42 @@ int SetClock(int index, uint32_t freq)
 	uint16_t divisor = 0;
 	char buf[CMD_SIZE] = { 0 };
 
-	if(freq > SIX_MHZ)
+	if(is_valid_index(index))
 	{
-		buf[0] = TCK_X5;
-		system_clock = SIXTY_MHZ;
-	}
-	else
-	{
-		buf[0] = TCK_D5;
-		system_clock = TWELVE_MHZ;
-	}
-	
-	if(raw_write(index, (unsigned char *) &buf, 1) == MPSSE_OK)
-	{
-		if(freq <= 0)
+		if(freq > SIX_MHZ)
 		{
-			divisor = 0xFFFF;
+			buf[0] = TCK_X5;
+			system_clock = SIXTY_MHZ;
 		}
 		else
 		{
-			divisor = freq2div(system_clock, freq);
+			buf[0] = TCK_D5;
+			system_clock = TWELVE_MHZ;
 		}
-
-		buf[0] = TCK_DIVISOR;
-		buf[1] = (divisor & 0xFF);
-		buf[2] = ((divisor >> 8) & 0xFF);
-
-		if(raw_write(index, (unsigned char *) &buf, 3) == MPSSE_OK)
+		
+		if(raw_write(index, (unsigned char *) &buf, 1) == MPSSE_OK)
 		{
-			mpsse[index].clock = div2freq(system_clock, divisor);
-			retval = MPSSE_OK;
+			if(freq <= 0)
+			{
+				divisor = 0xFFFF;
+			}
+			else
+			{
+				divisor = freq2div(system_clock, freq);
+			}
+	
+			buf[0] = TCK_DIVISOR;
+			buf[1] = (divisor & 0xFF);
+			buf[2] = ((divisor >> 8) & 0xFF);
+	
+			if(raw_write(index, (unsigned char *) &buf, 3) == MPSSE_OK)
+			{
+				mpsse[index].clock = div2freq(system_clock, divisor);
+				retval = MPSSE_OK;
+			}
 		}
 	}
-
+	
 	return retval;
 }
 
@@ -345,7 +355,14 @@ char *ErrorString(int index)
  */
 int GetClock(int index)
 {
-	return mpsse[index].clock;
+	int clock = 0;
+
+	if(is_valid_index(index))
+	{
+		clock = mpsse[index].clock;
+	}
+
+	return 0;
 }
 
 /*
@@ -353,7 +370,14 @@ int GetClock(int index)
  */
 int GetVid(int index)
 {
-	return mpsse[index].vid;
+	int vid = 0;
+
+	if(is_valid_index(index))
+	{
+		vid = mpsse[index].vid;
+	}
+
+	return vid;
 }
 
 /*
@@ -361,7 +385,14 @@ int GetVid(int index)
  */
 int GetPid(int index)
 {
-	return mpsse[index].pid;
+	int pid = 0;
+
+	if(is_valid_index(index) )
+	{
+		pid = mpsse[index].pid;
+	}
+
+	return pid;
 }
 
 /*
@@ -369,7 +400,14 @@ int GetPid(int index)
  */
 char *GetDescription(int index)
 {
-	return mpsse[index].description;
+	char *description = NULL;
+	
+	if(is_valid_index(index))
+	{
+		description = mpsse[index].description;
+	}
+
+	return description;
 }
 
 /* 
@@ -383,17 +421,23 @@ char *GetDescription(int index)
 int SetLoopback(int index, int enable)
 {
 	char buf[1] = { 0 };
+	int retval = MPSSE_FAIL;
 
-	if(enable)
+	if(is_valid_index(index))
 	{
-		buf[0] = LOOPBACK_START;
-	}
-	else
-	{
-		buf[0] = LOOPBACK_END;
+		if(enable)
+		{
+			buf[0] = LOOPBACK_START;
+		}
+		else
+		{
+			buf[0] = LOOPBACK_END;
+		}
+
+		retval = raw_write(index, (unsigned char *) &buf, 1);
 	}
 
-	return raw_write(index, (unsigned char *) &buf, 1);
+	return retval;
 }
 
 /*
@@ -405,19 +449,22 @@ int SetLoopback(int index, int enable)
  */
 void SetCSIdle(int index, int idle)
 {
-	if(idle > 0)
+	if(is_valid_index(index))
 	{
-		/* Chip select idles high, active low */
-		mpsse[index].pidle |= CS;
-		mpsse[index].pstop |= CS;
-		mpsse[index].pstart &= ~CS;
-	}
-	else
-	{
-		/* Chip select idles low, active high */
-		mpsse[index].pidle &= ~CS;
-		mpsse[index].pstop &= ~CS;
-		mpsse[index].pstart |= CS;
+		if(idle > 0)
+		{
+			/* Chip select idles high, active low */
+			mpsse[index].pidle |= CS;
+			mpsse[index].pstop |= CS;
+			mpsse[index].pstart &= ~CS;
+		}
+		else
+		{
+			/* Chip select idles low, active high */
+			mpsse[index].pidle &= ~CS;
+			mpsse[index].pstop &= ~CS;
+			mpsse[index].pstart |= CS;
+		}
 	}
 
 	return;
@@ -433,37 +480,44 @@ int Start(int index)
 {
 	int status = MPSSE_OK;
 
-	mpsse[index].status = STARTED;
-
-	if(mpsse[index].mode == I2C)
+	if(is_valid_index(index))
 	{
-		/* Set the default pin states while the clock is low in case this is an I2C repeated start condition */
-		status |= set_bits_low(index, (mpsse[index].pidle & ~SK));
+		mpsse[index].status = STARTED;
 
-		/* Make sure the pins are in their default idle state */
-		status |= set_bits_low(index, mpsse[index].pidle);
+		if(mpsse[index].mode == I2C)
+		{
+			/* Set the default pin states while the clock is low in case this is an I2C repeated start condition */
+			status |= set_bits_low(index, (mpsse[index].pidle & ~SK));
+	
+			/* Make sure the pins are in their default idle state */
+			status |= set_bits_low(index, mpsse[index].pidle);
+		}
+
+		/* Set the start condition */
+		status |= set_bits_low(index, mpsse[index].pstart);
+
+		/* 
+		 * Hackish work around to properly support SPI mode 3.
+		 * SPI3 clock idles high, but needs to be set low before sending out 
+		 * data to prevent unintenteded clock glitches from the FT2232.
+		 */
+		if(mpsse[index].mode == SPI3)
+	        {
+			status |= set_bits_low(index, (mpsse[index].pstart & ~SK));
+	        }
+		/*
+		 * Hackish work around to properly support SPI mode 1.
+		 * SPI1 clock idles low, but needs to be set high before sending out
+		 * data to preven unintended clock glitches from the FT2232.
+		 */
+		else if(mpsse[index].mode == SPI1)
+		{
+			status |= set_bits_low(index, (mpsse[index].pstart | SK));
+		}
 	}
-
-	/* Set the start condition */
-	status |= set_bits_low(index, mpsse[index].pstart);
-
-	/* 
-	 * Hackish work around to properly support SPI mode 3.
-	 * SPI3 clock idles high, but needs to be set low before sending out 
-	 * data to prevent unintenteded clock glitches from the FT2232.
-	 */
-	if(mpsse[index].mode == SPI3)
-        {
-		status |= set_bits_low(index, (mpsse[index].pstart & ~SK));
-        }
-	/*
-	 * Hackish work around to properly support SPI mode 1.
-	 * SPI1 clock idles low, but needs to be set high before sending out
-	 * data to preven unintended clock glitches from the FT2232.
-	 */
-	else if(mpsse[index].mode == SPI1)
+	else
 	{
-		status |= set_bits_low(index, (mpsse[index].pstart | SK));
+		status = MPSSE_FAIL;
 	}
 
 	return status;
@@ -483,55 +537,58 @@ int Write(int index, char *data, int size)
 	unsigned char *buf = NULL;
 	int retval = MPSSE_FAIL, buf_size = 0, txsize = 0, n = 0;
 
-	if(mpsse[index].mode)
+	if(is_valid_index(index))
 	{
-		while(n < size)
+		if(mpsse[index].mode)
 		{
-			txsize = size - n;
-			if(txsize > mpsse[index].xsize)
+			while(n < size)
 			{
-				txsize = mpsse[index].xsize;
-			}
-
-			/* 
-			 * For I2C we need to send each byte individually so that we can 
-			 * read back each individual ACK bit, so set the transmit size to 1.
-			 */
-			if(mpsse[index].mode == I2C)
-			{
-				txsize = 1;
-			}
-
-			buf = build_block_buffer(index, mpsse[index].tx, (unsigned char *) data+n, txsize, &buf_size);
-			if(buf)
-			{	
-				retval = raw_write(index, buf, buf_size);
-				n += txsize;
-				free(buf);
-
-				if(retval == MPSSE_FAIL)
+				txsize = size - n;
+				if(txsize > mpsse[index].xsize)
+				{
+					txsize = mpsse[index].xsize;
+				}
+	
+				/* 
+				 * For I2C we need to send each byte individually so that we can 
+				 * read back each individual ACK bit, so set the transmit size to 1.
+				 */
+				if(mpsse[index].mode == I2C)
+				{
+					txsize = 1;
+				}
+	
+				buf = build_block_buffer(index, mpsse[index].tx, (unsigned char *) data+n, txsize, &buf_size);
+				if(buf)
+				{	
+					retval = raw_write(index, buf, buf_size);
+					n += txsize;
+					free(buf);
+	
+					if(retval == MPSSE_FAIL)
+					{
+						break;
+					}
+				
+					/* Read in the ACK bit and store it in mpsse[index].rack */
+					if(mpsse[index].mode == I2C)
+					{
+						raw_read(index, (unsigned char *) &mpsse[index].rack, 1);
+					}
+				}
+				else
 				{
 					break;
 				}
-			
-				/* Read in the ACK bit and store it in mpsse[index].rack */
-				if(mpsse[index].mode == I2C)
-				{
-					raw_read(index, (unsigned char *) &mpsse[index].rack, 1);
-				}
-			}
-			else
-			{
-				break;
 			}
 		}
+	
+		if(retval == MPSSE_OK && n == size)
+		{
+			retval = MPSSE_OK;
+		}
 	}
-
-	if(retval == MPSSE_OK && n == size)
-	{
-		retval = MPSSE_OK;
-	}
-
+		
 	return retval;
 }
 
@@ -553,43 +610,46 @@ char *Read(int index, int size)
 	char sbuf[SPI_TRANSFER_SIZE] = { 0 };
 	int n = 0, rxsize = 0, data_size = 0;
 
-	if(mpsse[index].mode)
+	if(is_valid_index(index))
 	{
-		buf = malloc(size);
-		if(buf)
+		if(mpsse[index].mode)
 		{
-			memset(buf, 0, size);
-
-			while(n < size)
+			buf = malloc(size);
+			if(buf)
 			{
-				rxsize = size - n;
-				if(rxsize > mpsse[index].xsize)
+				memset(buf, 0, size);
+	
+				while(n < size)
 				{
-					rxsize = mpsse[index].xsize;
-				}
-
-				data = build_block_buffer(index, mpsse[index].rx, (unsigned char *) &sbuf, rxsize, &data_size);
-				if(data)
-				{
-					if(raw_write(index, data, data_size) == MPSSE_OK)
+					rxsize = size - n;
+					if(rxsize > mpsse[index].xsize)
 					{
-						n += raw_read(index, buf+n, rxsize);
+						rxsize = mpsse[index].xsize;
+					}
+	
+					data = build_block_buffer(index, mpsse[index].rx, (unsigned char *) &sbuf, rxsize, &data_size);
+					if(data)
+					{
+						if(raw_write(index, data, data_size) == MPSSE_OK)
+						{
+							n += raw_read(index, buf+n, rxsize);
+						}
+						else
+						{
+							break;
+						}
+						
+						free(data);
 					}
 					else
 					{
 						break;
 					}
-					
-					free(data);
-				}
-				else
-				{
-					break;
 				}
 			}
 		}
 	}
-
+	
 #ifdef SWIGPYTHON
 	swig_string_data sdata = { 0 };
 	sdata.size = n;
@@ -604,8 +664,15 @@ char *Read(int index, int size)
  * Returns the last received ACK bit.
  */
 int GetAck(int index)
-{
-	return (mpsse[index].rack & 0x01);
+{	
+	int ack = 0;
+
+	if(is_valid_index(index))
+	{
+		ack = (mpsse[index].rack & 0x01);
+	}
+
+	return ack;
 }
 
 /*
@@ -618,13 +685,16 @@ int GetAck(int index)
  */
 void SetAck(int index, int ack)
 {
-	if(ack)
+	if(is_valid_index(index))
 	{
-		mpsse[index].tack = 0xFF;
-	}
-	else
-	{
-		mpsse[index].tack = 0x00;
+		if(ack)
+		{
+			mpsse[index].tack = 0xFF;
+		}
+		else
+		{
+			mpsse[index].tack = 0x00;
+		}
 	}
 
 	return;
@@ -642,21 +712,28 @@ int Stop(int index)
 {
 	int retval = MPSSE_OK;
 
-	mpsse[index].status = STOPPED;
-
-	/* In I2C mode, we need to ensure that the data line goes low while the clock line is low to avoid sending an inadvertent start condition */
-	if(mpsse[index].mode == I2C)
+	if(is_valid_index(index))
 	{
-		retval |= set_bits_low(index, (mpsse[index].pidle & ~DO & ~SK));
+		mpsse[index].status = STOPPED;
+
+		/* In I2C mode, we need to ensure that the data line goes low while the clock line is low to avoid sending an inadvertent start condition */
+		if(mpsse[index].mode == I2C)
+		{
+			retval |= set_bits_low(index, (mpsse[index].pidle & ~DO & ~SK));
+		}
+
+		/* Send the stop condition */
+		retval |= set_bits_low(index, mpsse[index].pstop);
+
+		if(retval == MPSSE_OK)
+		{
+			/* Restore the pins to their idle states */
+			retval |= set_bits_low(index, mpsse[index].pidle);
+		}
 	}
-
-	/* Send the stop condition */
-	retval |= set_bits_low(index, mpsse[index].pstop);
-
-	if(retval == MPSSE_OK)
+	else
 	{
-		/* Restore the pins to their idle states */
-		retval |= set_bits_low(index, mpsse[index].pidle);
+		retval = MPSSE_FAIL;
 	}
 
 	return retval;
@@ -665,11 +742,25 @@ int Stop(int index)
 /* Sets the specified pin high */
 int PinHigh(int index, int pin)
 {
-	return gpio_write(index, pin, HIGH);
+	int retval = MPSSE_FAIL;
+
+	if(index >=0)
+	{
+		retval = gpio_write(index, pin, HIGH);
+	}
+
+	return retval;
 }
 
 /* Sets the specified pin low */
 int PinLow(int index, int pin)
 {
-	return gpio_write(index, pin, LOW);
+	int retval = MPSSE_FAIL;
+	
+	if(is_valid_index(index))
+	{
+		retval = gpio_write(index, pin, LOW);
+	}
+
+	return retval;
 }
