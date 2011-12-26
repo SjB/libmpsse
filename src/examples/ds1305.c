@@ -5,42 +5,42 @@
 
 int main(void)
 {
-	int sec = 0, min = 0, retval = EXIT_FAILURE;
+	int fd = 0, sec = 0, min = 0, retval = EXIT_FAILURE;
 	char *control = NULL, *seconds = NULL, *minutes = NULL;
 	
-	if(MPSSE(SPI3, ONE_HUNDRED_KHZ, MSB) == MPSSE_OK)
+	if((fd = MPSSE(SPI3, ONE_HUNDRED_KHZ, MSB)) != MPSSE_FAIL)
 	{
-		SetCSIdle(0);
+		SetCSIdle(fd, 0);
 
-		printf("%s initialized at %dHz (SPI mode 1)\n", GetDescription(), GetClock());
+		printf("%s initialized at %dHz (SPI mode 1)\n", GetDescription(fd), GetClock(fd));
 		
-		Start();
-		Write("\x0F", 1);
-		control = Read(1);
-		Stop();
+		Start(fd);
+		Write(fd, "\x0F", 1);
+		control = Read(fd, 1);
+		Stop(fd);
 		
 		control[0] &= ~0x80;
 		
-		Start();
-		Write("\x8F", 1);
-		Write(control, 1);
-		Stop();
+		Start(fd);
+		Write(fd, "\x8F", 1);
+		Write(fd, control, 1);
+		Stop(fd);
 
 		free(control);
 
 		while(1)
 		{
-			Start();
-			Write("\x00", 1);
-			seconds = Read(1);
-			Stop();
+			Start(fd);
+			Write(fd, "\x00", 1);
+			seconds = Read(fd, 1);
+			Stop(fd);
 
 			sec = (((seconds[0] >> 4) * 10) + (seconds[0] & 0x0F));
 
-			Start();
-			Write("\x01", 1);
-			minutes = Read(1);
-			Stop();
+			Start(fd);
+			Write(fd, "\x01", 1);
+			minutes = Read(fd, 1);
+			Stop(fd);
 
 			min = (((minutes[0] >> 4) * 10) + (minutes[0] & 0x0F));
 
@@ -54,10 +54,10 @@ int main(void)
 	}
 	else
 	{
-		printf("Failed to initialize MPSSE: %s\n", ErrorString());
+		printf("Failed to initialize MPSSE: %s\n", ErrorString(fd));
 	}
 
-	Close();
+	Close(fd);
 
 	return retval;
 }
