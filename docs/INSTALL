@@ -40,7 +40,7 @@ BUILDING EXAMPLE CODE
 
 UNINSTALLATION
 	
-	The mpsse library can be uninstalled by running:
+	Libmpsse can be uninstalled from your system by running:
 
 		# make uninstall
 	

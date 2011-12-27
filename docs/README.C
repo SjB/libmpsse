@@ -16,7 +16,7 @@ FUNCTIONS
 
 	struct mpsse_context *Open(int vid, int pid, char *serial, int interface, enum modes mode, int freq, int endianess)
 
-		Like MPSSE(), but opens the device matching the given vendor and product ID. 
+		Like MPSSE(), but opens the device matching the given vendor and product ID and serial number. 
 		Called internally by MPSSE().
 
 		@vid       - Device vendor ID.

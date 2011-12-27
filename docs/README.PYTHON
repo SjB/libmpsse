@@ -4,6 +4,9 @@ NAME
 FILE
     src/mpsse.py
 
+MODULE DOCS
+    http://libmpsse.googlecode.com
+
 CLASSES
     MPSSE
     
@@ -35,7 +38,7 @@ CLASSES
      |  GetVid(self)
      |      Returns the vendor ID of the FTDI chip.
      |  
-     |  Open(self, vid, pid, mode, frequency, serial=None, interface=1, endianess=0)
+     |  Open(self, vid, pid, mode, frequency, endianess=0, interface=1, serial=None)
      |      Opens the specified USB device. If this fails, an exception will be thrown.
      |      Endianess defaults to MSB; interface defaults to IFACE_A; serial defaults to None.
      |  
@@ -51,7 +54,7 @@ CLASSES
      |      Reads size bytes of data over the selected serial protocol.
      |  
      |  SetAck(self, ack)
-     |      Sets the transmitted ACK bit.
+     |      Sets the transmitted ACK bit. ACKs are sent by default.
      |      Set ack = 1 to send ACKs, ack = 0 to send NACKs.
      |  
      |  SetCSIdle(self, idle)
@@ -61,9 +64,10 @@ CLASSES
      |  
      |  SetClock(self, frequency)
      |      Sets the appropriate divisor for the desired clock frequency. Frequency must be specified in hertz.
+     |      Called internally by __init__ and Open.
      |  
      |  SetLoopback(self, enable)
-     |      Enable / disable internal loopback.
+     |      Enable / disable internal loopback. Loopback is disabled by default.
      |      Set enable = 1 to enable, enable = 0 to disable.
      |  
      |  SetMode(self, mode, endianess)
