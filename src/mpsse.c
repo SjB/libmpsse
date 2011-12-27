@@ -143,9 +143,12 @@ void Close(struct mpsse_context *mpsse)
 {
 	if(mpsse)
 	{
-		ftdi_set_bitmode(&mpsse->ftdi, 0, BITMODE_RESET);
-		ftdi_usb_close(&mpsse->ftdi);
-		ftdi_deinit(&mpsse->ftdi);
+		if(mpsse->open)
+		{
+			ftdi_set_bitmode(&mpsse->ftdi, 0, BITMODE_RESET);
+			ftdi_usb_close(&mpsse->ftdi);
+			ftdi_deinit(&mpsse->ftdi);
+		}
 
 		free(mpsse);
 		mpsse = NULL;
@@ -170,7 +173,8 @@ int SetMode(struct mpsse_context *mpsse, enum modes mode, int endianess)
 	char buf[CMD_SIZE] = { 0 };
 	char setup_commands[CMD_SIZE*4] = { 0 };
 
-	if(is_valid_context(mpsse))
+	/* Do not call is_valid_context() here, as the FTDI chip may not be completely configured when SetMode is called */
+	if(mpsse)
 	{
 		/* Read and write commands need to include endianess */
 		mpsse->tx = MPSSE_DO_WRITE | endianess;
@@ -302,7 +306,8 @@ int SetClock(struct mpsse_context *mpsse, uint32_t freq)
 	uint16_t divisor = 0;
 	char buf[CMD_SIZE] = { 0 };
 
-	if(is_valid_context(mpsse))
+	/* Do not call is_valid_context() here, as the FTDI chip may not be completely configured when SetClock is called */
+	if(mpsse)
 	{
 		if(freq > SIX_MHZ)
 		{
@@ -374,7 +379,7 @@ int GetClock(struct mpsse_context *mpsse)
 		clock = mpsse->clock;
 	}
 
-	return 0;
+	return clock;
 }
 
 /*

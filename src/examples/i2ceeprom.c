@@ -16,25 +16,26 @@ int main(void)
 	FILE *fp = NULL;
 	char *data = NULL;
 	int retval = EXIT_FAILURE;
+	struct mpsse_context *eeprom = NULL;
 
-	if(MPSSE(I2C, FOUR_HUNDRED_KHZ, MSB) == MPSSE_OK)
+	if((eeprom = MPSSE(I2C, FOUR_HUNDRED_KHZ, MSB)) != NULL && eeprom->open)
 	{
-		printf("%s initialized at %dHz (I2C)\n", GetDescription(), GetClock());
+		printf("%s initialized at %dHz (I2C)\n", GetDescription(eeprom), GetClock(eeprom));
 	
 		/* Write the EEPROM start address */	
-		Start();
-		Write(WCMD, sizeof(WCMD) - 1);
+		Start(eeprom);
+		Write(eeprom, WCMD, sizeof(WCMD) - 1);
 
-		if(GetAck() == 0)
+		if(GetAck(eeprom) == 0)
 		{
 			/* Send the EEPROM read command */
-			Start();
-			Write(RCMD, sizeof(RCMD) - 1);
+			Start(eeprom);
+			Write(eeprom, RCMD, sizeof(RCMD) - 1);
 
-			if(GetAck() == 0)
+			if(GetAck(eeprom) == 0)
 			{
 				/* Read in SIZE bytes from the EEPROM chip */
-				data = Read(SIZE);
+				data = Read(eeprom, SIZE);
 				if(data)
 				{
 					fp = fopen(FOUT, "wb");
@@ -52,14 +53,14 @@ int main(void)
 			}
 		}
 
-		Stop();
+		Stop(eeprom);
 	}
 	else
 	{
-		printf("Failed to initialize MPSSE: %s\n", ErrorString());
+		printf("Failed to initialize MPSSE: %s\n", ErrorString(eeprom));
 	}
 
-	Close();
+	Close(eeprom);
 
 	return retval;
 }

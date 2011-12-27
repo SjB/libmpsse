@@ -34,12 +34,12 @@ class MPSSE:
 		self.context = None
 		if mode is not None and frequency is not None:
 			self.context = _mpsse.MPSSE(mode, frequency, endianess)
-			if self.context == MPSSE_FAIL:
+			if self.context.open == 0:
 				raise Exception, self.ErrorString()
 
 	def Open(self, vid, pid, interface, mode, frequency, endianess):
 		self.context = _mpsse.Open(vid, pid, interface, mode, frequency, endianess)
-		if self.context == MPSSE_FAIL:
+		if self.context.open == 0:
 			raise Exception, self.ErrorString()
 		return MPSSE_OK
 

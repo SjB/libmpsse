@@ -7,26 +7,28 @@ WCMD = "\xA0\x00\x00"	# Write start address command
 RCMD = "\xA1"		# Read command
 FOUT = "eeprom.bin"	# Output file
 
-if MPSSE(I2C, FOUR_HUNDRED_KHZ, MSB) == MPSSE_OK:
+try:
+	eeprom = MPSSE(I2C, FOUR_HUNDRED_KHZ)
 
-	print "%s initialized at %dHz (I2C)" % (GetDescription(), GetClock())
+	print "%s initialized at %dHz (I2C)" % (eeprom.GetDescription(), eeprom.GetClock())
 
-	Start()
-	Write(WCMD)
+	eeprom.Start()
+	eeprom.Write(WCMD)
 
-	if GetAck() == 0:
+	if eeprom.GetAck() == 0:
 
-		Start()
-		Write(RCMD)
+		eeprom.Start()
+		eeprom.Write(RCMD)
 	
-		if GetAck() == 0:
-			data = Read(SIZE)
+		if eeprom.GetAck() == 0:
+			data = eeprom.Read(SIZE)
 
-		Stop()
+		eeprom.Stop()
 	
 	open(FOUT, "wb").write(data)	
 	print "Dumped %d bytes to %s" % (len(data), FOUT)
-else:
-	print "Failed to initialize MPSSE:", ErrorString()
 	
-Close()
+	eeprom.Close()
+except Exception, e:
+	print "MPSSE failure:", e
+	

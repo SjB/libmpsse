@@ -6,18 +6,20 @@ SIZE = 0x100000			# Size of SPI flash device: 1MB
 RCMD = "\x03\x00\x00\x00"	# Standard SPI flash read command (0x03) followed by starting address (0x000000)
 FOUT = "flash.bin"		# Output file
 
-if MPSSE(SPI0, TWELVE_MHZ, MSB) == MPSSE_OK:
+try:
+	flash = MPSSE(SPI0, TWELVE_MHZ, MSB)
 
-	print "%s initialized at %dHz (SPI mode 0)" % (GetDescription(), GetClock())
+	print "%s initialized at %dHz (SPI mode 0)" % (flash.GetDescription(), flash.GetClock())
 
-	Start()
-	Write(RCMD)
-	data = Read(SIZE)
-	Stop()
+	flash.Start()
+	flash.Write(RCMD)
+	data = flash.Read(SIZE)
+	flash.Stop()
 
 	open(FOUT, "wb").write(data)
 	print "Dumped %d bytes to %s" % (len(data), FOUT)
-else:
-	print "Failed to initialize MPSSE:", ErrorString()
 	
-Close()
+	flash.Close()
+except Exception, e:
+	print "MPSSE failure:", e
+	

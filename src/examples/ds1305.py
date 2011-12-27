@@ -28,29 +28,32 @@ try:
 
 	# Loop to print the time elapsed every second
 	while True:
-	
-		# Read in the elapsed seconds
-		ds1305.Start()
-		ds1305.Write("\x00")
-		seconds = ord(ds1305.Read(1))
-		ds1305.Stop()
 
-		# High 4 bits == tens of seconds, low 4 bits == seconds
-		seconds = (((seconds >> 4) * 10) + (seconds & 0x0F))
+		try:	
+			sleep(1)
 
-		# Read in the elapsed minutes
-		ds1305.Start()
-		ds1305.Write("\x01")
-		minutes = ord(ds1305.Read(1))
-		ds1305.Stop()	
+			# Read in the elapsed seconds
+			ds1305.Start()
+			ds1305.Write("\x00")
+			seconds = ord(ds1305.Read(1))
+			ds1305.Stop()
 
-		# High 4 bits == tens of minutes, low 4 bits == minutes
-		minutes = (((minutes >> 4) * 10) + (minutes & 0x0F))
+			# High 4 bits == tens of seconds, low 4 bits == seconds
+			seconds = (((seconds >> 4) * 10) + (seconds & 0x0F))
 
-		print "%.2d:%.2d" % (minutes, seconds)
-	
-		sleep(1)
-	
+			# Read in the elapsed minutes
+			ds1305.Start()
+			ds1305.Write("\x01")
+			minutes = ord(ds1305.Read(1))
+			ds1305.Stop()	
+
+			# High 4 bits == tens of minutes, low 4 bits == minutes
+			minutes = (((minutes >> 4) * 10) + (minutes & 0x0F))
+
+			print "%.2d:%.2d" % (minutes, seconds)
+		except KeyboardInterrupt:
+			break
+			
 	ds1305.Close()
 except Exception, e:
 	print "Error reading from DS1305:", e
