@@ -35,7 +35,7 @@ class MPSSE:
 
 	def __init__(self, mode=None, frequency=None, endianess=MSB):
 		"""
-		If mode and frequency are specified, then attempt to connect to any known FTDI chip. If this fails, an exception will be thrown.
+		If mode and frequency are specified, then attempt to connect to any known FTDI chip.
 		If mode and frequency are not specified, this simply returns the class instance.
 		Endianess defaults to MSB.
 		"""
@@ -47,7 +47,7 @@ class MPSSE:
 
 	def Open(self, vid, pid, mode, frequency, endianess=MSB, interface=IFACE_A, serial=None):
 		"""
-		Opens the specified USB device. If this fails, an exception will be thrown.
+		Opens the specified USB device.
 		Endianess defaults to MSB; interface defaults to IFACE_A; serial defaults to None.
 		"""
 		self.context = _mpsse.Open(vid, pid, serial, interface, mode, frequency, endianess)
@@ -74,14 +74,18 @@ class MPSSE:
 		Sets the appropriate transmit and receive commands based on the requested mode and byte order.
 		Called internally by __init__ and Open.
 		"""
-		return _mpsse.SetMode(self.context, mode, endianess)
+		if _mpsse.SetMode(self.context, mode, endianess) == MPSSE_FAIL:
+			raise Exception, self.ErrorString()
+		return MPSSE_OK
 
 	def SetClock(self, frequency):
 		"""
 		Sets the appropriate divisor for the desired clock frequency. Frequency must be specified in hertz.
 		Called internally by __init__ and Open.
 		"""
-		return _mpsse.SetClock(self.context, frequency)
+		if _mpsse.SetClock(self.context, frequency) == MPSSE_FAIL:
+			raise Exception, self.ErrorString()
+		return MPSSE_OK
 
 	def GetClock(self):
 		"""
@@ -113,7 +117,9 @@ class MPSSE:
 		Enable / disable internal loopback. Loopback is disabled by default.
 		Set enable = 1 to enable, enable = 0 to disable.
 		"""
-		return _mpsse.SetLoopback(self.context, enable)
+		if _mpsse.SetLoopback(self.context, enable) == MPSSE_FAIL:
+			raise Exception, self.ErrorString()
+		return MPSSE_OK
 
 	def SetCSIdle(self, idle):
 		"""
@@ -127,19 +133,25 @@ class MPSSE:
 		"""
 		Send data start condition.
 		"""
-		return _mpsse.Start(self.context)
+		if _mpsse.Start(self.context) == MPSSE_FAIL:
+			raise Exception, self.ErrorString()
+		return MPSSE_OK
 
 	def Stop(self):
 		"""
 		Send data stop condition.
 		"""
-		return _mpsse.Stop(self.context)
+		if _mpsse.Stop(self.context) == MPSSE_FAIL:
+			raise Exception, self.ErrorString()
+		return MPSSE_OK
 
 	def Write(self, data):
 		"""
 		Send data (string) out via the selected serial protocol.
 		"""
-		return _mpsse.Write(self.context, data)
+		if _mpsse.Write(self.context, data) == MPSSE_FAIL:
+			raise Exception, self.ErrorString()
+		return MPSSE_OK
 
 	def Read(self, size):
 		"""
@@ -166,12 +178,17 @@ class MPSSE:
 		Sets the specified GPIO pin high.
 		The pin can be GPIO pin 0 - 11.
 		"""
-		return _mpsse.PinHigh(self.context, pin)
+		if _mpsse.PinHigh(self.context, pin) == MPSSE_FAIL:
+			raise Exception, self.ErrorString()
+		return MPSSE_OK
 
 	def PinLow(self, pin):
 		"""
 		Sets the specified GPIO pin low.
 		The Pin can be GPIO pin 0 - 11.
 		"""
-		return _mpsse.PinLow(self.context, pin)
+		if _mpsse.PinLow(self.context, pin) == MPSSE_FAIL:
+			raise Exception, self.ErrorString()
+		return MPSSE_OK
+
 

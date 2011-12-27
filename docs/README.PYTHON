@@ -4,9 +4,6 @@ NAME
 FILE
     src/mpsse.py
 
-MODULE DOCS
-    http://libmpsse.googlecode.com
-
 CLASSES
     MPSSE
     
@@ -39,7 +36,7 @@ CLASSES
      |      Returns the vendor ID of the FTDI chip.
      |  
      |  Open(self, vid, pid, mode, frequency, endianess=0, interface=1, serial=None)
-     |      Opens the specified USB device. If this fails, an exception will be thrown.
+     |      Opens the specified USB device.
      |      Endianess defaults to MSB; interface defaults to IFACE_A; serial defaults to None.
      |  
      |  PinHigh(self, pin)
@@ -84,32 +81,36 @@ CLASSES
      |      Send data (string) out via the selected serial protocol.
      |  
      |  __init__(self, mode=None, frequency=None, endianess=0)
-     |      If mode and frequency are specified, then attempt to connect to any known FTDI chip. If this fails, an exception will be thrown.
+     |      If mode and frequency are specified, then attempt to connect to any known FTDI chip.
      |      If mode and frequency are not specified, this simply returns the class instance.
      |      Endianess defaults to MSB.
 
 DATA
-    FIVE_MHZ = 5000000
+    ONE_HUNDRED_KHZ = 100000
     FOUR_HUNDRED_KHZ = 400000
-    I2C = 5
-    IFACE_A = 1
+    ONE_MHZ = 1000000
+    TWO_MHZ = 2000000
+    FIVE_MHZ = 5000000
+    SIX_MHZ = 6000000
+    TEN_MHZ = 1000000
+    TWELVE_MHZ = 12000000
+    THIRY_MHZ = 30000000
+
     IFACE_ANY = 0
+    IFACE_A = 1
     IFACE_B = 2
     IFACE_C = 3
     IFACE_D = 4
+    
+    MSB = 0
     LSB = 8
+
     MPSSE_FAIL = -1
     MPSSE_OK = 0
-    MSB = 0
-    ONE_HUNDRED_KHZ = 100000
-    ONE_MHZ = 1000000
-    SIX_MHZ = 6000000
+
     SPI0 = 1
     SPI1 = 2
     SPI2 = 3
     SPI3 = 4
-    TEN_MHZ = 1000000
-    THIRY_MHZ = 30000000
-    TWELVE_MHZ = 12000000
-    TWO_MHZ = 2000000
+    I2C = 5
 
