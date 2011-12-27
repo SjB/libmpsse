@@ -47,7 +47,7 @@ struct mpsse_context *MPSSE(enum modes mode, int freq, int endianess)
 
 	for(i=0; supported_devices[i].vid != 0; i++)
 	{
-		if((mpsse = Open(supported_devices[i].vid, supported_devices[i].pid, NULL, IFACE_A, mode, freq, endianess)) != NULL)
+		if((mpsse = Open(supported_devices[i].vid, supported_devices[i].pid, mode, freq, endianess, IFACE_A, NULL)) != NULL)
 		{
 			if(mpsse->open)
 			{
@@ -75,7 +75,7 @@ struct mpsse_context *MPSSE(enum modes mode, int freq, int endianess)
  * On success, mpsse->open will be set to 1.
  * On failure, mpsse->open will be set to 0.
  */
-struct mpsse_context *Open(int vid, int pid, const char *serial, int interface, enum modes mode, int freq, int endianess)
+struct mpsse_context *Open(int vid, int pid, enum modes mode, int freq, int endianess, int interface, const char *serial)
 {
 	int status = 0;
 	struct mpsse_context *mpsse = NULL;

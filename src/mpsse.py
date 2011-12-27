@@ -50,7 +50,7 @@ class MPSSE:
 		Opens the specified USB device.
 		Endianess defaults to MSB; interface defaults to IFACE_A; serial defaults to None.
 		"""
-		self.context = _mpsse.Open(vid, pid, serial, interface, mode, frequency, endianess)
+		self.context = _mpsse.Open(vid, pid, mode, frequency, endianess, interface, serial)
 		if self.context.open == 0:
 			raise Exception, self.ErrorString()
 		return MPSSE_OK

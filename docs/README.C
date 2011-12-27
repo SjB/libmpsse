@@ -14,18 +14,18 @@ FUNCTIONS
 		On failure, mpsse->open will be set to 0.
 
 
-	struct mpsse_context *Open(int vid, int pid, char *serial, int interface, enum modes mode, int freq, int endianess)
+	struct mpsse_context *Open(int vid, int pid, enum modes mode, int freq, int endianess, int interface, const char *serial)
 
 		Like MPSSE(), but opens the device matching the given vendor and product ID and serial number. 
 		Called internally by MPSSE().
 
 		@vid       - Device vendor ID.
 		@pid       - Device product ID.
-		@serial	   - Serial number of the FTDI (set to NULL if not needed).
-		@interface - FTDI interface to use, one of: IFACE_ANY, IFACE_A - IFACE_D
 		@mode      - MPSSE mode, one of: SPI0, SPI1, SPI2, SPI3, I2C.
 		@freq      - Clock frequency to use for the specified mode.
 		@endianess - SPecifies how data is clocked in/out (MSB, LSB).
+		@interface - FTDI interface to use, one of: IFACE_ANY, IFACE_A - IFACE_D
+		@serial	   - Serial number of the FTDI (set to NULL if not needed).
 
 		Returns a pointer to an MPSSE context structure. 
 		On success, mpsse->open will be set to 1.

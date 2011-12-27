@@ -130,7 +130,7 @@ struct mpsse_context
 };
 
 struct mpsse_context *MPSSE(enum modes mode, int freq, int endianess);
-struct mpsse_context *Open(int vid, int pid, const char *serial, int interface, enum modes mode, int freq, int endianess);
+struct mpsse_context *Open(int vid, int pid, enum modes mode, int freq, int endianess, int interface, const char *serial);
 void Close(struct mpsse_context *mpsse);
 char *ErrorString(struct mpsse_context *mpsse);
 int SetMode(struct mpsse_context *mpsse, enum modes mode, int endianess);
