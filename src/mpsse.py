@@ -45,12 +45,12 @@ class MPSSE:
 			if self.context.open == 0:
 				raise Exception, self.ErrorString()
 
-	def Open(self, vid, pid, mode, frequency, serial=None, interface=IFACE_A, endianess=MSB):
+	def Open(self, vid, pid, mode, frequency, endianess=MSB, interface=IFACE_A, serial=None):
 		"""
 		Opens the specified USB device. If this fails, an exception will be thrown.
 		Endianess defaults to MSB; interface defaults to IFACE_A; serial defaults to None.
 		"""
-		self.context = _mpsse.Open(vid, pid, interface, serial, mode, frequency, endianess)
+		self.context = _mpsse.Open(vid, pid, serial, interface, mode, frequency, endianess)
 		if self.context.open == 0:
 			raise Exception, self.ErrorString()
 		return MPSSE_OK
@@ -79,6 +79,7 @@ class MPSSE:
 	def SetClock(self, frequency):
 		"""
 		Sets the appropriate divisor for the desired clock frequency. Frequency must be specified in hertz.
+		Called internally by __init__ and Open.
 		"""
 		return _mpsse.SetClock(self.context, frequency)
 
@@ -109,7 +110,7 @@ class MPSSE:
 
 	def SetLoopback(self, enable):
 		"""
-		Enable / disable internal loopback.
+		Enable / disable internal loopback. Loopback is disabled by default.
 		Set enable = 1 to enable, enable = 0 to disable.
 		"""
 		return _mpsse.SetLoopback(self.context, enable)
@@ -148,7 +149,7 @@ class MPSSE:
 
 	def SetAck(self, ack):
 		"""
-		Sets the transmitted ACK bit.
+		Sets the transmitted ACK bit. ACKs are sent by default.
 		Set ack = 1 to send ACKs, ack = 0 to send NACKs.
 		"""
 		return _mpsse.SetAck(self.context, ack)

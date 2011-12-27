@@ -1,5 +1,8 @@
 /*
- * LibMPSSE source.
+ * Main libmpsse source file.
+ *
+ * Craig Heffner
+ * 27 December 2011
  */
 
 #include <string.h>

@@ -1,5 +1,8 @@
 /*
  * Internal functions used by libmpsse.
+ *
+ * Craig Heffner
+ * 27 December 2011
  */
 
 #include <string.h>
