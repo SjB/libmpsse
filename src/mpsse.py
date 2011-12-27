@@ -29,16 +29,28 @@ TWELVE_MHZ = _mpsse.TWELVE_MHZ
 THIRY_MHZ = _mpsse.THIRTY_MHZ
 
 class MPSSE:
+	"""
+	Python class wrapper for libmpsse.
+	"""
 
 	def __init__(self, mode=None, frequency=None, endianess=MSB):
+		"""
+		If mode and frequency are specified, then attempt to connect to any known FTDI chip. If this fails, an exception will be thrown.
+		If mode and frequency are not specified, this simply returns the class instance.
+		Endianess defaults to MSB.
+		"""
 		self.context = None
 		if mode is not None and frequency is not None:
 			self.context = _mpsse.MPSSE(mode, frequency, endianess)
 			if self.context.open == 0:
 				raise Exception, self.ErrorString()
 
-	def Open(self, vid, pid, interface, mode, frequency, endianess):
-		self.context = _mpsse.Open(vid, pid, interface, mode, frequency, endianess)
+	def Open(self, vid, pid, mode, frequency, serial=None, interface=IFACE_A, endianess=MSB):
+		"""
+		Opens the specified USB device. If this fails, an exception will be thrown.
+		Endianess defaults to MSB; interface defaults to IFACE_A; serial defaults to None.
+		"""
+		self.context = _mpsse.Open(vid, pid, interface, serial, mode, frequency, endianess)
 		if self.context.open == 0:
 			raise Exception, self.ErrorString()
 		return MPSSE_OK
