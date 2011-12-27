@@ -23,8 +23,9 @@ LIBRARY API
 
 		3) Besides the above described differences, all Python methods have a 1:1 compatibility with their
 		   respective C functions. However, in Python the class constructor (MPSSE) and Open method have 
-		   sensible defaults for several of their arguments so not all arguments are required. See the
-		   README.PYTHON file for more details.
+		   sensible defaults for several of their arguments so not all arguments are required. 
+
+	See the README.C and README.PYTHON files for more details.
 
 CODE EXAMPLES
 
