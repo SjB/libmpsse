@@ -1,0 +1,102 @@
+NAME
+    mpsse
+
+FILE
+    mpsse.py
+
+MODULE DOCS
+    docs/README.API_PYTHON
+
+CLASSES
+    MPSSE
+    
+    class MPSSE
+     |  Methods defined here:
+     |  
+     |  Close(self)
+     |  
+     |  ErrorString(self)
+     |  
+     |  GetAck(self)
+     |  
+     |  GetClock(self)
+     |  
+     |  GetDescription(self)
+     |  
+     |  GetPid(self)
+     |  
+     |  GetVid(self)
+     |  
+     |  Open(self, vid, pid, interface, mode, frequency, endianess)
+     |  
+     |  PinHigh(self, pin)
+     |  
+     |  PinLow(self, pin)
+     |  
+     |  Read(self, size)
+     |  
+     |  SetAck(self, ack)
+     |  
+     |  SetCSIdle(self, idle)
+     |  
+     |  SetClock(self, frequency)
+     |  
+     |  SetLoopback(self, enable)
+     |  
+     |  SetMode(self, mode, endianess)
+     |  
+     |  Start(self)
+     |  
+     |  Stop(self)
+     |  
+     |  Open(self, vid, pid, interface, mode, frequency, endianess)
+     |  
+     |  PinHigh(self, pin)
+     |  
+     |  PinLow(self, pin)
+     |  
+     |  Read(self, size)
+     |  
+     |  SetAck(self, ack)
+     |  
+     |  SetCSIdle(self, idle)
+     |  
+     |  SetClock(self, frequency)
+     |  
+     |  SetLoopback(self, enable)
+     |  
+     |  SetMode(self, mode, endianess)
+     |  
+     |  Start(self)
+     |  
+     |  Stop(self)
+     |  
+     |  Write(self, data)
+     |  
+     |  __init__(self, mode=None, frequency=None, endianess=0)
+
+DATA
+    FIVE_MHZ = 5000000
+    FOUR_HUNDRED_KHZ = 400000
+    I2C = 5
+    IFACE_A = 1
+    IFACE_ANY = 0
+    IFACE_B = 2
+    IFACE_C = 3
+    IFACE_D = 4
+    LSB = 8
+    MPSSE_FAIL = -1
+    MPSSE_OK = 0
+    MSB = 0
+    ONE_HUNDRED_KHZ = 100000
+    ONE_MHZ = 1000000
+    SIX_MHZ = 6000000
+    SPI0 = 1
+    SPI1 = 2
+    SPI2 = 3
+    SPI3 = 4
+    TEN_MHZ = 1000000
+    THIRY_MHZ = 30000000
+    TWELVE_MHZ = 12000000
+    TWO_MHZ = 2000000
+
