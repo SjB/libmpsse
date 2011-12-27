@@ -779,7 +779,7 @@ int Stop(struct mpsse_context *mpsse)
 }
 
 /* 
- * Sets the specified pin high 
+ * Sets the specified pin high.
  *
  * @mpsse - MPSSE context pointer.
  * @pin   - Pin number to set high.

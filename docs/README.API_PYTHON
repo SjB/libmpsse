@@ -2,78 +2,87 @@ NAME
     mpsse
 
 FILE
-    mpsse.py
-
-MODULE DOCS
-    docs/README.API_PYTHON
+    src/mpsse.py
 
 CLASSES
     MPSSE
     
     class MPSSE
+     |  Python class wrapper for libmpsse.
+     |  
      |  Methods defined here:
      |  
      |  Close(self)
+     |      Closes the device, deinitializes libftdi, and frees the libmpsse context.
      |  
      |  ErrorString(self)
+     |      Returns the last libftdi error string.
      |  
      |  GetAck(self)
+     |      Returns the last received ACK bit.
+     |      Returns 0 for ACK, 1 for NACK.
      |  
      |  GetClock(self)
+     |      Gets the currently configured clock rate.
      |  
      |  GetDescription(self)
+     |      Returns the description of the FTDI chip, if any. 
+     |      This will only be populated if __init__ is used to open the device.
      |  
      |  GetPid(self)
+     |      Returns the product ID of the FTDI chip.
      |  
      |  GetVid(self)
+     |      Returns the vendor ID of the FTDI chip.
      |  
-     |  Open(self, vid, pid, interface, mode, frequency, endianess)
-     |  
-     |  PinHigh(self, pin)
-     |  
-     |  PinLow(self, pin)
-     |  
-     |  Read(self, size)
-     |  
-     |  SetAck(self, ack)
-     |  
-     |  SetCSIdle(self, idle)
-     |  
-     |  SetClock(self, frequency)
-     |  
-     |  SetLoopback(self, enable)
-     |  
-     |  SetMode(self, mode, endianess)
-     |  
-     |  Start(self)
-     |  
-     |  Stop(self)
-     |  
-     |  Open(self, vid, pid, interface, mode, frequency, endianess)
+     |  Open(self, vid, pid, mode, frequency, serial=None, interface=1, endianess=0)
+     |      Opens the specified USB device. If this fails, an exception will be thrown.
+     |      Endianess defaults to MSB; interface defaults to IFACE_A; serial defaults to None.
      |  
      |  PinHigh(self, pin)
+     |      Sets the specified GPIO pin high.
+     |      The pin can be GPIO pin 0 - 11.
      |  
      |  PinLow(self, pin)
+     |      Sets the specified GPIO pin low.
+     |      The Pin can be GPIO pin 0 - 11.
      |  
      |  Read(self, size)
+     |      Reads size bytes of data over the selected serial protocol.
      |  
      |  SetAck(self, ack)
+     |      Sets the transmitted ACK bit.
+     |      Set ack = 1 to send ACKs, ack = 0 to send NACKs.
      |  
      |  SetCSIdle(self, idle)
+     |      Sets the idle state of the chip select pin. CS idles high by default.
+     |      Only appropriate when using one of the SPI modes.
+     |      Set idle = 1 to idle high, idle = 0 to idle low.
      |  
      |  SetClock(self, frequency)
+     |      Sets the appropriate divisor for the desired clock frequency. Frequency must be specified in hertz.
      |  
      |  SetLoopback(self, enable)
+     |      Enable / disable internal loopback.
+     |      Set enable = 1 to enable, enable = 0 to disable.
      |  
      |  SetMode(self, mode, endianess)
+     |      Sets the appropriate transmit and receive commands based on the requested mode and byte order.
+     |      Called internally by __init__ and Open.
      |  
      |  Start(self)
+     |      Send data start condition.
      |  
      |  Stop(self)
+     |      Send data stop condition.
      |  
      |  Write(self, data)
+     |      Send data (string) out via the selected serial protocol.
      |  
      |  __init__(self, mode=None, frequency=None, endianess=0)
+     |      If mode and frequency are specified, then attempt to connect to any known FTDI chip. If this fails, an exception will be thrown.
+     |      If mode and frequency are not specified, this simply returns the class instance.
+     |      Endianess defaults to MSB.
 
 DATA
     FIVE_MHZ = 5000000
