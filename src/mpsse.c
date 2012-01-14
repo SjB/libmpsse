@@ -11,6 +11,7 @@
 #include <ftdi.h>
 #include "mpsse.h"
 #include "support.h"
+#include "config.h"
 
 /* List of known FT2232-based devices */
 struct vid_pid supported_devices[] = { 
@@ -821,4 +822,33 @@ int PinLow(struct mpsse_context *mpsse, int pin)
 	}
 
 	return retval;
+}
+
+/* 
+ * Returns the libmpsse version number. 
+ * High nibble is major version, low nibble is minor version.
+ */
+int Version(void)
+{
+	int major = 0, minor = 0, version = 0;
+	char *version_string = NULL, *decimal_ptr = NULL;
+
+	version_string = strdup(PACKAGE_VERSION);
+	if(version_string)
+	{
+		decimal_ptr = strchr(version_string, '.');
+		if(decimal_ptr && strlen(decimal_ptr) > 1)
+		{
+			memset(decimal_ptr, 0, 1);
+			minor = atoi(decimal_ptr+1);
+		}
+
+		major = atoi(version_string);
+		
+		free(version_string);
+	}
+
+	version = (major << 4) + (minor & 0x0F);
+
+	return version;
 }

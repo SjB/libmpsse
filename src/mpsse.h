@@ -148,6 +148,7 @@ int GetAck(struct mpsse_context *mpsse);
 void SetAck(struct mpsse_context *mpsse, int ack);
 int PinHigh(struct mpsse_context *mpsse, int pin);
 int PinLow(struct mpsse_context *mpsse, int pin);
+int Version(void);
 
 #ifdef SWIGPYTHON
 

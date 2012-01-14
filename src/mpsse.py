@@ -191,4 +191,10 @@ class MPSSE:
 			raise Exception, self.ErrorString()
 		return MPSSE_OK
 
+	def Version(self):
+		"""
+		Returns the libmpsse version number.
+		High nibble is major, low nibble is minor.
+		"""
+		return _mpsse.Version()
 
