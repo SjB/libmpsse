@@ -247,10 +247,9 @@ DEFINITIONS
 	        TWO_MHZ          = 2000000,
 	        FIVE_MHZ         = 5000000,
 	        SIX_MHZ          = 6000000,
-	        TEN_MHZ          = 1000000,
+	        TEN_MHZ          = 10000000,
 	        TWELVE_MHZ       = 12000000,
 	        THIRTY_MHZ       = 30000000,
-	        SIXTY_MHZ        = 60000000
 
 
 	Mode definitions, used for the 'mode' argument of MPSSE() and Open():
