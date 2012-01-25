@@ -852,3 +852,10 @@ int Version(void)
 
 	return version;
 }
+
+int Tristate(struct mpsse_context *mpsse)
+{
+	char cmd[1] = { ENABLE_TRISTATE };
+
+	return raw_write(mpsse, (unsigned char *) &cmd, sizeof(cmd));
+}

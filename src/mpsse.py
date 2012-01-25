@@ -197,4 +197,6 @@ class MPSSE:
 		High nibble is major, low nibble is minor.
 		"""
 		return _mpsse.Version()
-
+	
+	def Tristate(self):
+		return _mpsse.Tristate(self.context)

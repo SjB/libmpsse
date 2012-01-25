@@ -88,6 +88,7 @@ enum mpsse_commands
 	ENABLE_3_PHASE_CLOCK	= 0x8C,
 	DISABLE_3_PHASE_CLOCK	= 0x8D,
 	DISABLE_ADAPTIVE_CLOCK	= 0x97,
+	ENABLE_TRISTATE		= 0x9E,
 	TCK_X5			= 0x8A,
 	TCK_D5			= 0x8B,
 	TOGGLE_CLOCK		= 0x8E
@@ -149,6 +150,7 @@ void SetAck(struct mpsse_context *mpsse, int ack);
 int PinHigh(struct mpsse_context *mpsse, int pin);
 int PinLow(struct mpsse_context *mpsse, int pin);
 int Version(void);
+int Tristate(struct mpsse_context *mpsse);
 
 #ifdef SWIGPYTHON
 
