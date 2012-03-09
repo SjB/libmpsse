@@ -89,6 +89,9 @@ struct mpsse_context *Open(int vid, int pid, enum modes mode, int freq, int endi
 		/* ftdilib initialization */
 		if(ftdi_init(&mpsse->ftdi) == 0)
 		{
+			/* Set the FTDI interface  */
+			ftdi_set_interface(&mpsse->ftdi, interface);
+
 			/* Open the specified device */
 			if(ftdi_usb_open_desc(&mpsse->ftdi, vid, pid, NULL, serial) == 0)
 			{
@@ -107,7 +110,6 @@ struct mpsse_context *Open(int vid, int pid, enum modes mode, int freq, int endi
 					mpsse->xsize = SPI_TRANSFER_SIZE;
 				}
 	
-				status |= ftdi_set_interface(&mpsse->ftdi, interface);
 				status |= ftdi_usb_reset(&mpsse->ftdi);
 				status |= ftdi_set_latency_timer(&mpsse->ftdi, LATENCY_MS);
 				status |= ftdi_write_data_set_chunksize(&mpsse->ftdi, CHUNK_SIZE);
@@ -196,6 +198,7 @@ int SetMode(struct mpsse_context *mpsse, enum modes mode, int endianess)
 		/* Disable FTDI internal loopback */
 	        SetLoopback(mpsse, 0);
 
+		/* Send ACKs by default */
 		SetAck(mpsse, 0);
 
 		/* Ensure adaptive clock is disabled */
@@ -722,7 +725,7 @@ int GetAck(struct mpsse_context *mpsse)
  * Sets the transmitted ACK bit.
  *
  * @mpsse - MPSSE context pointer.
- * @ack   - 1 to send ACKs, 0 to send NACKs.
+ * @ack   - 0 to send ACKs, 1 to send NACKs.
  *
  * Returns void.
  */
@@ -730,7 +733,7 @@ void SetAck(struct mpsse_context *mpsse, int ack)
 {
 	if(is_valid_context(mpsse))
 	{
-		if(ack)
+		if(!ack)
 		{
 			mpsse->tack = 0xFF;
 		}

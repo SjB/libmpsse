@@ -50,6 +50,12 @@ int main(void)
 
 					free(data);
 				}
+	
+				/* Tell libmpsse to send NACKs after reading data */
+				SetAck(1);
+
+				/* Read in one dummy byte, with a NACK */
+				Read(eeprom, 1);
 			}
 		}
 

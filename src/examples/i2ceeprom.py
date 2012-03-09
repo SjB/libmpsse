@@ -22,6 +22,8 @@ try:
 	
 		if eeprom.GetAck() == 0:
 			data = eeprom.Read(SIZE)
+			SetAck(1)
+			eeprom.Read(1)
 
 		eeprom.Stop()
 	
