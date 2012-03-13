@@ -55,6 +55,10 @@ struct mpsse_context *MPSSE(enum modes mode, int freq, int endianess)
 				mpsse->description = supported_devices[i].description;
 				break;
 			}
+			else
+			{
+				Close(mpsse);
+			}
 		}
 	}
 
