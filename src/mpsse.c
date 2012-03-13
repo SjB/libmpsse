@@ -55,9 +55,11 @@ struct mpsse_context *MPSSE(enum modes mode, int freq, int endianess)
 				mpsse->description = supported_devices[i].description;
 				break;
 			}
-			else
+			/* If there is another device still left to try, free the context pointer and try again */
+			else if(supported_devices[i+1].vid != 0)
 			{
 				Close(mpsse);
+				mpsse = NULL;
 			}
 		}
 	}
