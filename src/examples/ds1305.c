@@ -13,7 +13,7 @@ int main(void)
 	{
 		SetCSIdle(ds1305, 0);
 
-		printf("%s initialized at %dHz (SPI mode 1)\n", GetDescription(ds1305), GetClock(ds1305));
+		printf("%s initialized at %dHz (SPI mode 3)\n", GetDescription(ds1305), GetClock(ds1305));
 		
 		Start(ds1305);
 		Write(ds1305, "\x0F", 1);
