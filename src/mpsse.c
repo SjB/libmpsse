@@ -739,7 +739,7 @@ void SetAck(struct mpsse_context *mpsse, int ack)
 {
 	if(is_valid_context(mpsse))
 	{
-		if(!ack)
+		if(ack)
 		{
 			mpsse->tack = 0xFF;
 		}
