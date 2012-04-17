@@ -72,12 +72,12 @@ struct mpsse_context *MPSSE(enum modes mode, int freq, int endianess)
  *
  * @vid         - Device vendor ID.
  * @pid         - Device product ID.
- * @description - Device product description (set to NULL if not needed).
- * @serial      - Device serial number (set to NULL if not needed).
- * @interface   - FTDI interface to use (IFACE_A - IFACE_D)
  * @mode        - MPSSE mode, one of enum modes.
  * @freq        - Clock frequency to use for the specified mode.
  * @endianess   - Specifies how data is clocked in/out (MSB, LSB).
+ * @interface   - FTDI interface to use (IFACE_A - IFACE_D).
+ * @description - Device product description (set to NULL if not needed).
+ * @serial      - Device serial number (set to NULL if not needed).
  *
  * Returns a pointer to an MPSSE context structure. 
  * On success, mpsse->open will be set to 1.
