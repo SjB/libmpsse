@@ -11,6 +11,7 @@ SPI1 = _mpsse.SPI1
 SPI2 = _mpsse.SPI2
 SPI3 = _mpsse.SPI3
 I2C = _mpsse.I2C
+GPIO = _mpsse.GPIO
 
 IFACE_ANY = _mpsse.IFACE_ANY
 IFACE_A = _mpsse.IFACE_A
