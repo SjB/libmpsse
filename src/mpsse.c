@@ -48,7 +48,7 @@ struct mpsse_context *MPSSE(enum modes mode, int freq, int endianess)
 
 	for(i=0; supported_devices[i].vid != 0; i++)
 	{
-		if((mpsse = Open(supported_devices[i].vid, supported_devices[i].pid, mode, freq, endianess, IFACE_A, NULL)) != NULL)
+		if((mpsse = Open(supported_devices[i].vid, supported_devices[i].pid, mode, freq, endianess, IFACE_A, NULL, NULL)) != NULL)
 		{
 			if(mpsse->open)
 			{
@@ -70,19 +70,20 @@ struct mpsse_context *MPSSE(enum modes mode, int freq, int endianess)
 /* 
  * Open device by VID/PID 
  *
- * @vid       - Device vendor ID.
- * @pid       - Device product ID.
- * @serial    - Device serial number (set to NULL if not needed).
- * @interface - FTDI interface to use (IFACE_A - IFACE_D)
- * @mode      - MPSSE mode, one of enum modes.
- * @freq      - Clock frequency to use for the specified mode.
- * @endianess - Specifies how data is clocked in/out (MSB, LSB).
+ * @vid         - Device vendor ID.
+ * @pid         - Device product ID.
+ * @description - Device product description (set to NULL if not needed).
+ * @serial      - Device serial number (set to NULL if not needed).
+ * @interface   - FTDI interface to use (IFACE_A - IFACE_D)
+ * @mode        - MPSSE mode, one of enum modes.
+ * @freq        - Clock frequency to use for the specified mode.
+ * @endianess   - Specifies how data is clocked in/out (MSB, LSB).
  *
  * Returns a pointer to an MPSSE context structure. 
  * On success, mpsse->open will be set to 1.
  * On failure, mpsse->open will be set to 0.
  */
-struct mpsse_context *Open(int vid, int pid, enum modes mode, int freq, int endianess, int interface, const char *serial)
+struct mpsse_context *Open(int vid, int pid, enum modes mode, int freq, int endianess, int interface, const char *description, const char *serial)
 {
 	int status = 0;
 	struct mpsse_context *mpsse = NULL;
@@ -99,7 +100,7 @@ struct mpsse_context *Open(int vid, int pid, enum modes mode, int freq, int endi
 			ftdi_set_interface(&mpsse->ftdi, interface);
 
 			/* Open the specified device */
-			if(ftdi_usb_open_desc(&mpsse->ftdi, vid, pid, NULL, serial) == 0)
+			if(ftdi_usb_open_desc(&mpsse->ftdi, vid, pid, description, serial) == 0)
 			{
 				mpsse->mode = mode;
 				mpsse->vid = vid;
