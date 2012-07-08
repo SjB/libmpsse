@@ -21,7 +21,9 @@ LIBRARY API
 		2) Due to its object-oriented nature, each class instance in Python internally handles the MPSSE
 		   context pointer; thus, none of the Python methods in the MPSSE class require this argument.
 
-		3) Besides the above described differences, all Python methods have a 1:1 compatibility with their
+		3) Size parameters required by the C functions are not used by the corresponding Python methods.
+
+		4) Besides the above described differences, all Python methods have a 1:1 compatibility with their
 		   respective C functions. However, in Python the class constructor (MPSSE) and Open method have 
 		   sensible defaults for several of their arguments so not all arguments are required. 
 
@@ -59,3 +61,13 @@ PHYSICAL CONNECTIONS
 	Included in the docs directory is the FTDI MPSSE Basics application note (AN 135). Section 2 of this document
 	covers all of the pin configurations for each FTDI chip, as well as example diagrams regarding the physical
 	connections between the FTDI chip and your target device.
+
+KNOWN LIMITATIONS
+
+	Libmpsse supports all four SPI modes as well as I2C. However, due to the design of the FTDI MPSSE implementation,
+	there are some limitations:
+
+		o All protocols support master mode only
+		o In I2C, the SCL and SDA pins are open drain, but the MPSSE implementation explicitly drives these lines high.
+		  Although this is usually fine, it means that some I2C features, such as clock stretching, are not supported.
+

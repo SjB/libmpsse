@@ -27,7 +27,7 @@ FIVE_MHZ = _mpsse.FIVE_MHZ
 SIX_MHZ = _mpsse.SIX_MHZ
 TEN_MHZ = _mpsse.TEN_MHZ
 TWELVE_MHZ = _mpsse.TWELVE_MHZ
-THIRY_MHZ = _mpsse.THIRTY_MHZ
+THIRTY_MHZ = _mpsse.THIRTY_MHZ
 
 class MPSSE:
 	"""
@@ -159,6 +159,12 @@ class MPSSE:
 		Reads size bytes of data over the selected serial protocol.
 		"""
 		return _mpsse.Read(self.context, size)
+
+	def Transfer(self, data):
+		"""
+		Sends data and reads len(data) bytes from the selected serial protocol.
+		"""
+		return _mpsse.Transfer(self.context, data)
 
 	def SetAck(self, ack):
 		"""

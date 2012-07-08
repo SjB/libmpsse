@@ -86,6 +86,19 @@ FUNCTIONS
                 Returns MPSSE_FAIL on failure.
 
 
+	char *Transfer(struct mpsse_context *mpsse, char *outbuf, int size)
+
+		Performs a bi-directional data transfer of size bytes.
+		Only applicable to the SPI modes.
+		Note that in Python the size field is not used.
+
+		@mpsse  - MPSSE context pointer.
+		@outbuf - Buffer of bytes to send.
+		@size   - Size of outbuf.
+
+		Returns a pointer to the read data on success.
+		Returns NULL on failure.
+
 	int GetAck(struct mpsse_context *mpsse)
 
 		Return the status of the last received acknolwedgement bit (I2C only).

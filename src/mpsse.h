@@ -125,6 +125,7 @@ struct mpsse_context
 	uint8_t trish;
 	uint8_t tx;
 	uint8_t rx;
+	uint8_t txrx;
 	uint8_t tack;
 	uint8_t rack;
 };
@@ -151,7 +152,6 @@ int PinLow(struct mpsse_context *mpsse, int pin);
 int Version(void);
 
 #ifdef SWIGPYTHON
-
 typedef struct swig_string_data
 {
         int size;
@@ -159,11 +159,10 @@ typedef struct swig_string_data
 } swig_string_data;
 
 swig_string_data Read(struct mpsse_context *mpsse, int size);
-
+swig_string_data Transfer(struct mpsse_context *mpsse, char *outbuf, int size);
 #else
-
 char *Read(struct mpsse_context *mpsse, int size);
-
+char *Transfer(struct mpsse_context *mpsse, char *outbuf, int size);
 #endif
 
 #endif

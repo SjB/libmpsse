@@ -144,7 +144,7 @@ unsigned char *build_block_buffer(struct mpsse_context *mpsse, uint8_t cmd, unsi
 			buf[i++] = ((rsize >> 8) & 0xFF);
 
 			/* On a write, copy the data to transmit after the command */
-			if(cmd == mpsse->tx)
+			if(cmd == mpsse->tx || cmd == mpsse->txrx)
 			{
 				memcpy(buf+i, data+k, dsize);
 

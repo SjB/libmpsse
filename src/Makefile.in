@@ -59,6 +59,6 @@ uninstall:
 clean:
 	rm -rf examples/*.dSYM examples/spiflash examples/i2ceeprom examples/ds1305 *.o *.so *.a _$(TARGET).py* pylib$(TARGET).py* $(TARGET)_wrap.c *.pyc
 
-cleanall: clean
+distclean: clean
 	rm -rf *.cache config.* Makefile
 

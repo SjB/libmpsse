@@ -190,8 +190,9 @@ int SetMode(struct mpsse_context *mpsse, enum modes mode, int endianess)
 	if(mpsse)
 	{
 		/* Read and write commands need to include endianess */
-		mpsse->tx = MPSSE_DO_WRITE | endianess;
-		mpsse->rx = MPSSE_DO_READ | endianess;
+		mpsse->tx   = MPSSE_DO_WRITE | endianess;
+		mpsse->rx   = MPSSE_DO_READ  | endianess;
+		mpsse->txrx = MPSSE_DO_WRITE | MPSSE_DO_READ | endianess;
 
 		/* Clock, data out, chip select pins are outputs; all others are inputs. */
 		mpsse->tris = DEFAULT_TRIS;
@@ -221,6 +222,8 @@ int SetMode(struct mpsse_context *mpsse, enum modes mode, int endianess)
 				/* SPI mode 0 propogates data on the falling edge and read data on the rising edge of the clock */
 				mpsse->tx |= MPSSE_WRITE_NEG;
 				mpsse->rx &= ~MPSSE_READ_NEG;
+				mpsse->txrx |= MPSSE_WRITE_NEG;
+				mpsse->txrx &= ~MPSSE_READ_NEG;
 				break;
 			case SPI3:
 				/* SPI mode 3 clock idles high */
@@ -231,6 +234,8 @@ int SetMode(struct mpsse_context *mpsse, enum modes mode, int endianess)
 				/* SPI mode 3 propogates data on the falling edge and read data on the rising edge of the clock */
 				mpsse->tx |= MPSSE_WRITE_NEG;
 				mpsse->rx &= ~MPSSE_READ_NEG;
+				mpsse->txrx |= MPSSE_WRITE_NEG;
+				mpsse->txrx &= ~MPSSE_READ_NEG;
 				break;
 			case SPI1:
 				/* SPI mode 1 clock idles low */
@@ -245,6 +250,8 @@ int SetMode(struct mpsse_context *mpsse, enum modes mode, int endianess)
 				/* Data read on falling clock edge */
 				mpsse->rx |= MPSSE_READ_NEG;
 				mpsse->tx &= ~MPSSE_WRITE_NEG;
+				mpsse->txrx |= MPSSE_READ_NEG;
+				mpsse->txrx &= ~MPSSE_WRITE_NEG;
 				break;
 			case SPI2:
 				/* SPI 2 clock idles high */
@@ -252,8 +259,10 @@ int SetMode(struct mpsse_context *mpsse, enum modes mode, int endianess)
 				mpsse->pstart |= SK;
 				mpsse->pstop |= SK;
 				/* Data read on falling clock edge */
-				mpsse->tx &= ~MPSSE_WRITE_NEG;
 				mpsse->rx |= MPSSE_READ_NEG;
+				mpsse->tx &= ~MPSSE_WRITE_NEG;
+				mpsse->txrx |= MPSSE_READ_NEG;
+				mpsse->txrx &= ~MPSSE_WRITE_NEG;
 				break;
 			case I2C:
 				/* I2C propogates data on the falling clock edge and reads data on the falling (or rising) clock edge */
@@ -606,7 +615,7 @@ int Write(struct mpsse_context *mpsse, char *data, int size)
 					txsize = 1;
 				}
 	
-				buf = build_block_buffer(mpsse, mpsse->tx, (unsigned char *) data+n, txsize, &buf_size);
+				buf = build_block_buffer(mpsse, mpsse->tx, (unsigned char *) (data + n), txsize, &buf_size);
 				if(buf)
 				{	
 					retval = raw_write(mpsse, buf, buf_size);
@@ -699,6 +708,75 @@ char *Read(struct mpsse_context *mpsse, int size)
 		}
 	}
 	
+#ifdef SWIGPYTHON
+	swig_string_data sdata = { 0 };
+	sdata.size = n;
+	sdata.data = (char *) buf;
+	return sdata;
+#else
+	return (char *) buf;
+#endif
+}
+
+/*
+ * Reads and writes data over the selected serial protocol (SPI only).
+ * 
+ * @mpsse  - MPSSE context pointer.
+ * @outbuf - Buffer containing bytes to write.
+ * @size   - Number of bytes to transfer.
+ *
+ * Returns a pointer to the read data on success.
+ * Returns NULL on failure.
+ */
+#ifdef SWIGPYTHON
+swig_string_data Transfer(struct mpsse_context *mpsse, char *outbuf, int size)
+#else
+char *Transfer(struct mpsse_context *mpsse, char *outbuf, int size)
+#endif
+{
+	unsigned char *data = NULL, *buf = NULL;
+	int n = 0, rxsize = 0, data_size = 0;
+
+	if(is_valid_context(mpsse))
+	{
+		if(mpsse->mode)
+		{
+			buf = malloc(size);
+			if(buf)
+			{
+				memset(buf, 0, size);
+
+				while(n < size)
+				{
+					rxsize = size - n;
+					if(rxsize > mpsse->xsize)
+					{
+						rxsize = mpsse->xsize;
+					}
+
+					data = build_block_buffer(mpsse, mpsse->txrx, (unsigned char *) (outbuf + n), rxsize, &data_size);
+					if(data)
+					{
+						if(raw_write(mpsse, data, data_size) == MPSSE_OK)
+						{
+							n += raw_read(mpsse, buf+n, rxsize);
+						}
+						else
+						{
+							break;
+						}
+
+						free(data);
+					}
+					else
+					{
+						break;
+					}
+				}
+			}
+		}
+	}
+
 #ifdef SWIGPYTHON
 	swig_string_data sdata = { 0 };
 	sdata.size = n;
