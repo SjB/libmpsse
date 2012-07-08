@@ -11,7 +11,8 @@
 #define LSB			0x08
 
 #define CHUNK_SIZE		65535
-#define SPI_TRANSFER_SIZE	(63 * 1024) 
+#define SPI_RW_SIZE		(63 * 1024) 
+#define SPI_TRANSFER_SIZE	1024
 #define I2C_TRANSFER_SIZE	64
 
 #define LATENCY_MS		2
@@ -159,10 +160,10 @@ typedef struct swig_string_data
 } swig_string_data;
 
 swig_string_data Read(struct mpsse_context *mpsse, int size);
-swig_string_data Transfer(struct mpsse_context *mpsse, char *outbuf, int size);
+swig_string_data Transfer(struct mpsse_context *mpsse, char *data, int size);
 #else
 char *Read(struct mpsse_context *mpsse, int size);
-char *Transfer(struct mpsse_context *mpsse, char *outbuf, int size);
+char *Transfer(struct mpsse_context *mpsse, char *data, int size);
 #endif
 
 #endif

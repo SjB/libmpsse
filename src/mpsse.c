@@ -114,7 +114,7 @@ struct mpsse_context *Open(int vid, int pid, enum modes mode, int freq, int endi
 				}
 				else
 				{
-					mpsse->xsize = SPI_TRANSFER_SIZE;
+					mpsse->xsize = SPI_RW_SIZE;
 				}
 	
 				status |= ftdi_usb_reset(&mpsse->ftdi);
@@ -124,6 +124,8 @@ struct mpsse_context *Open(int vid, int pid, enum modes mode, int freq, int endi
 				status |= ftdi_set_bitmode(&mpsse->ftdi, 0, BITMODE_RESET);
 				status |= ftdi_set_bitmode(&mpsse->ftdi, 0, BITMODE_MPSSE);
 				status |= ftdi_usb_purge_buffers(&mpsse->ftdi);
+				status |= ftdi_usb_purge_rx_buffer(&mpsse->ftdi);
+				status |= ftdi_usb_purge_tx_buffer(&mpsse->ftdi);
 
 				if(status == 0)
 				{
@@ -665,7 +667,7 @@ char *Read(struct mpsse_context *mpsse, int size)
 #endif
 {
 	unsigned char *data = NULL, *buf = NULL;
-	char sbuf[SPI_TRANSFER_SIZE] = { 0 };
+	char sbuf[SPI_RW_SIZE] = { 0 };
 	int n = 0, rxsize = 0, data_size = 0;
 
 	if(is_valid_context(mpsse))
@@ -721,21 +723,21 @@ char *Read(struct mpsse_context *mpsse, int size)
 /*
  * Reads and writes data over the selected serial protocol (SPI only).
  * 
- * @mpsse  - MPSSE context pointer.
- * @outbuf - Buffer containing bytes to write.
- * @size   - Number of bytes to transfer.
+ * @mpsse - MPSSE context pointer.
+ * @data  - Buffer containing bytes to write.
+ * @size  - Number of bytes to transfer.
  *
  * Returns a pointer to the read data on success.
  * Returns NULL on failure.
  */
 #ifdef SWIGPYTHON
-swig_string_data Transfer(struct mpsse_context *mpsse, char *outbuf, int size)
+swig_string_data Transfer(struct mpsse_context *mpsse, char *data, int size)
 #else
-char *Transfer(struct mpsse_context *mpsse, char *outbuf, int size)
+char *Transfer(struct mpsse_context *mpsse, char *data, int size)
 #endif
 {
-	unsigned char *data = NULL, *buf = NULL;
-	int n = 0, rxsize = 0, data_size = 0;
+	unsigned char *txdata = NULL, *buf = NULL;
+	int n = 0, data_size = 0, rxsize = 0;
 
 	if(is_valid_context(mpsse))
 	{
@@ -746,27 +748,28 @@ char *Transfer(struct mpsse_context *mpsse, char *outbuf, int size)
 			{
 				memset(buf, 0, size);
 
+				/* When sending and recieving, FTDI chips don't seem to like large data blocks. Limit the size of each block to SPI_TRANSFER_SIZE */
+				rxsize = size - n;
+				if(rxsize > SPI_TRANSFER_SIZE)
+				{
+					rxsize = SPI_TRANSFER_SIZE;
+				}
+
 				while(n < size)
 				{
-					rxsize = size - n;
-					if(rxsize > mpsse->xsize)
+					txdata = build_block_buffer(mpsse, mpsse->txrx, (unsigned char *) (data + n), rxsize, &data_size);
+					if(txdata)
 					{
-						rxsize = mpsse->xsize;
-					}
-
-					data = build_block_buffer(mpsse, mpsse->txrx, (unsigned char *) (outbuf + n), rxsize, &data_size);
-					if(data)
-					{
-						if(raw_write(mpsse, data, data_size) == MPSSE_OK)
+						if(raw_write(mpsse, txdata, data_size) == MPSSE_OK)
 						{
-							n += raw_read(mpsse, buf+n, rxsize);
+							n += raw_read(mpsse, (buf + n), rxsize);
 						}
 						else
 						{
 							break;
 						}
 
-						free(data);
+						free(txdata);
 					}
 					else
 					{

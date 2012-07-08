@@ -62,12 +62,19 @@ PHYSICAL CONNECTIONS
 	covers all of the pin configurations for each FTDI chip, as well as example diagrams regarding the physical
 	connections between the FTDI chip and your target device.
 
+KNOWN BUGS
+
+	The following are known bugs in libmpsse:
+
+		o In SPI, the Transfer method fails if transfering large data chunks.
+		o Two invalid commands are sent to the FT2232D series chips.
+
 KNOWN LIMITATIONS
 
 	Libmpsse supports all four SPI modes as well as I2C. However, due to the design of the FTDI MPSSE implementation,
 	there are some limitations:
 
-		o All protocols support master mode only
+		o All protocols support master mode only.
 		o In I2C, the SCL and SDA pins are open drain, but the MPSSE implementation explicitly drives these lines high.
 		  Although this is usually fine, it means that some I2C features, such as clock stretching, are not supported.
 

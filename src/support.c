@@ -42,6 +42,8 @@ int raw_read(struct mpsse_context *mpsse, unsigned char *buf, int size)
 
 		/* Make sure the buffers are cleared after a read or subsequent reads may fail */
 		ftdi_usb_purge_rx_buffer(&mpsse->ftdi);
+		ftdi_usb_purge_tx_buffer(&mpsse->ftdi);
+		ftdi_usb_purge_buffers(&mpsse->ftdi);
 	}
 
 	return n;
