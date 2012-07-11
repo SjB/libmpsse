@@ -16,7 +16,7 @@ class SPIFlash:
 
 	def __init__(self, speed=SIX_MHZ):
 	
-		self.flash = MPSSE(SPI0, FIVE_MHZ, MSB)
+		self.flash = MPSSE(SPI0, speed, MSB)
 		self.chip = self.flash.GetDescription()
 		self.speed = self.flash.GetClock()
 
