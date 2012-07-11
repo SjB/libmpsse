@@ -26,13 +26,13 @@ int main(void)
 		Start(eeprom);
 		Write(eeprom, WCMD, sizeof(WCMD) - 1);
 
-		if(GetAck(eeprom) == 0)
+		if(GetAck(eeprom) == ACK)
 		{
 			/* Send the EEPROM read command */
 			Start(eeprom);
 			Write(eeprom, RCMD, sizeof(RCMD) - 1);
 
-			if(GetAck(eeprom) == 0)
+			if(GetAck(eeprom) == ACK)
 			{
 				/* Read in SIZE bytes from the EEPROM chip */
 				data = Read(eeprom, SIZE);
@@ -52,7 +52,7 @@ int main(void)
 				}
 	
 				/* Tell libmpsse to send NACKs after reading data */
-				SetAck(eeprom, 1);
+				SendNacks(eeprom);
 
 				/* Read in one dummy byte, with a NACK */
 				Read(eeprom, 1);

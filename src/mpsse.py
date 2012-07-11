@@ -6,6 +6,9 @@ MPSSE_FAIL = _mpsse.MPSSE_FAIL
 MSB = _mpsse.MSB
 LSB = _mpsse.LSB
 
+ACK = _mpsse.ACK
+NACK = _mpsse.NACK
+
 SPI0 = _mpsse.SPI0
 SPI1 = _mpsse.SPI1
 SPI2 = _mpsse.SPI2
@@ -172,6 +175,12 @@ class MPSSE:
 		Set ack = 1 to send ACKs, ack = 0 to send NACKs.
 		"""
 		return _mpsse.SetAck(self.context, ack)
+
+	def SendAcks(self):
+		return _mpsse.SendAcks(self.context)
+
+	def SendNacks(self):
+		return _mpsse.SendNacks(self.context)
 
 	def GetAck(self):
 		"""

@@ -15,17 +15,17 @@ try:
 	eeprom.Start()
 	eeprom.Write(WCMD)
 
-	if eeprom.GetAck() == 0:
+	if eeprom.GetAck() == ACK:
 
 		eeprom.Start()
 		eeprom.Write(RCMD)
 	
-		if eeprom.GetAck() == 0:
+		if eeprom.GetAck() == ACK:
 			data = eeprom.Read(SIZE)
-			SetAck(1)
+			eeprom.SendNacks()
 			eeprom.Read(1)
 
-		eeprom.Stop()
+	eeprom.Stop()
 	
 	open(FOUT, "wb").write(data)	
 	print "Dumped %d bytes to %s" % (len(data), FOUT)

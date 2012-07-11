@@ -215,7 +215,7 @@ int SetMode(struct mpsse_context *mpsse, enum modes mode, int endianess)
 	        SetLoopback(mpsse, 0);
 
 		/* Send ACKs by default */
-		SetAck(mpsse, 0);
+		SetAck(mpsse, ACK);
 
 		/* Ensure adaptive clock is disabled */
 		setup_commands[setup_commands_size++] = DISABLE_ADAPTIVE_CLOCK;
@@ -827,7 +827,7 @@ void SetAck(struct mpsse_context *mpsse, int ack)
 {
 	if(is_valid_context(mpsse))
 	{
-		if(ack)
+		if(ack == NACK)
 		{
 			mpsse->tack = 0xFF;
 		}
@@ -838,6 +838,16 @@ void SetAck(struct mpsse_context *mpsse, int ack)
 	}
 
 	return;
+}
+
+void SendAcks(struct mpsse_context *mpsse)
+{
+	return SetAck(mpsse, ACK);
+}
+
+void SendNacks(struct mpsse_context *mpsse)
+{
+	return SetAck(mpsse, NACK);
 }
 
 /*

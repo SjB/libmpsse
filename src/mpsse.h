@@ -82,6 +82,12 @@ enum pins
 	GPIO3	= 128
 };
 
+enum i2c_ack
+{
+	ACK  = 0,
+	NACK = 1
+};
+
 #define DEFAULT_TRIS            (SK | DO | CS | GPIO0 | GPIO1 | GPIO2 | GPIO3)  /* SK/DO/CS and GPIOs are outputs, DI is an input */
 #define DEFAULT_PORT            (SK | CS)       				/* SK and CS are high, all others low */
 
@@ -150,6 +156,8 @@ int Write(struct mpsse_context *mpsse, char *data, int size);
 int Stop(struct mpsse_context *mpsse);
 int GetAck(struct mpsse_context *mpsse);
 void SetAck(struct mpsse_context *mpsse, int ack);
+void SendAcks(struct mpsse_context *mpsse);
+void SendNacks(struct mpsse_context *mpsse);
 int PinHigh(struct mpsse_context *mpsse, int pin);
 int PinLow(struct mpsse_context *mpsse, int pin);
 int Version(void);
