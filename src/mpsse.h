@@ -18,11 +18,13 @@
 #define LATENCY_MS		2
 #define TIMEOUT_DIVISOR		1000000
 #define USB_TIMEOUT		120000
+#define SETUP_DELAY		25000
 
 #define BITMODE_RESET		0
 #define BITMODE_MPSSE		2
 
 #define CMD_SIZE		3
+#define MAX_SETUP_COMMANDS	10
 #define SS_TX_COUNT		3
 
 #define LOW			0

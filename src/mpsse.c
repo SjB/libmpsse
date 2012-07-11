@@ -123,20 +123,26 @@ struct mpsse_context *Open(int vid, int pid, enum modes mode, int freq, int endi
 				status |= ftdi_read_data_set_chunksize(&mpsse->ftdi, CHUNK_SIZE);
 				status |= ftdi_set_bitmode(&mpsse->ftdi, 0, BITMODE_RESET);
 				status |= ftdi_set_bitmode(&mpsse->ftdi, 0, BITMODE_MPSSE);
-				status |= ftdi_usb_purge_buffers(&mpsse->ftdi);
-				status |= ftdi_usb_purge_rx_buffer(&mpsse->ftdi);
-				status |= ftdi_usb_purge_tx_buffer(&mpsse->ftdi);
 
 				if(status == 0)
 				{
+					/* Set the read and write timeout periods */
+					set_timeouts(mpsse, USB_TIMEOUT);
+
 					if(SetClock(mpsse, freq) == MPSSE_OK)
 					{
-						/* Set the read and write timeout periods */
-						set_timeouts(mpsse, USB_TIMEOUT);
-	
 						if(SetMode(mpsse, mode, endianess) == MPSSE_OK)
 						{
 							mpsse->open = 1;
+
+							/* Give the chip a few mS to initialize */
+							usleep(SETUP_DELAY);
+
+							/* 
+							 * Not all FTDI chips support all the commands that SetMode may have sent.
+							 * This clears out any errors from unsupported commands that might have been sent during set up. 
+							 */
+							ftdi_usb_purge_buffers(&mpsse->ftdi);
 						}
 					}
 				}
@@ -186,7 +192,7 @@ int SetMode(struct mpsse_context *mpsse, enum modes mode, int endianess)
 {
 	int retval = MPSSE_OK, i = 0, setup_commands_size = 0;
 	char buf[CMD_SIZE] = { 0 };
-	char setup_commands[CMD_SIZE*4] = { 0 };
+	char setup_commands[CMD_SIZE*MAX_SETUP_COMMANDS] = { 0 };
 
 	/* Do not call is_valid_context() here, as the FTDI chip may not be completely configured when SetMode is called */
 	if(mpsse)
@@ -284,7 +290,7 @@ int SetMode(struct mpsse_context *mpsse, enum modes mode, int endianess)
 			default:
 				retval = MPSSE_FAIL;
 		}
-	
+
 		/* Send any setup commands to the chip */
 		if(retval == MPSSE_OK && setup_commands_size > 0)
 		{
