@@ -165,7 +165,7 @@ class MPSSE:
 
 	def Transfer(self, data):
 		"""
-		Sends data and reads len(data) bytes from the selected serial protocol.
+		Sends data and reads len(data) bytes in SPI mode.
 		"""
 		return _mpsse.Transfer(self.context, data)
 
@@ -177,9 +177,15 @@ class MPSSE:
 		return _mpsse.SetAck(self.context, ack)
 
 	def SendAcks(self):
+		"""
+		Causes all subsequent I2C read operations to respond with an acknowledgement.
+		"""
 		return _mpsse.SendAcks(self.context)
 
 	def SendNacks(self):
+		"""
+		Causes all subsequent I2C read operations to respond with a no-acknowledgement.
+		"""
 		return _mpsse.SendNacks(self.context)
 
 	def GetAck(self):

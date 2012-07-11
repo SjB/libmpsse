@@ -840,11 +840,25 @@ void SetAck(struct mpsse_context *mpsse, int ack)
 	return;
 }
 
+/*
+ * Causes libmpsse to send ACKs after each read byte in I2C mode.
+ *
+ * @mpsse - MPSSE context pointer.
+ *
+ * Returns void.
+ */
 void SendAcks(struct mpsse_context *mpsse)
 {
 	return SetAck(mpsse, ACK);
 }
 
+/*
+ * Causes libmpsse to send NACKs after each read byte in I2C mode.
+ *
+ * @mpsse - MPSSE context pointer.
+ *
+ * Returns void.
+ */
 void SendNacks(struct mpsse_context *mpsse)
 {
 	return SetAck(mpsse, NACK);

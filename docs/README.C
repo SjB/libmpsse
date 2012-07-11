@@ -120,6 +120,24 @@ FUNCTIONS
 		Returns void.
 
 
+	void SendAcks(struct mpsse_context *mpsse)
+	
+		Causes libmpsse to send ACKs after each read byte in I2C mode.
+
+		@mpsse - MPSSE context pointer.
+		
+		Returns void.
+
+
+	void SendNacks(struct mpsse_context *mpsse)
+
+		Causes libmpsse to send NACKs after each read byte in I2C mode.
+
+		@mpsse - MPSSE context pointer.
+
+		Returns void.
+
+
 	char *ErrorString(struct mpsse_context *mpsse)
 
                 Get the last error string as reported by libftdi. This data should not be freed by the caller.

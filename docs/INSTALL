@@ -32,6 +32,11 @@ INSTALLATION
 		$ make
 		# make install
 
+	To build without the Python wrapper libraries, specify the --disable-python argument
+	when running the configure script:
+
+		$ ./configure --disable-python
+
 BUILDING EXAMPLE CODE
 
 	After libmpsse has been installed, you can build the example C programs by running:
