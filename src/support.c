@@ -239,10 +239,10 @@ int gpio_write(struct mpsse_context *mpsse, int pin, int direction)
 	else
 	{
 		/* The first four pins can't be changed unless we are in a stopped status */
-		if(pin < NUM_GPIOL_PINS && mpsse->status == STOPPED)
+		if(pin > GPIOH7 && mpsse->status == STOPPED)
 		{
 			/* Convert pin number (0-3) to the corresponding pin bit */
-			pin = (GPIO0 << pin);
+//			pin = (GPIO0 << pin);
 
 	        	if(direction == HIGH)
 	        	{
@@ -259,10 +259,11 @@ int gpio_write(struct mpsse_context *mpsse, int pin, int direction)
 
 			retval = set_bits_low(mpsse, mpsse->pstart);
 		}
-		else if(pin >= NUM_GPIOL_PINS && pin < NUM_GPIO_PINS)
+//		else if(pin >= NUM_GPIOL_PINS && pin < NUM_GPIO_PINS)
+		else
 		{
 			/* Convert pin number (4 - 11) to the corresponding pin bit */
-			pin -= NUM_GPIOL_PINS;
+//			pin -= NUM_GPIOL_PINS;
 
 			if(direction == HIGH)
 			{

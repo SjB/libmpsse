@@ -968,7 +968,7 @@ int ReadPins(struct mpsse_context *mpsse)
 {
 	uint8_t val = 0;
 
-	if(is_valid_context(mpsse) && mpsse->mode == BITBANG)
+	if(is_valid_context(mpsse))
 	{
 		ftdi_read_pins((struct ftdi_context *) &mpsse->ftdi, (unsigned char *) &val);
 	}
@@ -977,7 +977,7 @@ int ReadPins(struct mpsse_context *mpsse)
 }
 
 /*
- * Checks if a specific pin is high or low. FOr use in BITBANG mode only.
+ * Checks if a specific pin is high or low. For use in BITBANG mode only.
  *
  * @mpsse - MPSSE context pointer.
  * @pin   - The pin number.

@@ -234,7 +234,7 @@ FUNCTIONS
 	int PinHigh(struct mpsse_context *mpsse, int pin)
 
 		Set the specified GPIO pin high (1).
-		Note that the state of GPIO pins 0-3 can only be changed prior to a Start()
+		Note that the state of the GPOL pins can only be changed prior to a Start()
 		or after a Stop() condition is sent. 
 
 		@mpsse - MPSSE context pointer.
@@ -255,6 +255,27 @@ FUNCTIONS
 
 		Returns MPSSE_OK on success.
 		Returns MPSSE_FAIL on failure.
+
+
+	int ReadPins(struct mpsse_context *mpsse);
+
+		Reads the state of the chip's pins.
+
+		@mpsse - MPSSE context pointer.
+
+		Returns a byte with the corresponding pin's bits set to 1 or 0.
+
+
+	int PinState(struct mpsse_context *mpsse, int pin, int state)
+
+		Checks if a specific pin is high or low.
+
+		@mpsse - MPSSE context pointer.
+		@pin   - The pin number.
+		@state - The state of the pins, as returned by ReadPins.
+		         If set to -1, ReadPins will automatically be called.
+		
+		Returns a 1 if the pin is high, 0 if the pin is low.
 
 
 
@@ -286,12 +307,28 @@ DEFINITIONS
 
 	Mode definitions, used for the 'mode' argument of MPSSE() and Open():
 
-	        SPI0 = 1,
-	        SPI1 = 2,
-	        SPI2 = 3,
-	        SPI3 = 4,
-	        I2C  = 5,
-	        GPIO = 6
+	        SPI0    = 1,
+	        SPI1    = 2,
+	        SPI2    = 3,
+	        SPI3    = 4,
+	        I2C     = 5,
+	        GPIO    = 6
+		BITBANG = 7
+
+	GPIO pin definitions:
+
+		GPIOL0 = 0,
+		GPIOL1 = 1,
+		GPIOL2 = 2,
+		GPIOL3 = 3,
+		GPIOH0 = 4,
+		GPIOH1 = 5,
+		GPIOH2 = 6,
+		GPIOH3 = 7,
+		GPIOH4 = 8,
+		GPIOH5 = 9,
+		GPIOH6 = 10,
+		GPIOH7 = 11
 
 	MPSSE return codes; most functions that return an integer value return one of these unless otherwise specified:
 
