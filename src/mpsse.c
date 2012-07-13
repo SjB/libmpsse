@@ -122,27 +122,39 @@ struct mpsse_context *Open(int vid, int pid, enum modes mode, int freq, int endi
 				status |= ftdi_write_data_set_chunksize(&mpsse->ftdi, CHUNK_SIZE);
 				status |= ftdi_read_data_set_chunksize(&mpsse->ftdi, CHUNK_SIZE);
 				status |= ftdi_set_bitmode(&mpsse->ftdi, 0, BITMODE_RESET);
-				status |= ftdi_set_bitmode(&mpsse->ftdi, 0, BITMODE_MPSSE);
 
 				if(status == 0)
 				{
 					/* Set the read and write timeout periods */
 					set_timeouts(mpsse, USB_TIMEOUT);
-
-					if(SetClock(mpsse, freq) == MPSSE_OK)
+					
+					if(mpsse->mode != BITBANG)
 					{
-						if(SetMode(mpsse, mode, endianess) == MPSSE_OK)
+						ftdi_set_bitmode(&mpsse->ftdi, 0, BITMODE_MPSSE);
+
+						if(SetClock(mpsse, freq) == MPSSE_OK)
+						{
+							if(SetMode(mpsse, mode, endianess) == MPSSE_OK)
+							{
+								mpsse->open = 1;
+
+								/* Give the chip a few mS to initialize */
+								usleep(SETUP_DELAY);
+
+								/* 
+								 * Not all FTDI chips support all the commands that SetMode may have sent.
+								 * This clears out any errors from unsupported commands that might have been sent during set up. 
+								 */
+								ftdi_usb_purge_buffers(&mpsse->ftdi);
+							}
+						}
+					}
+					else
+					{
+						/* Skip the setup functions if we're just operating in BITBANG mode */
+						if(ftdi_set_bitmode(&mpsse->ftdi, 0xFF, BITMODE_BITBANG) == 0)
 						{
 							mpsse->open = 1;
-
-							/* Give the chip a few mS to initialize */
-							usleep(SETUP_DELAY);
-
-							/* 
-							 * Not all FTDI chips support all the commands that SetMode may have sent.
-							 * This clears out any errors from unsupported commands that might have been sent during set up. 
-							 */
-							ftdi_usb_purge_buffers(&mpsse->ftdi);
 						}
 					}
 				}
@@ -943,6 +955,45 @@ int PinLow(struct mpsse_context *mpsse, int pin)
 	}
 
 	return retval;
+}
+
+/*
+ * Reads the state of the chip's pins. For use in BITBANG mode only.
+ *
+ * @mpsse - MPSSE context pointer.
+ *
+ * Returns a byte with the corresponding pin's bits set to 1 or 0.
+ */
+int ReadPins(struct mpsse_context *mpsse)
+{
+	uint8_t val = 0;
+
+	if(is_valid_context(mpsse) && mpsse->mode == BITBANG)
+	{
+		ftdi_read_pins((struct ftdi_context *) &mpsse->ftdi, (unsigned char *) &val);
+	}
+
+	return (int) val;
+}
+
+/*
+ * Checks if a specific pin is high or low. FOr use in BITBANG mode only.
+ *
+ * @mpsse - MPSSE context pointer.
+ * @pin   - The pin number.
+ * @state - The state of the pins, as returned by ReadPins.
+ *          If set to -1, ReadPins will automatically be called.
+ *
+ * Returns a 1 if the pin is high, 0 if the pin is low.
+ */
+int PinState(struct mpsse_context *mpsse, int pin, int state)
+{
+	if(state == -1)
+	{
+		state = ReadPins(mpsse);
+	}
+
+	return ((state & (1 << pin)) >> pin);
 }
 
 /* 

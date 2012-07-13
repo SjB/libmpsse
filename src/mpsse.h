@@ -62,12 +62,13 @@ enum clock_rates
 /* Supported MPSSE modes */
 enum modes
 {
-	SPI0 = 1,
-	SPI1 = 2,
-	SPI2 = 3,
-	SPI3 = 4,
-	I2C  = 5,
-	GPIO = 6
+	SPI0    = 1,
+	SPI1    = 2,
+	SPI2    = 3,
+	SPI3    = 4,
+	I2C     = 5,
+	GPIO    = 6,
+	BITBANG = 7
 };
 
 enum pins
@@ -80,6 +81,22 @@ enum pins
 	GPIO1	= 32,
 	GPIO2	= 64,
 	GPIO3	= 128
+};
+
+enum gpio_pins
+{
+	GPIOL0 = 0,
+	GPIOL1 = 1,
+	GPIOL2 = 2,
+	GPIOL3 = 3,
+	GPIOH0 = 4,
+	GPIOH1 = 5,
+	GPIOH2 = 6,
+	GPIOH3 = 7,
+	GPIOH4 = 8,
+	GPIOH5 = 9,
+	GPIOH6 = 10,
+	GPIOH7 = 11
 };
 
 enum i2c_ack
@@ -132,6 +149,7 @@ struct mpsse_context
 	uint8_t pidle;
 	uint8_t gpioh;
 	uint8_t trish;
+	uint8_t bitbang;
 	uint8_t tx;
 	uint8_t rx;
 	uint8_t txrx;
@@ -160,6 +178,8 @@ void SendAcks(struct mpsse_context *mpsse);
 void SendNacks(struct mpsse_context *mpsse);
 int PinHigh(struct mpsse_context *mpsse, int pin);
 int PinLow(struct mpsse_context *mpsse, int pin);
+int ReadPins(struct mpsse_context *mpsse);
+int PinState(struct mpsse_context *mpsse, int pin, int state);
 int Version(void);
 
 #ifdef SWIGPYTHON

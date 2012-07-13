@@ -15,6 +15,7 @@ SPI2 = _mpsse.SPI2
 SPI3 = _mpsse.SPI3
 I2C = _mpsse.I2C
 GPIO = _mpsse.GPIO
+BITBANG = _mpsse.BITBANG
 
 IFACE_ANY = _mpsse.IFACE_ANY
 IFACE_A = _mpsse.IFACE_A
@@ -37,14 +38,14 @@ class MPSSE:
 	Python class wrapper for libmpsse.
 	"""
 
-	def __init__(self, mode=None, frequency=None, endianess=MSB):
+	def __init__(self, mode=None, frequency=ONE_MHZ, endianess=MSB):
 		"""
-		If mode and frequency are specified, then attempt to connect to any known FTDI chip.
-		If mode and frequency are not specified, this simply returns the class instance.
+		If mode is specified, then attempt to connect to any known FTDI chip.
+		If mode is not specified, this simply returns the class instance.
 		Endianess defaults to MSB.
 		"""
 		self.context = None
-		if mode is not None and frequency is not None:
+		if mode is not None:
 			self.context = _mpsse.MPSSE(mode, frequency, endianess)
 			if self.context.open == 0:
 				raise Exception, self.ErrorString()
@@ -212,6 +213,21 @@ class MPSSE:
 		if _mpsse.PinLow(self.context, pin) == MPSSE_FAIL:
 			raise Exception, self.ErrorString()
 		return MPSSE_OK
+
+	def ReadPins(self):
+		"""
+		Reads the current state of the chip's pins. For use in BITBANG mode only.
+		Returns a byte with the corresponding pin's bits set.
+		"""
+		return _mpsse.ReadPins(self.context)
+
+	def PinState(self, pin, state=-1):
+		"""
+		Checks the current state of the pins. For use in BITBANG mode only.
+		Set pin to the pin number you want to check. 
+		State is the value returned by ReadPins. If not specified, ReadPins will be called automatically.
+		"""
+		return _mpsse.PinState(self.context, pin, state)
 
 	def Version(self):
 		"""
