@@ -17,6 +17,19 @@ I2C = _mpsse.I2C
 GPIO = _mpsse.GPIO
 BITBANG = _mpsse.BITBANG
 
+GPIOL0 = _mpsse.GPIOL0
+GPIOL1 = _mpsse.GPIOL1
+GPIOL2 = _mpsse.GPIOL2
+GPIOL3 = _mpsse.GPIOL3
+GPIOH0 = _mpsse.GPIOH0
+GPIOH1 = _mpsse.GPIOH1
+GPIOH2 = _mpsse.GPIOH2
+GPIOH3 = _mpsse.GPIOH3
+GPIOH4 = _mpsse.GPIOH4
+GPIOH5 = _mpsse.GPIOH5
+GPIOH6 = _mpsse.GPIOH6
+GPIOH7 = _mpsse.GPIOH7
+
 IFACE_ANY = _mpsse.IFACE_ANY
 IFACE_A = _mpsse.IFACE_A
 IFACE_B = _mpsse.IFACE_B
