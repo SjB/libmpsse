@@ -20,7 +20,7 @@ $(TARGET): mpsse.o
 	$(CC) $(CFLAGS) -shared -Wl,$(SONAME),lib$(TARGET).so $(TARGET).o support.o -o lib$(TARGET).so $(LDFLAGS)
 	ar rcs lib$(TARGET).a $(TARGET).o support.o
 
-examples: spiflash i2ceeprom ds1305
+examples: spiflash i2ceeprom ds1305 gpio bitbang
 
 spiflash:
 	$(CC) $(CFLAGS) examples/spiflash.c -o examples/spiflash -lmpsse
@@ -30,6 +30,12 @@ i2ceeprom:
 
 ds1305:
 	$(CC) $(CFLAGS) examples/ds1305.c -o examples/ds1305 -lmpsse
+
+gpio:
+	$(CC) $(CFLAGS) examples/gpio.c -o examples/gpio -lmpsse
+
+bitbang:
+	$(CC) $(CFLAGS) examples/bitbang.c -o examples/bitbang -lmpsse
 
 mpsse.o: support.o
 	$(CC) $(CFLAGS) $(LDFLAGS) -c mpsse.c
@@ -67,7 +73,8 @@ uninstall: py$(BUILD)-uninstall
 	rm -f $(INCDIR)/$(TARGET).h
 
 clean:
-	rm -rf examples/*.dSYM examples/spiflash examples/i2ceeprom examples/ds1305 *.o *.so *.a _$(TARGET).py* pylib$(TARGET).py* $(TARGET)_wrap.c *.pyc
+	rm -rf examples/*.dSYM examples/spiflash examples/i2ceeprom examples/ds1305 examples/gpio examples/bitbang
+	rm -rf *.o *.so *.a _$(TARGET).py* pylib$(TARGET).py* $(TARGET)_wrap.c *.pyc
 
 distclean: clean
 	rm -rf *.cache config.* Makefile

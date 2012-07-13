@@ -31,6 +31,8 @@ int main(void)
 
 		while(1)
 		{
+			sleep(1);
+
 			Start(ds1305);
 			Write(ds1305, "\x00", 1);
 			seconds = Read(ds1305, 1);
@@ -49,8 +51,6 @@ int main(void)
 
 			free(minutes);
 			free(seconds);
-
-			sleep(1);
 		}	
 	}
 	else
