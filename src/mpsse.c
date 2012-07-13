@@ -134,7 +134,7 @@ struct mpsse_context *Open(int vid, int pid, enum modes mode, int freq, int endi
 
 						if(SetClock(mpsse, freq) == MPSSE_OK)
 						{
-							if(SetMode(mpsse, mode, endianess) == MPSSE_OK)
+							if(SetMode(mpsse, endianess) == MPSSE_OK)
 							{
 								mpsse->open = 1;
 
@@ -194,13 +194,12 @@ void Close(struct mpsse_context *mpsse)
  * Sets the appropriate transmit and receive commands based on the requested mode and byte order.
  *
  * @mpsse     - MPSSE context pointer.
- * @mode      - The desired mode, as listed in enum modes.
  * @endianess - MPSSE_MSB or MPSSE_LSB.
  *
  * Returns MPSSE_OK on success.
  * Returns MPSSE_FAIL on failure.
  */
-int SetMode(struct mpsse_context *mpsse, enum modes mode, int endianess)
+int SetMode(struct mpsse_context *mpsse, int endianess)
 {
 	int retval = MPSSE_OK, i = 0, setup_commands_size = 0;
 	char buf[CMD_SIZE] = { 0 };
@@ -232,7 +231,7 @@ int SetMode(struct mpsse_context *mpsse, enum modes mode, int endianess)
 		/* Ensure adaptive clock is disabled */
 		setup_commands[setup_commands_size++] = DISABLE_ADAPTIVE_CLOCK;
 
-		switch(mode)
+		switch(mpsse->mode)
 		{
 			case SPI0:
 				/* SPI mode 0 clock idles low */
@@ -759,7 +758,8 @@ char *Transfer(struct mpsse_context *mpsse, char *data, int size)
 
 	if(is_valid_context(mpsse))
 	{
-		if(mpsse->mode)
+		/* Make sure we're configured for one of the SPI modes */
+		if(mpsse->mode >= SPI0 && mpsse->mode <= SPI3)
 		{
 			buf = malloc(size);
 			if(buf)
