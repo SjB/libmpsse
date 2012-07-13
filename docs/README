@@ -67,7 +67,6 @@ KNOWN BUGS
 	The following are known bugs in libmpsse:
 
 		o In SPI, the Transfer method fails if transfering large data chunks.
-		o Two invalid commands are sent to the FT2232D series chips.
 
 KNOWN LIMITATIONS
 
