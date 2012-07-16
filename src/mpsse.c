@@ -993,6 +993,12 @@ int PinState(struct mpsse_context *mpsse, int pin, int state)
 		state = ReadPins(mpsse);
 	}
 
+	/* If not in bitbang mode, the specified pin should be one of GPIOLx. Convert these defines into an absolute pin number. */
+	if(mpsse->mode != BITBANG)
+	{
+		pin += NUM_GPIOL_PINS;
+	}
+
 	return ((state & (1 << pin)) >> pin);
 }
 

@@ -14,8 +14,11 @@ int main(void)
 		for(i=0; i<10; i++)
 		{
 			PinHigh(io, GPIOL0);
+			printf("GPIOL0 State: %d\n", PinState(io, GPIOL0, -1));
 			sleep(1);
+			
 			PinLow(io, GPIOL0);
+			printf("GPIOL0 State: %d\n", PinState(io, GPIOL0, -1));
 			sleep(1);
 		}
 	
