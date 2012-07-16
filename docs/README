@@ -67,7 +67,8 @@ KNOWN BUGS
 
 	The following are known bugs in libmpsse:
 
-		o In SPI, the Transfer method fails if transfering large data chunks.
+		o In SPI, the Transfer method fails if transfering large data chunks. Use the Read/Write functions 
+		  for transferring large chunks of data (~1MB or more).
 
 KNOWN LIMITATIONS
 
@@ -77,4 +78,3 @@ KNOWN LIMITATIONS
 		o All protocols support master mode only.
 		o In I2C, the SCL and SDA pins are open drain, but the MPSSE implementation explicitly drives these lines high.
 		  Although this is usually fine, it means that some I2C features, such as clock stretching, are not supported.
-
