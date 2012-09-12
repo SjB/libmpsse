@@ -7,6 +7,14 @@ This is done via the PinHigh and PinLow functions, which set the specified pin h
 	gpio.PinLow(GPIOH1)
 	gpio.Close()
 
+The state of the first four GPIO pins (GPIOL0 - GPIOL3) can also be read using the ReadPins or PinState
+functions. Note that unlike in BITBANG mode, you should specify the appropriate GPIOLx definition for the
+GPIOL pin you wish to read, rather than the absolute pin number:
+
+	gpio = MPSSE(GPIO)
+	print "GPIOL0 State:", gpio.PinState(GPIOL0)
+	gpio.Close()
+
 The following GPIO pins are defined by libmpsse:
 
 	GPIOL0

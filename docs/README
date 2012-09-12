@@ -35,7 +35,7 @@ CODE EXAMPLES
 	There are SPI and I2C code examples for both C and Python in the src/examples directory. After installing
 	libmpsse, the C examples can be built by running:
 
-		$ make examples
+		$ make example-code
 
 	There are more detailed descriptions of the SPI and I2C APIs in docs/README.SPI and docs/README.I2C files.
 
