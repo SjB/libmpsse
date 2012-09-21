@@ -116,7 +116,10 @@ enum mpsse_commands
 	DISABLE_ADAPTIVE_CLOCK	= 0x97,
 	TCK_X5			= 0x8A,
 	TCK_D5			= 0x8B,
-	TOGGLE_CLOCK		= 0x8E
+	TOGGLE_CLOCK		= 0x8E,
+	PULSE_CLOCK_IO_HIGH	= 0x94,
+	PULSE_CLOCK_IO_LOW	= 0x95,
+	TRISTATE_IO		= 0x9E,
 };
 
 enum low_bits_status
@@ -180,6 +183,9 @@ int PinHigh(struct mpsse_context *mpsse, int pin);
 int PinLow(struct mpsse_context *mpsse, int pin);
 int ReadPins(struct mpsse_context *mpsse);
 int PinState(struct mpsse_context *mpsse, int pin, int state);
+int ClockUntilHigh(struct mpsse_context *mpsse);
+int ClockUntilLow(struct mpsse_context *mpsse);
+int Tristate(struct mpsse_context *mpsse);
 int Version(void);
 
 #ifdef SWIGPYTHON

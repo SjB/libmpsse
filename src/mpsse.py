@@ -242,6 +242,24 @@ class MPSSE:
 		"""
 		return _mpsse.PinState(self.context, pin, state)
 
+	def ClockUntilHigh(self):
+		"""
+		Toggles the clock without data transfer until GPIO1 is pulled high.
+		"""
+		return _mpsse.ClockUntilHigh(self.context)
+
+	def ClockUntilLow(self):
+		"""
+		Toggles the clock without data transfer until GPIO1 is pulled low.
+		"""
+		return _mpsse.ClockUntilLow(self.context)
+
+	def Tristate(self):
+		"""
+		Puts all I/O pins into a tristate mode (FT232H only).
+		"""
+		return _mpsse.Tristate(self.context)
+
 	def Version(self):
 		"""
 		Returns the libmpsse version number.

@@ -1005,6 +1005,53 @@ int PinState(struct mpsse_context *mpsse, int pin, int state)
 	return ((state & (1 << pin)) >> pin);
 }
 
+/*
+ * Toggles the clock pin until GPIO1 is pulled high.
+ *
+ * @mpsse - MPSSE context pointer.
+ *
+ * Returns MPSSE_OK on success, MPSSE_FAIL on failure.
+ */
+int ClockUntilHigh(struct mpsse_context *mpsse)
+{
+	unsigned char cmd[] = { PULSE_CLOCK_IO_HIGH };
+
+	return raw_write(mpsse, (unsigned char *) &cmd, sizeof(cmd));
+}
+
+/*
+ * Toggles the clock pin until GPIO1 is pulled low.
+ *
+ * @mpsse - MPSSE context pointer.
+ *
+ * Returns MPSSE_OK on success, MPSSE_FAIL on failure.
+ */
+int ClockUntilLow(struct mpsse_context *mpsse)
+{
+	unsigned char cmd[] = { PULSE_CLOCK_IO_LOW };
+	
+	return raw_write(mpsse, (unsigned char *) &cmd, sizeof(cmd));
+}
+
+/*
+ * Places all I/O pins into a tristate mode.
+ *
+ * @mpsse - MPSSE context pointer.
+ *
+ * Returns MPSSE_OK on success, MPSSE_FAIL on failure.
+ */
+int Tristate(struct mpsse_context *mpsse)
+{
+	unsigned char cmd[CMD_SIZE] = { 0 };
+
+	/* Tristate the all I/O pins (FT232H only) */
+	cmd[0] = TRISTATE_IO;
+	cmd[1] = 0xFF;
+	cmd[2] = 0xFF;
+
+	return raw_write(mpsse, (unsigned char *) &cmd, sizeof(cmd));
+}
+
 /* 
  * Returns the libmpsse version number. 
  * High nibble is major version, low nibble is minor version.
