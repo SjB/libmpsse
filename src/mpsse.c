@@ -557,11 +557,10 @@ int Start(struct mpsse_context *mpsse)
 
 	if(is_valid_context(mpsse))
 	{
-		mpsse->status = STARTED;
 
-		if(mpsse->mode == I2C)
+		if(mpsse->mode == I2C && mpsse->status == STARTED)
 		{
-			/* Set the default pin states while the clock is low in case this is an I2C repeated start condition */
+			/* Set the default pin states while the clock is low since this is an I2C repeated start condition */
 			status |= set_bits_low(mpsse, (mpsse->pidle & ~SK));
 	
 			/* Make sure the pins are in their default idle state */
@@ -589,10 +588,13 @@ int Start(struct mpsse_context *mpsse)
 		{
 			status |= set_bits_low(mpsse, (mpsse->pstart | SK));
 		}
+		
+		mpsse->status = STARTED;
 	}
 	else
 	{
 		status = MPSSE_FAIL;
+		mpsse->status = STOPPED;
 	}
 
 	return status;
@@ -890,8 +892,6 @@ int Stop(struct mpsse_context *mpsse)
 
 	if(is_valid_context(mpsse))
 	{
-		mpsse->status = STOPPED;
-
 		/* In I2C mode, we need to ensure that the data line goes low while the clock line is low to avoid sending an inadvertent start condition */
 		if(mpsse->mode == I2C)
 		{
@@ -906,10 +906,13 @@ int Stop(struct mpsse_context *mpsse)
 			/* Restore the pins to their idle states */
 			retval |= set_bits_low(mpsse, mpsse->pidle);
 		}
+		
+		mpsse->status = STOPPED;
 	}
 	else
 	{
 		retval = MPSSE_FAIL;
+		mpsse->status = STOPPED;
 	}
 
 	return retval;
