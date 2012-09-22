@@ -254,11 +254,39 @@ class MPSSE:
 		"""
 		return _mpsse.ClockUntilLow(self.context)
 
+	def ToggleClock(self, count):
+		"""
+		Toggle the clock line count times without transferring any data.
+		"""
+		return _mpsse.ToggleClock(self.context, count, gpio)
+
+	def ToggleClockX8(self, count, gpio=-1):
+		"""
+		Toggle the clock line 8*count times without transferring any data.
+		
+		If gpio is 0, then the clock output will be interrupted by pulling GPIOL1 low.
+		If gpio is 1, then the clock output will be interrupted by pulling GPIOL1 high.
+		If gpio is -1, GPIOL1 is ignored (default).
+		"""
+		return _mpsse.ToggleClockX8(self.context, count, gpio)
+
 	def Tristate(self):
 		"""
 		Puts all I/O pins into a tristate mode (FT232H only).
 		"""
 		return _mpsse.Tristate(self.context)
+
+	def MCUWrite(self, data, address=0):
+		"""
+		Writes data starting at address using MCU emulation mode.
+		"""
+		return _mpsse.MCUWrite(self.context, data, address)
+
+	def MCURead(self, size, address=0):
+		"""
+		Reads size bytes of data starting at address using MCU emulation mode.
+		"""
+		return _mpsse.MCURead(self.context, size, address)
 
 	def Version(self):
 		"""

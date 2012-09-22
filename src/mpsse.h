@@ -68,7 +68,9 @@ enum modes
 	SPI3    = 4,
 	I2C     = 5,
 	GPIO    = 6,
-	BITBANG = 7
+	BITBANG = 7,
+	MCU8	= 8,
+	MCU16	= 9
 };
 
 enum pins
@@ -116,10 +118,18 @@ enum mpsse_commands
 	DISABLE_ADAPTIVE_CLOCK	= 0x97,
 	TCK_X5			= 0x8A,
 	TCK_D5			= 0x8B,
-	TOGGLE_CLOCK		= 0x8E,
+	CLOCK_N_CYCLES		= 0x8E,
+	CLOCK_N8_CYCLES		= 0x8F,
 	PULSE_CLOCK_IO_HIGH	= 0x94,
 	PULSE_CLOCK_IO_LOW	= 0x95,
+	CLOCK_N8_CYCLES_IO_HIGH	= 0x9C,
+	CLOCK_N8_CYCLES_IO_LOW	= 0x9D,
 	TRISTATE_IO		= 0x9E,
+	CPU_SEND_IMMEDIATE	= 0x87,
+	CPU_READ_SHORT		= 0x90,
+	CPU_READ_LONG		= 0x91,
+	CPU_WRITE_SHORT		= 0x92,
+	CPU_WRITE_LONG		= 0x93
 };
 
 enum low_bits_status
@@ -174,6 +184,7 @@ int SetLoopback(struct mpsse_context *mpsse, int enable);
 void SetCSIdle(struct mpsse_context *mpsse, int idle);
 int Start(struct mpsse_context *mpsse);
 int Write(struct mpsse_context *mpsse, char *data, int size);
+int MCUWrite(struct mpsse_context *mpsse, char *data, int size, int address);
 int Stop(struct mpsse_context *mpsse);
 int GetAck(struct mpsse_context *mpsse);
 void SetAck(struct mpsse_context *mpsse, int ack);
@@ -185,6 +196,8 @@ int ReadPins(struct mpsse_context *mpsse);
 int PinState(struct mpsse_context *mpsse, int pin, int state);
 int ClockUntilHigh(struct mpsse_context *mpsse);
 int ClockUntilLow(struct mpsse_context *mpsse);
+int ToggleClock(struct mpsse_context *mpsse, int count);
+int ToggleClockX8(struct mpsse_context *mpsse, int count, int gpio);
 int Tristate(struct mpsse_context *mpsse);
 int Version(void);
 
@@ -196,9 +209,11 @@ typedef struct swig_string_data
 } swig_string_data;
 
 swig_string_data Read(struct mpsse_context *mpsse, int size);
+swig_string_data MCURead(struct mpsse_context *mpsse, int size, int address);
 swig_string_data Transfer(struct mpsse_context *mpsse, char *data, int size);
 #else
 char *Read(struct mpsse_context *mpsse, int size);
+char *MCURead(struct mpsse_context *mpsse, int size, int address);
 char *Transfer(struct mpsse_context *mpsse, char *data, int size);
 #endif
 
