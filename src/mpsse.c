@@ -30,6 +30,45 @@ struct vid_pid supported_devices[] = {
 			{ 0, 0, NULL }
 };
 
+/* Called on library load */
+static void _mpsse_ldInit(void) __attribute__((__constructor__));
+static void _mpsse_ldInit(void)
+{
+	MPSSE.MPSSE             = &mpsse_easy_open;
+	MPSSE.Open              = &mpsse_open;
+	MPSSE.Close             = &mpsse_close;
+	MPSSE.Write             = &mpsse_write;
+	MPSSE.MCUWrite          = &mpsse_mcu_write;
+	MPSSE.Read              = &mpsse_read;
+	MPSSE.MCURead           = &mpsse_mcu_read;
+	MPSSE.Transfer          = &mpsse_transfer;
+	MPSSE.ErrorString       = &mpsse_error_string;
+	MPSSE.SetMode           = &mpsse_set_mode;
+	MPSSE.SetClock          = &mpsse_set_clock;
+	MPSSE.GetClock          = &mpsse_get_clock;
+	MPSSE.GetVid            = &mpsse_get_vid;
+	MPSSE.GetPid            = &mpsse_get_pid;
+	MPSSE.GetDescription    = &mpsse_get_description;
+	MPSSE.SetLoopback       = &mpsse_set_loopback;
+	MPSSE.SetCSIdle         = &mpsse_set_cs_idle;
+	MPSSE.Start             = &mpsse_start;
+	MPSSE.Stop              = &mpsse_stop;
+	MPSSE.GetAck            = &mpsse_get_ack;
+	MPSSE.SetAck            = &mpsse_set_ack;
+	MPSSE.SendAcks          = &mpsse_send_acks;
+	MPSSE.SendNacks         = &mpsse_send_nacks;
+	MPSSE.PinHigh           = &mpsse_pin_high;
+	MPSSE.PinLow            = &mpsse_pin_low;
+	MPSSE.ReadPins          = &mpsse_read_pins;
+	MPSSE.PinState          = &mpsse_pin_state;
+	MPSSE.ClockUntilHigh    = &mpsse_clock_until_high;
+	MPSSE.ClockUntilLow     = &mpsse_clock_until_low;
+	MPSSE.ToggleClock       = &mpsse_toggle_clock;
+	MPSSE.ToggleClockX8     = &mpsse_toggle_clock_x8;
+	MPSSE.Tristate          = &mpsse_tristate;
+	MPSSE.Version           = &mpsse_version;
+};
+
 /*
  * Opens and initializes the first FTDI device found.
  * 
@@ -41,14 +80,14 @@ struct vid_pid supported_devices[] = {
  * On success, mpsse->open will be set to 1.
  * On failure, mpsse->open will be set to 0.
  */
-struct mpsse_context *MPSSE(enum modes mode, int freq, int endianess)
+struct mpsse_context *mpsse_easy_open(enum modes mode, int freq, int endianess)
 {
 	int i = 0;
 	struct mpsse_context *mpsse = NULL;
 
 	for(i=0; supported_devices[i].vid != 0; i++)
 	{
-		if((mpsse = Open(supported_devices[i].vid, supported_devices[i].pid, mode, freq, endianess, IFACE_A, NULL, NULL)) != NULL)
+		if((mpsse = mpsse_open(supported_devices[i].vid, supported_devices[i].pid, mode, freq, endianess, IFACE_A, NULL, NULL)) != NULL)
 		{
 			if(mpsse->open)
 			{
@@ -58,7 +97,7 @@ struct mpsse_context *MPSSE(enum modes mode, int freq, int endianess)
 			/* If there is another device still left to try, free the context pointer and try again */
 			else if(supported_devices[i+1].vid != 0)
 			{
-				Close(mpsse);
+				mpsse_close(mpsse);
 				mpsse = NULL;
 			}
 		}
@@ -83,7 +122,7 @@ struct mpsse_context *MPSSE(enum modes mode, int freq, int endianess)
  * On success, mpsse->open will be set to 1.
  * On failure, mpsse->open will be set to 0.
  */
-struct mpsse_context *Open(int vid, int pid, enum modes mode, int freq, int endianess, int interface, const char *description, const char *serial)
+struct mpsse_context *mpsse_open(int vid, int pid, enum modes mode, int freq, int endianess, int interface, const char *description, const char *serial)
 {
 	int status = 0;
 	struct mpsse_context *mpsse = NULL;
@@ -132,9 +171,9 @@ struct mpsse_context *Open(int vid, int pid, enum modes mode, int freq, int endi
 					{
 						ftdi_set_bitmode(&mpsse->ftdi, 0, BITMODE_MPSSE);
 
-						if(SetClock(mpsse, freq) == MPSSE_OK)
+						if(mpsse_set_clock(mpsse, freq) == MPSSE_OK)
 						{
-							if(SetMode(mpsse, endianess) == MPSSE_OK)
+							if(mpsse_set_mode(mpsse, endianess) == MPSSE_OK)
 							{
 								mpsse->open = 1;
 
@@ -172,7 +211,7 @@ struct mpsse_context *Open(int vid, int pid, enum modes mode, int freq, int endi
  *
  * Returns void.
  */
-void Close(struct mpsse_context *mpsse)
+void mpsse_close(struct mpsse_context *mpsse)
 {
 	if(mpsse)
 	{
@@ -199,7 +238,7 @@ void Close(struct mpsse_context *mpsse)
  * Returns MPSSE_OK on success.
  * Returns MPSSE_FAIL on failure.
  */
-int SetMode(struct mpsse_context *mpsse, int endianess)
+int mpsse_set_mode(struct mpsse_context *mpsse, int endianess)
 {
 	int retval = MPSSE_OK, i = 0, setup_commands_size = 0;
 	char buf[CMD_SIZE] = { 0 };
@@ -223,10 +262,10 @@ int SetMode(struct mpsse_context *mpsse, int endianess)
 		mpsse->pstart &= ~CS;
 
 		/* Disable FTDI internal loopback */
-	        SetLoopback(mpsse, 0);
+	        mpsse_set_loopback(mpsse, 0);
 
 		/* Send ACKs by default */
-		SetAck(mpsse, ACK);
+		mpsse_set_ack(mpsse, ACK);
 
 		/* Ensure adaptive clock is disabled */
 		setup_commands[setup_commands_size++] = DISABLE_ADAPTIVE_CLOCK;
@@ -349,7 +388,7 @@ int SetMode(struct mpsse_context *mpsse, int endianess)
  * Returns MPSSE_OK on success.
  * Returns MPSSE_FAIL on failure.
  */
-int SetClock(struct mpsse_context *mpsse, uint32_t freq)
+int mpsse_set_clock(struct mpsse_context *mpsse, uint32_t freq)
 {
 	int retval = MPSSE_FAIL;
 	uint32_t system_clock = 0;
@@ -403,11 +442,11 @@ int SetClock(struct mpsse_context *mpsse, uint32_t freq)
  *
  * Returns a pointer to the last error string.
  */
-char *ErrorString(struct mpsse_context *mpsse)
+char *mpsse_error_string(struct mpsse_context *mpsse)
 {
 	if(mpsse != NULL)
 	{
-        	return ftdi_get_error_string(&mpsse->ftdi);
+		return ftdi_get_error_string(&mpsse->ftdi);
 	}
 
 	return NULL_CONTEXT_ERROR_MSG;
@@ -420,7 +459,7 @@ char *ErrorString(struct mpsse_context *mpsse)
  *
  * Returns the existing clock rate in hertz.
  */
-int GetClock(struct mpsse_context *mpsse)
+int mpsse_get_clock(struct mpsse_context *mpsse)
 {
 	int clock = 0;
 
@@ -439,7 +478,7 @@ int GetClock(struct mpsse_context *mpsse)
  *
  * Returns the integer value of the vendor ID.
  */
-int GetVid(struct mpsse_context *mpsse)
+int mpsse_get_vid(struct mpsse_context *mpsse)
 {
 	int vid = 0;
 
@@ -458,7 +497,7 @@ int GetVid(struct mpsse_context *mpsse)
  *
  * Returns the integer value of the product ID.
  */
-int GetPid(struct mpsse_context *mpsse)
+int mpsse_get_pid(struct mpsse_context *mpsse)
 {
 	int pid = 0;
 
@@ -477,7 +516,7 @@ int GetPid(struct mpsse_context *mpsse)
  *
  * Returns the description of the FTDI chip.
  */
-char *GetDescription(struct mpsse_context *mpsse)
+char *mpsse_get_description(struct mpsse_context *mpsse)
 {
 	char *description = NULL;
 	
@@ -498,7 +537,7 @@ char *GetDescription(struct mpsse_context *mpsse)
  * Returns MPSSE_OK on success.
  * Returns MPSSE_FAIL on failure.
  */
-int SetLoopback(struct mpsse_context *mpsse, int enable)
+int mpsse_set_loopback(struct mpsse_context *mpsse, int enable)
 {
 	char buf[1] = { 0 };
 	int retval = MPSSE_FAIL;
@@ -528,7 +567,7 @@ int SetLoopback(struct mpsse_context *mpsse, int enable)
  *
  * Returns void.
  */
-void SetCSIdle(struct mpsse_context *mpsse, int idle)
+void mpsse_set_cs_idle(struct mpsse_context *mpsse, int idle)
 {
 	if(is_valid_context(mpsse))
 	{
@@ -559,7 +598,7 @@ void SetCSIdle(struct mpsse_context *mpsse, int idle)
  * Returns MPSSE_OK on success.
  * Returns MPSSE_FAIL on failure.
  */
-int Start(struct mpsse_context *mpsse)
+int mpsse_start(struct mpsse_context *mpsse)
 {
 	int status = MPSSE_OK;
 
@@ -618,7 +657,7 @@ int Start(struct mpsse_context *mpsse)
  * Returns MPSSE_OK on success.
  * Returns MPSSE_FAIL on failure.
  */
-int Write(struct mpsse_context *mpsse, char *data, int size)
+int mpsse_write(struct mpsse_context *mpsse, char *data, int size)
 {
 	unsigned char *buf = NULL;
 	int retval = MPSSE_FAIL, buf_size = 0, txsize = 0, n = 0;
@@ -688,9 +727,9 @@ int Write(struct mpsse_context *mpsse, char *data, int size)
  * Returns NULL on failure.
  */
 #ifdef SWIGPYTHON
-swig_string_data Read(struct mpsse_context *mpsse, int size)
+swig_string_data mpsse_read(struct mpsse_context *mpsse, int size)
 #else
-char *Read(struct mpsse_context *mpsse, int size)
+char *mpsse_read(struct mpsse_context *mpsse, int size)
 #endif
 {
 	unsigned char *data = NULL, *buf = NULL;
@@ -758,9 +797,9 @@ char *Read(struct mpsse_context *mpsse, int size)
  * Returns NULL on failure.
  */
 #ifdef SWIGPYTHON
-swig_string_data Transfer(struct mpsse_context *mpsse, char *data, int size)
+swig_string_data mpsse_transfer(struct mpsse_context *mpsse, char *data, int size)
 #else
-char *Transfer(struct mpsse_context *mpsse, char *data, int size)
+char *mpsse_transfer(struct mpsse_context *mpsse, char *data, int size)
 #endif
 {
 	unsigned char *txdata = NULL, *buf = NULL;
@@ -825,7 +864,7 @@ char *Transfer(struct mpsse_context *mpsse, char *data, int size)
  *
  * Returns either an ACK (0) or a NACK (1).
  */
-int GetAck(struct mpsse_context *mpsse)
+int mpsse_get_ack(struct mpsse_context *mpsse)
 {	
 	int ack = 0;
 
@@ -845,7 +884,7 @@ int GetAck(struct mpsse_context *mpsse)
  *
  * Returns void.
  */
-void SetAck(struct mpsse_context *mpsse, int ack)
+void mpsse_set_ack(struct mpsse_context *mpsse, int ack)
 {
 	if(is_valid_context(mpsse))
 	{
@@ -869,9 +908,9 @@ void SetAck(struct mpsse_context *mpsse, int ack)
  *
  * Returns void.
  */
-void SendAcks(struct mpsse_context *mpsse)
+void mpsse_send_acks(struct mpsse_context *mpsse)
 {
-	return SetAck(mpsse, ACK);
+	return mpsse_set_ack(mpsse, ACK);
 }
 
 /*
@@ -881,9 +920,9 @@ void SendAcks(struct mpsse_context *mpsse)
  *
  * Returns void.
  */
-void SendNacks(struct mpsse_context *mpsse)
+void mpsse_send_nacks(struct mpsse_context *mpsse)
 {
-	return SetAck(mpsse, NACK);
+	return mpsse_set_ack(mpsse, NACK);
 }
 
 /*
@@ -894,7 +933,7 @@ void SendNacks(struct mpsse_context *mpsse)
  * Returns MPSSE_OK on success.
  * Returns MPSSE_FAIL on failure.
  */
-int Stop(struct mpsse_context *mpsse)
+int mpsse_stop(struct mpsse_context *mpsse)
 {
 	int retval = MPSSE_OK;
 
@@ -937,9 +976,9 @@ int Stop(struct mpsse_context *mpsse)
  * Returns NULL on failure.
  */
 #ifdef SWIGPYTHON
-swig_string_data MCURead(struct mpsse_context *mpsse, int size, int address)
+swig_string_data mpsse_mcu_read(struct mpsse_context *mpsse, int size, int address)
 #else
-char *MCURead(struct mpsse_context *mpsse, int size, int address)
+char *mpsse_mcu_read(struct mpsse_context *mpsse, int size, int address)
 #endif
 {
 	int i = 0, j = 0, txsize = 0, rxsize = 0;
@@ -982,12 +1021,12 @@ char *MCURead(struct mpsse_context *mpsse, int size, int address)
 	}
 
 #ifdef SWIGPYTHON
-        swig_string_data sdata = { 0 };
-        sdata.size = rxsize;
-        sdata.data = (char *) rxbuf;
-        return sdata;
+	swig_string_data sdata = { 0 };
+	sdata.size = rxsize;
+	sdata.data = (char *) rxbuf;
+	return sdata;
 #else
-        return (char *) rxbuf;
+	return (char *) rxbuf;
 #endif
 }
 
@@ -1001,7 +1040,7 @@ char *MCURead(struct mpsse_context *mpsse, int size, int address)
  *
  * Returns MPSSE_OK on success, MPSSE_FAIL on failure.
  */
-int MCUWrite(struct mpsse_context *mpsse, char *data, int size, int address)
+int mpsse_mcu_write(struct mpsse_context *mpsse, char *data, int size, int address)
 {
 	unsigned char *buf = NULL;
 	int buf_size = 0, i = 0, j = 0, retval = MPSSE_FAIL;
@@ -1038,7 +1077,7 @@ int MCUWrite(struct mpsse_context *mpsse, char *data, int size, int address)
  * Returns MPSSE_OK on success.
  * Returns MPSSE_FAIL on failure.
  */
-int PinHigh(struct mpsse_context *mpsse, int pin)
+int mpsse_pin_high(struct mpsse_context *mpsse, int pin)
 {
 	int retval = MPSSE_FAIL;
 
@@ -1059,7 +1098,7 @@ int PinHigh(struct mpsse_context *mpsse, int pin)
  * Returns MPSSE_OK on success.
  * Returns MPSSE_FAIL on failure.
  */
-int PinLow(struct mpsse_context *mpsse, int pin)
+int mpsse_pin_low(struct mpsse_context *mpsse, int pin)
 {
 	int retval = MPSSE_FAIL;
 	
@@ -1078,7 +1117,7 @@ int PinLow(struct mpsse_context *mpsse, int pin)
  *
  * Returns a byte with the corresponding pin's bits set to 1 or 0.
  */
-int ReadPins(struct mpsse_context *mpsse)
+int mpsse_read_pins(struct mpsse_context *mpsse)
 {
 	uint8_t val = 0;
 
@@ -1100,11 +1139,11 @@ int ReadPins(struct mpsse_context *mpsse)
  *
  * Returns a 1 if the pin is high, 0 if the pin is low.
  */
-int PinState(struct mpsse_context *mpsse, int pin, int state)
+int mpsse_pin_state(struct mpsse_context *mpsse, int pin, int state)
 {
 	if(state == -1)
 	{
-		state = ReadPins(mpsse);
+		state = mpsse_read_pins(mpsse);
 	}
 
 	/* If not in bitbang mode, the specified pin should be one of GPIOLx. Convert these defines into an absolute pin number. */
@@ -1123,7 +1162,7 @@ int PinState(struct mpsse_context *mpsse, int pin, int state)
  *
  * Returns MPSSE_OK on success, MPSSE_FAIL on failure.
  */
-int ClockUntilHigh(struct mpsse_context *mpsse)
+int mpsse_clock_until_high(struct mpsse_context *mpsse)
 {
 	unsigned char cmd[] = { PULSE_CLOCK_IO_HIGH };
 
@@ -1137,7 +1176,7 @@ int ClockUntilHigh(struct mpsse_context *mpsse)
  *
  * Returns MPSSE_OK on success, MPSSE_FAIL on failure.
  */
-int ClockUntilLow(struct mpsse_context *mpsse)
+int mpsse_clock_until_low(struct mpsse_context *mpsse)
 {
 	unsigned char cmd[] = { PULSE_CLOCK_IO_LOW };
 	
@@ -1152,7 +1191,7 @@ int ClockUntilLow(struct mpsse_context *mpsse)
  *
  * Returns MPSSE_OK on success, MPSSE_FAIL on failure.
  */
-int ToggleClock(struct mpsse_context *mpsse, int count)
+int mpsse_toggle_clock(struct mpsse_context *mpsse, int count)
 {
 	unsigned char cmd[CMD_SIZE-1] = { 0 };
 
@@ -1176,7 +1215,7 @@ int ToggleClock(struct mpsse_context *mpsse, int count)
  *
  * Returns MPSSE_OK on success, MPSSE_FAIL on failure.
  */
-int ToggleClockX8(struct mpsse_context *mpsse, int count, int gpio)
+int mpsse_toggle_clock_x8(struct mpsse_context *mpsse, int count, int gpio)
 {
 	unsigned char cmd[CMD_SIZE] = { 0 };
 
@@ -1208,7 +1247,7 @@ int ToggleClockX8(struct mpsse_context *mpsse, int count, int gpio)
  *
  * Returns MPSSE_OK on success, MPSSE_FAIL on failure.
  */
-int Tristate(struct mpsse_context *mpsse)
+int mpsse_tristate(struct mpsse_context *mpsse)
 {
 	unsigned char cmd[CMD_SIZE] = { 0 };
 
@@ -1224,7 +1263,7 @@ int Tristate(struct mpsse_context *mpsse)
  * Returns the libmpsse version number. 
  * High nibble is major version, low nibble is minor version.
  */
-int Version(void)
+int mpsse_version(void)
 {
 	int major = 0, minor = 0, version = 0;
 	char *version_string = NULL, *decimal_ptr = NULL;
@@ -1248,3 +1287,4 @@ int Version(void)
 
 	return version;
 }
+
