@@ -13,14 +13,14 @@ int main(void)
 	int retval = EXIT_FAILURE;
 	struct mpsse_context *flash = NULL;
 	
-	if((flash = MPSSE(SPI0, TWELVE_MHZ, MSB)) != NULL && flash->open)
+	if((flash = MPSSE.SPI.Open(SPI0, TWELVE_MHZ, MSB)) != NULL && flash->open)
 	{
-		printf("%s initialized at %dHz (SPI mode 0)\n", GetDescription(flash), GetClock(flash));
+		printf("%s initialized at %dHz (SPI mode 0)\n", MPSSE.GetDescription(flash), MPSSE.GetClock(flash));
 		
-		Start(flash);
-		Write(flash, RCMD, sizeof(RCMD) - 1);
-		data = Read(flash, SIZE);
-		Stop(flash);
+		MPSSE.SPI.Start(flash);
+		MPSSE.SPI.Write(flash, RCMD, sizeof(RCMD) - 1);
+		data = MPSSE.SPI.Read(flash, SIZE);
+		MPSSE.SPI.Stop(flash);
 		
 		if(data)
 		{
@@ -39,10 +39,10 @@ int main(void)
 	}
 	else
 	{
-		printf("Failed to initialize MPSSE: %s\n", ErrorString(flash));
+		printf("Failed to initialize MPSSE: %s\n", MPSSE.ErrorString(flash));
 	}
 
-	Close(flash);
+	MPSSE.SPI.Close(flash);
 
 	return retval;
 }

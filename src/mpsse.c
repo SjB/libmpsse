@@ -34,40 +34,118 @@ struct vid_pid supported_devices[] = {
 static void _mpsse_ldInit(void) __attribute__((__constructor__));
 static void _mpsse_ldInit(void)
 {
-	MPSSE.MPSSE             = &mpsse_easy_open;
-	MPSSE.Open              = &mpsse_open;
-	MPSSE.Close             = &mpsse_close;
-	MPSSE.Write             = &mpsse_write;
-	MPSSE.MCUWrite          = &mpsse_mcu_write;
-	MPSSE.Read              = &mpsse_read;
-	MPSSE.MCURead           = &mpsse_mcu_read;
-	MPSSE.Transfer          = &mpsse_transfer;
-	MPSSE.ErrorString       = &mpsse_error_string;
-	MPSSE.SetMode           = &mpsse_set_mode;
-	MPSSE.SetClock          = &mpsse_set_clock;
-	MPSSE.GetClock          = &mpsse_get_clock;
-	MPSSE.GetVid            = &mpsse_get_vid;
-	MPSSE.GetPid            = &mpsse_get_pid;
-	MPSSE.GetDescription    = &mpsse_get_description;
-	MPSSE.SetLoopback       = &mpsse_set_loopback;
-	MPSSE.SetCSIdle         = &mpsse_set_cs_idle;
-	MPSSE.Start             = &mpsse_start;
-	MPSSE.Stop              = &mpsse_stop;
-	MPSSE.GetAck            = &mpsse_get_ack;
-	MPSSE.SetAck            = &mpsse_set_ack;
-	MPSSE.SendAcks          = &mpsse_send_acks;
-	MPSSE.SendNacks         = &mpsse_send_nacks;
-	MPSSE.PinHigh           = &mpsse_pin_high;
-	MPSSE.PinLow            = &mpsse_pin_low;
-	MPSSE.ReadPins          = &mpsse_read_pins;
-	MPSSE.PinState          = &mpsse_pin_state;
-	MPSSE.ClockUntilHigh    = &mpsse_clock_until_high;
-	MPSSE.ClockUntilLow     = &mpsse_clock_until_low;
-	MPSSE.ToggleClock       = &mpsse_toggle_clock;
-	MPSSE.ToggleClockX8     = &mpsse_toggle_clock_x8;
-	MPSSE.Tristate          = &mpsse_tristate;
-	MPSSE.Version           = &mpsse_version;
+	MPSSE.Open			= &mpsse_open;
+	MPSSE.Close			= &mpsse_close;
+	MPSSE.Version			= &mpsse_version;
+	MPSSE.ErrorString		= &mpsse_error_string;
+	MPSSE.SetMode			= &mpsse_set_mode;
+	MPSSE.SetClock			= &mpsse_set_clock;
+	MPSSE.GetClock			= &mpsse_get_clock;
+	MPSSE.GetVid			= &mpsse_get_vid;
+	MPSSE.GetPid			= &mpsse_get_pid;
+	MPSSE.GetDescription		= &mpsse_get_description;
+	MPSSE.SetLoopback		= &mpsse_set_loopback;
+	
+	MPSSE.GPIO.Open			= &mpsse_gpio_open;
+	MPSSE.GPIO.PinHigh		= &mpsse_pin_high;
+	MPSSE.GPIO.PinLow		= &mpsse_pin_low;
+	MPSSE.GPIO.ReadPins		= &mpsse_read_pins;
+	MPSSE.GPIO.PinState		= &mpsse_pin_state;
+	MPSSE.GPIO.ClockUntilHigh	= &mpsse_clock_until_high;
+	MPSSE.GPIO.ClockUntilLow	= &mpsse_clock_until_low;
+	MPSSE.GPIO.ToggleClock		= &mpsse_toggle_clock;
+	MPSSE.GPIO.ToggleClockX8	= &mpsse_toggle_clock_x8;
+	MPSSE.BITBANG.Close		= &mpsse_close;
+
+	MPSSE.BITBANG.Open		= &mpsse_bitbang_open;
+        MPSSE.BITBANG.PinHigh		= &mpsse_pin_high;
+        MPSSE.BITBANG.PinLow		= &mpsse_pin_low;
+        MPSSE.BITBANG.ReadPins		= &mpsse_read_pins;
+        MPSSE.BITBANG.PinState		= &mpsse_pin_state;
+        MPSSE.BITBANG.ClockUntilHigh	= &mpsse_clock_until_high;
+        MPSSE.BITBANG.ClockUntilLow	= &mpsse_clock_until_low;
+        MPSSE.BITBANG.ToggleClock	= &mpsse_toggle_clock;
+        MPSSE.BITBANG.ToggleClockX8	= &mpsse_toggle_clock_x8;
+	MPSSE.BITBANG.Close		= &mpsse_close;
+
+	MPSSE.SPI.Open			= &mpsse_easy_open;
+	MPSSE.SPI.Read			= &mpsse_read;
+	MPSSE.SPI.Write			= &mpsse_write;
+	MPSSE.SPI.Transfer		= &mpsse_transfer;
+	MPSSE.SPI.SetCSIdle		= &mpsse_set_cs_idle;
+	MPSSE.SPI.Start			= &mpsse_start;
+	MPSSE.SPI.Stop			= &mpsse_stop;
+	MPSSE.SPI.Close			= &mpsse_close;
+
+	MPSSE.I2C.Open			= &mpsse_i2c_open;
+	MPSSE.I2C.Read			= &mpsse_read;
+	MPSSE.I2C.Write			= &mpsse_write;
+	MPSSE.I2C.Start			= &mpsse_start;
+	MPSSE.I2C.Stop			= &mpsse_stop;
+	MPSSE.I2C.Tristate		= &mpsse_tristate;
+	MPSSE.I2C.GetAck		= &mpsse_get_ack;
+	MPSSE.I2C.SetAck		= &mpsse_set_ack;
+	MPSSE.I2C.SendAcks		= &mpsse_send_acks;
+	MPSSE.I2C.SendNacks		= &mpsse_send_nacks;
+	MPSSE.I2C.Close			= &mpsse_close;
+	
+	MPSSE.MCU.Open			= &mpsse_mcu_open;
+	MPSSE.MCU.Read			= &mpsse_mcu_read;
+	MPSSE.MCU.Write			= &mpsse_mcu_write;
+	MPSSE.MCU.Close			= &mpsse_close;
 };
+
+/*
+ * Opens and initializes the first FTDI device in MCU mode.
+ *
+ * @mode - The MCU mode to use. One of: MCU8, MCU16
+ *
+ * Returns a pointer to an MPSSE context structure.
+ * On success, mpsse->open will be set to 1.
+ * On failure, mpsse->open will be set to 0.
+ */
+struct mpsse_context *mpsse_mcu_open(enum modes mode)
+{
+	return mpsse_easy_open(mode, 0, MSB);
+}
+
+/*
+ * Opens and initializes the first FTDI device in I2C mode.
+ *
+ * @freq - The I2C frequency to use.
+ *
+ * Returns a pointer to an MPSSE context structure.
+ * On success, mpsse->open will be set to 1.
+ * On failure, mpsse->open will be set to 0.
+ */
+struct mpsse_context *mpsse_i2c_open(int freq)
+{
+	return mpsse_easy_open(I2C, freq, MSB);
+}
+
+/*
+ * Opens and initializes the first FTDI device in GPIO mode.
+ *
+ * Returns a pointer to an MPSSE context structure.
+ * On success, mpsse->open will be set to 1.
+ * On failure, mpsse->open will be set to 0.
+ */
+struct mpsse_context *mpsse_gpio_open(void)
+{
+	return mpsse_easy_open(GPIO, 0, 0);
+}
+
+/*
+ * Opens and initializes the first FTDI device in Bitbang mode.
+ *
+ * Returns a pointer to an MPSSE context structure.
+ * On success, mpsse->open will be set to 1.
+ * On failure, mpsse->open will be set to 0.
+ */
+struct mpsse_context *mpsse_bitbang_open(void)
+{
+	return mpsse_easy_open(BITBANG, 0, 0);
+}
 
 /*
  * Opens and initializes the first FTDI device found.
@@ -219,9 +297,9 @@ void mpsse_close(struct mpsse_context *mpsse)
 		{
 			ftdi_set_bitmode(&mpsse->ftdi, 0, BITMODE_RESET);
 			ftdi_usb_close(&mpsse->ftdi);
-			ftdi_deinit(&mpsse->ftdi);
 		}
 
+		ftdi_deinit(&mpsse->ftdi);
 		free(mpsse);
 		mpsse = NULL;
 	}
