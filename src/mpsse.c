@@ -55,7 +55,7 @@ static void _mpsse_ldInit(void)
 	MPSSE.GPIO.ClockUntilLow	= &mpsse_clock_until_low;
 	MPSSE.GPIO.ToggleClock		= &mpsse_toggle_clock;
 	MPSSE.GPIO.ToggleClockX8	= &mpsse_toggle_clock_x8;
-	MPSSE.BITBANG.Close		= &mpsse_close;
+	MPSSE.GPIO.Close		= &mpsse_close;
 
 	MPSSE.BITBANG.Open		= &mpsse_bitbang_open;
         MPSSE.BITBANG.PinHigh		= &mpsse_pin_high;
