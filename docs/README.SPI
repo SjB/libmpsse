@@ -7,6 +7,10 @@ There are four standard modes that an SPI bus can support (modes 0 and 3 are mos
 	3) Mode 2 (SPI2)
 	4) Mode 3 (SPI3)
 
+While libmpsse fully supports SPI modes 0 and 2, due to the limitations of the FTDI chips modes 1 and 3 will only work with
+SPI chips that support on the fly instruction decoding. Certian chips, particularly those that support daisy chaining, will 
+typically not function properly with libmpsse in SPI modes 1 and 3.
+
 When initializing libmpsse, you must specify:
 
 	1) The SPI mode to use

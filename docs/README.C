@@ -1,27 +1,14 @@
-FUNCTIONS
+MPSSE FUNCTIONS
 
 
-	struct mpsse_context *MPSSE(enum modes mode, int freq, int endianess)
+	struct mpsse_context *MPSSE.Open(int vid, int pid, enum modes mode, int freq, int endianess, int interface, const char *description, const char *serial)
 
-		Auto detects, opens and initializes the first FTDI device for the specified mode.
-	 
-		@mode      - Mode to open the device in. One of: SPI0, SPI1, SPI2, SPI3, I2C.
-		@freq      - Clock frequency to use for the specified mode.
-		@endianess - Specifies how data is clocked in/out (MSB, LSB).
-
-		Returns a pointer to an MPSSE context structure. 
-		On success, mpsse->open will be set to 1.
-		On failure, mpsse->open will be set to 0.
-
-
-	struct mpsse_context *Open(int vid, int pid, enum modes mode, int freq, int endianess, int interface, const char *description, const char *serial)
-
-		Like MPSSE(), but opens the device matching the given vendor and product ID, description, or serial number. 
-		Called internally by MPSSE().
+		Opens the device matching the given vendor and product ID, description, or serial number. 
+		This can be used to create an MPSSE context for any supported mode.
 
 		@vid         - Device vendor ID.
 		@pid         - Device product ID.
-		@mode        - MPSSE mode, one of: SPI0, SPI1, SPI2, SPI3, I2C.
+		@mode        - MPSSE mode, one of: SPI0, SPI1, SPI2, SPI3, I2C, MCU8, MCU16, GPIO, BITBANG.
 		@freq        - Clock frequency to use for the specified mode.
 		@endianess   - Specifies how data is clocked in/out (MSB, LSB).
 		@interface   - FTDI interface to use, one of: IFACE_ANY, IFACE_A - IFACE_D.
@@ -33,7 +20,7 @@ FUNCTIONS
 		On failure, mpsse->open will be set to 0.
 
 
-	void Close(struct mpsse_context *mpsse)
+	void MPSSE.Close(struct mpsse_context *mpsse)
 	 
 		Closes the FTDI device and deinitializes libftdi.
 
@@ -42,9 +29,94 @@ FUNCTIONS
 		Returns void.
 
 
-	int Start(struct mpsse_context *mpsse)
+	char *MPSSE.ErrorString(struct mpsse_context *mpsse)
 
-                Send the start condition for the selected protocol.
+		Get the last error string as reported by libftdi. This data should not be freed by the caller.
+
+		@mpsse - MPSSE context pointer.
+
+		Returns a pointer to the last error string reported by libftdi.
+
+
+	int MPSSE.GetVid(struct mpsse_context *mpsse)
+
+		Get the USB vendor ID of the connected FTDI device.
+
+		@mpsse - MPSSE context pointer.
+
+		Returns the FTDI vendor ID.
+
+
+	int MPSSE.GetPid(struct mpsse_context *mpsse)
+
+		Get the USB product ID of the connected FTDI device.
+
+		@mpsse - MPSSE context pointer.
+
+		Returns the FTDI product ID.
+
+
+	char *MPSSE.GetDescription(struct mpsse_context *mpsse)
+
+		Get the description, as listed in the internal supported_devices structure, of the connected FTDI device.
+		The caller must not free the return value.
+
+		@mpsse - MPSSE context pointer.
+
+		Returns a pointer to the device description string.
+
+	int MPSSE.GetClock(struct mpsse_context *mpsse)
+
+		Gets the currently configured clock frequency.
+
+		@mpsse - MPSSE context pointer.
+
+		Returns an unsigned 32 bit value representing the clock frequency.
+
+
+	int MPSSE.SetClock(struct mpsse_context *mpsse, int freq)
+
+		Sets the appropriate divisor for the desired clock frequency.
+		Called internally by Open().
+
+		@mpsse - MPSSE context pointer.
+		@freq  - Desired clock frequency in hertz.
+
+		Returns MPSSE_OK on success.
+		Returns MPSSE_FAIL on failure.
+
+
+	int MPSSE.SetMode(struct mpsse_context *mpsse, enum modes mode, int endianess)
+
+		Sets the appropriate transmit and receive commands based on the requested mode and byte order.
+		Called internally by Open().
+
+		@mpsse     - MPSSE context pointer.
+		@mode      - The desired mode, as listed in enum modes.
+		@endianess - Most or least significant byte first (MSB / LSB).
+
+		Returns MPSSE_OK on success.
+		Returns MPSSE_FAIL on failure.
+
+
+	int MPSSE.SetLoopback(struct mpsse_context *mpsse, int enable)
+
+		Enable / disable internal loopback.
+		Called internally by SetMode().
+
+		@mpsse  - MPSSE context pointer.
+		@enable - Zero to disable the FTDI internal loopback, 1 to enable loopback.
+
+		Returns MPSSE_OK on success.
+		Returns MPSSE_FAIL on failure.
+
+
+SPI FUNCTIONS
+
+
+	int MPSSE.SPI.Start(struct mpsse_context *mpsse)
+
+                Asserts the chip select pin.
 
 		@mpsse - MPSSE context pointer.
                 
@@ -52,9 +124,9 @@ FUNCTIONS
                 Returns MPSSE_FAIL on failure.
 
 
-	int Stop(struct mpsse_context *mpsse)
+	int MPSSE.SPI.Stop(struct mpsse_context *mpsse)
 
-                Send the data stop condition for the selected serial protocol.
+                Deasserts the chip select pin.
 
 		@mpsse - MPSSE context pointer.
 
@@ -62,9 +134,9 @@ FUNCTIONS
                 Returns MPSSE_FAIL on failure.
 
 
-	char *Read(struct mpsse_context *mpsse, int size)
+	char *MPSSE.SPI.Read(struct mpsse_context *mpsse, int size)
 
-                Reads data over the selected serial protocol.
+                Reads SPI data.
 
 		@mpsse - MPSSE context pointer.
                 @size  - Number of bytes to read.
@@ -73,10 +145,9 @@ FUNCTIONS
                 Returns NULL on failure.
 
 
-        int Write(struct mpsse_context *mpsse, char *data, int size)
+        int MPSSE.SPI.Write(struct mpsse_context *mpsse, char *data, int size)
 
-                Send data out via the selected serial protocol.
-                Note that in Python the size field is not used.
+                Writes SPI data.
 
 		@mpsse - MPSSE context pointer.
                 @data  - Buffer of data to send.
@@ -86,11 +157,9 @@ FUNCTIONS
                 Returns MPSSE_FAIL on failure.
 
 
-	char *Transfer(struct mpsse_context *mpsse, char *outbuf, int size)
+	char *MPSSE.SPI.Transfer(struct mpsse_context *mpsse, char *outbuf, int size)
 
 		Performs a bi-directional data transfer of size bytes.
-		Only applicable to the SPI modes.
-		Note that in Python the size field is not used.
 
 		@mpsse  - MPSSE context pointer.
 		@outbuf - Buffer of bytes to send.
@@ -99,9 +168,13 @@ FUNCTIONS
 		Returns a pointer to the read data on success.
 		Returns NULL on failure.
 
-	int GetAck(struct mpsse_context *mpsse)
 
-		Return the status of the last received acknolwedgement bit (I2C only).
+I2C FUNCTIONS
+
+
+	int MPSSE.I2C.GetAck(struct mpsse_context *mpsse)
+
+		Return the status of the last received acknolwedgement bit.
 
 		@mpsse - MPSSE context pointer.
 
@@ -109,9 +182,9 @@ FUNCTIONS
 		Returns 1 if a NACK was received.
 
 
-	void SetAck(struct mpsse_context *mpsse, int ack)
+	void MPSSE.I2C.SetAck(struct mpsse_context *mpsse, int ack)
 
-		Set the ACK bit to send when Read() receives a byte from the I2C slave device (I2C only).
+		Set the ACK bit to send when Read() receives a byte from the I2C slave device.
 
 		@mpsse - MPSSE context pointer.
 		@ack   - Set to 0 to send ACKs (default).
@@ -120,7 +193,7 @@ FUNCTIONS
 		Returns void.
 
 
-	void SendAcks(struct mpsse_context *mpsse)
+	void MPSSE.I2C.SendAcks(struct mpsse_context *mpsse)
 	
 		Causes libmpsse to send ACKs after each read byte in I2C mode.
 
@@ -129,7 +202,7 @@ FUNCTIONS
 		Returns void.
 
 
-	void SendNacks(struct mpsse_context *mpsse)
+	void MPSSE.I2C.SendNacks(struct mpsse_context *mpsse)
 
 		Causes libmpsse to send NACKs after each read byte in I2C mode.
 
@@ -138,88 +211,7 @@ FUNCTIONS
 		Returns void.
 
 
-	char *ErrorString(struct mpsse_context *mpsse)
-
-                Get the last error string as reported by libftdi. This data should not be freed by the caller.
-		
-		@mpsse - MPSSE context pointer.
-
-		Returns a pointer to the last error string reported by libftdi.
-
-
-	int GetVid(struct mpsse_context *mpsse)
-
-		Get the USB vendor ID of the connected FTDI device.
-
-		@mpsse - MPSSE context pointer.
-		
-		Returns the FTDI vendor ID.
-		
-
-	int GetPid(struct mpsse_context *mpsse)
-
-		Get the USB product ID of the connected FTDI device.
-		
-		@mpsse - MPSSE context pointer.
 	
-		Returns the FTDI product ID.
-
-
-	char *GetDescription(struct mpsse_context *mpsse)
-
-		Get the description, as listed in the internal supported_devices structure, of the connected FTDI device.
-		The caller must not free the return value.
-		
-		@mpsse - MPSSE context pointer.
-		
-		Returns a pointer to the device description string.
-
-	
-	int GetClock(struct mpsse_context *mpsse)
-
-		Gets the currently configured clock frequency.
-		
-		@mpsse - MPSSE context pointer.
-
-		Returns an unsigned 32 bit value representing the clock frequency.
-
-
-	int SetClock(struct mpsse_context *mpsse, int freq)
-
-                Sets the appropriate divisor for the desired clock frequency.
-		Called internally by Open().
-
-		@mpsse - MPSSE context pointer.
-                @freq  - Desired clock frequency in hertz.
-
-                Returns MPSSE_OK on success.
-                Returns MPSSE_FAIL on failure.
-
-
-	int SetMode(struct mpsse_context *mpsse, enum modes mode, int endianess)
-
-                Sets the appropriate transmit and receive commands based on the requested mode and byte order.
-                Called internally by Open().
-
-		@mpsse     - MPSSE context pointer.
-                @mode      - The desired mode, as listed in enum modes.
-                @endianess - Most or least significant byte first (MSB / LSB).
-
-                Returns MPSSE_OK on success.
-                Returns MPSSE_FAIL on failure.
-
-
-	int SetLoopback(struct mpsse_context *mpsse, int enable)
-
-		Enable / disable internal loopback.
-		Called internally by SetMode().
-	 
-		@mpsse  - MPSSE context pointer.
-		@enable - Zero to disable the FTDI internal loopback, 1 to enable loopback.
-
-		Returns MPSSE_OK on success.
-		Returns MPSSE_FAIL on failure.
-
 
 	void SetCSIdle(struct mpsse_context *mpsse, int idle)
 
