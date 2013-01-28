@@ -1072,6 +1072,58 @@ int PinLow(struct mpsse_context *mpsse, int pin)
 }
 
 /*
+ * Sets the input/output direction of all pins. For use in BITBANG mode only.
+ *
+ * @mpsse     - MPSSE context pointer.
+ * @direction - Byte indicating input/output direction of each bit.  1 is out.
+ *
+ * Returns MPSSE_OK if direction could be set, MPSSE_FAIL otherwise.
+ */
+int SetDirection(struct mpsse_context *mpsse, uint8_t direction)
+{
+	int retval = MPSSE_FAIL;
+
+	if(is_valid_context(mpsse))
+	{
+		if(mpsse->mode == BITBANG)
+		{
+			if(ftdi_set_bitmode(&mpsse->ftdi, direction, BITMODE_BITBANG) == 0)
+                	{
+				retval = MPSSE_OK;
+			}
+		}
+	}
+
+	return retval;
+}
+
+/*
+ * Sets the input/output value of all pins. For use in BITBANG mode only.
+ *
+ * @mpsse - MPSSE context pointer.
+ * @data  - Byte indicating bit hi/low value of each bit.
+ *
+ * Returns MPSSE_OK if direction could be set, MPSSE_FAIL otherwise.
+ */
+int WritePins(struct mpsse_context *mpsse, uint8_t data)
+{
+	int retval = MPSSE_FAIL;
+
+	if(is_valid_context(mpsse))
+	{
+		if(mpsse->mode == BITBANG)
+		{
+			if(ftdi_write_data(&mpsse->ftdi, &data, 1) == 0)
+			{
+				retval = MPSSE_OK;
+			}
+		}
+	}
+    
+	return retval;
+}
+
+/*
  * Reads the state of the chip's pins. For use in BITBANG mode only.
  *
  * @mpsse - MPSSE context pointer.

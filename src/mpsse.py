@@ -227,6 +227,20 @@ class MPSSE:
 			raise Exception, self.ErrorString()
 		return MPSSE_OK
 
+	def SetDirection(self, direction):
+		"""
+		Sets the input/output direction of pins as determined by direction (1 = Output, 0 = Input). 
+		For use in BITBANG mode only.
+		"""
+		return _mpsse.SetDirection(self.context, direction)
+
+	def WritePins(self, data):
+		"""
+		Writes a new state to the chip's pins as determined by data (1 = Output, 0 = Input).
+		For use in BITBANG mode only.
+		"""
+		return _mpsse.WritePins(self.context, data)
+
 	def ReadPins(self):
 		"""
 		Reads the current state of the chip's pins. For use in BITBANG mode only.

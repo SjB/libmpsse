@@ -192,6 +192,8 @@ void SendAcks(struct mpsse_context *mpsse);
 void SendNacks(struct mpsse_context *mpsse);
 int PinHigh(struct mpsse_context *mpsse, int pin);
 int PinLow(struct mpsse_context *mpsse, int pin);
+int SetDirection(struct mpsse_context *mpsse, uint8_t direction);
+int WritePins(struct mpsse_context *mpsse, uint8_t data);
 int ReadPins(struct mpsse_context *mpsse);
 int PinState(struct mpsse_context *mpsse, int pin, int state);
 int ClockUntilHigh(struct mpsse_context *mpsse);
