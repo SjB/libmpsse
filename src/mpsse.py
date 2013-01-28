@@ -63,12 +63,12 @@ class MPSSE:
 			if self.context.open == 0:
 				raise Exception, self.ErrorString()
 
-	def Open(self, vid, pid, mode, frequency, endianess=MSB, interface=IFACE_A, description=None, serial=None):
+	def Open(self, vid, pid, mode, frequency, endianess=MSB, interface=IFACE_A, description=None, serial=None, index=0):
 		"""
 		Opens the specified USB device.
-		Endianess defaults to MSB; interface defaults to IFACE_A; description and serial default to None.
+		Endianess defaults to MSB; interface defaults to IFACE_A; description and serial default to None, index defaults to 0.
 		"""
-		self.context = _mpsse.Open(vid, pid, mode, frequency, endianess, interface, description, serial)
+		self.context = _mpsse.OpenIndex(vid, pid, mode, frequency, endianess, interface, description, serial, index)
 		if self.context.open == 0:
 			raise Exception, self.ErrorString()
 		return MPSSE_OK

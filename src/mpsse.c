@@ -68,7 +68,7 @@ struct mpsse_context *MPSSE(enum modes mode, int freq, int endianess)
 }
 
 /* 
- * Open device by VID/PID 
+ * Open device by VID/PID
  *
  * @vid         - Device vendor ID.
  * @pid         - Device product ID.
@@ -85,6 +85,28 @@ struct mpsse_context *MPSSE(enum modes mode, int freq, int endianess)
  */
 struct mpsse_context *Open(int vid, int pid, enum modes mode, int freq, int endianess, int interface, const char *description, const char *serial)
 {
+	return OpenIndex(vid, pid, mode, freq, endianess, interface, description, serial, 0);
+}
+
+/* 
+ * Open device by VID/PID/index
+ *
+ * @vid         - Device vendor ID.
+ * @pid         - Device product ID.
+ * @mode        - MPSSE mode, one of enum modes.
+ * @freq        - Clock frequency to use for the specified mode.
+ * @endianess   - Specifies how data is clocked in/out (MSB, LSB).
+ * @interface   - FTDI interface to use (IFACE_A - IFACE_D).
+ * @description - Device product description (set to NULL if not needed).
+ * @serial      - Device serial number (set to NULL if not needed).
+ * @index       - Device index (set to 0 if not needed).
+ *
+ * Returns a pointer to an MPSSE context structure. 
+ * On success, mpsse->open will be set to 1.
+ * On failure, mpsse->open will be set to 0.
+ */
+struct mpsse_context *OpenIndex(int vid, int pid, enum modes mode, int freq, int endianess, int interface, const char *description, const char *serial, int index)
+{
 	int status = 0;
 	struct mpsse_context *mpsse = NULL;
 
@@ -100,7 +122,7 @@ struct mpsse_context *Open(int vid, int pid, enum modes mode, int freq, int endi
 			ftdi_set_interface(&mpsse->ftdi, interface);
 
 			/* Open the specified device */
-			if(ftdi_usb_open_desc(&mpsse->ftdi, vid, pid, description, serial) == 0)
+			if(ftdi_usb_open_desc_index(&mpsse->ftdi, vid, pid, description, serial, index) == 0)
 			{
 				mpsse->mode = mode;
 				mpsse->vid = vid;
