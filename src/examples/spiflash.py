@@ -15,10 +15,20 @@ class SPIFlash:
 	PP_PERIOD = .025	# Page program time, in seconds
 
 	def __init__(self, speed=SIX_MHZ):
+
+		# Sanity check on the specified clock speed
+		if not speed or speed is None:
+			speed = SIX_MHZ
 	
 		self.flash = MPSSE(SPI0, speed, MSB)
 		self.chip = self.flash.GetDescription()
 		self.speed = self.flash.GetClock()
+		self._init_gpio()
+
+	def _init_gpio(self):
+		# Set the GPIOL0 and GPIOL1 pins high for connection to SPI flash WP and HOLD pins.
+		self.flash.PinHigh(GPIOL0)
+		self.flash.PinHigh(GPIOL1)
 
 	def _addr2str(self, address):
         	addr_str = ""
