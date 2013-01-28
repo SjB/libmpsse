@@ -321,7 +321,7 @@ int SetMode(struct mpsse_context *mpsse, int endianess)
 			/* Set the idle pin states */
 			set_bits_low(mpsse, mpsse->pidle);
 	
-			/* All GPIO pins are inputs, pulled low */
+			/* All GPIO pins are outputs, set low */
 			mpsse->trish = 0xFF;
 			mpsse->gpioh = 0x00;
 	
