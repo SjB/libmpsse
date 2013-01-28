@@ -18,24 +18,24 @@ int main(void)
 	int retval = EXIT_FAILURE;
 	struct mpsse_context *eeprom = NULL;
 
-	if((eeprom = MPSSE.I2C.Open(FOUR_HUNDRED_KHZ)) != NULL && eeprom->open)
+	if((eeprom = MPSSE(I2C, FOUR_HUNDRED_KHZ, MSB)) != NULL && eeprom->open)
 	{
-		printf("%s initialized at %dHz (I2C)\n", MPSSE.GetDescription(eeprom), MPSSE.GetClock(eeprom));
+		printf("%s initialized at %dHz (I2C)\n", GetDescription(eeprom), GetClock(eeprom));
 	
 		/* Write the EEPROM start address */	
-		MPSSE.I2C.Start(eeprom);
-		MPSSE.I2C.Write(eeprom, WCMD, sizeof(WCMD) - 1);
+		Start(eeprom);
+		Write(eeprom, WCMD, sizeof(WCMD) - 1);
 
-		if(MPSSE.I2C.GetAck(eeprom) == ACK)
+		if(GetAck(eeprom) == ACK)
 		{
 			/* Send the EEPROM read command */
-			MPSSE.I2C.Start(eeprom);
-			MPSSE.I2C.Write(eeprom, RCMD, sizeof(RCMD) - 1);
+			Start(eeprom);
+			Write(eeprom, RCMD, sizeof(RCMD) - 1);
 
-			if(MPSSE.I2C.GetAck(eeprom) == ACK)
+			if(GetAck(eeprom) == ACK)
 			{
 				/* Read in SIZE bytes from the EEPROM chip */
-				data = MPSSE.I2C.Read(eeprom, SIZE);
+				data = Read(eeprom, SIZE);
 				if(data)
 				{
 					fp = fopen(FOUT, "wb");
@@ -52,21 +52,21 @@ int main(void)
 				}
 	
 				/* Tell libmpsse to send NACKs after reading data */
-				MPSSE.I2C.SendNacks(eeprom);
+				SendNacks(eeprom);
 
 				/* Read in one dummy byte, with a NACK */
-				MPSSE.I2C.Read(eeprom, 1);
+				Read(eeprom, 1);
 			}
 		}
 
-		MPSSE.I2C.Stop(eeprom);
+		Stop(eeprom);
 	}
 	else
 	{
-		printf("Failed to initialize MPSSE: %s\n", MPSSE.ErrorString(eeprom));
+		printf("Failed to initialize MPSSE: %s\n", ErrorString(eeprom));
 	}
 
-	MPSSE.I2C.Close(eeprom);
+	Close(eeprom);
 
 	return retval;
 }

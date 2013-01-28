@@ -8,24 +8,24 @@ int main(void)
 	struct mpsse_context *ds1305 = NULL;
 	int sec = 0, min = 0, retval = EXIT_FAILURE;
 	char *control = NULL, *seconds = NULL, *minutes = NULL;
-
-	if((ds1305 = MPSSE.SPI.Open(SPI3, ONE_HUNDRED_KHZ, MSB)) != NULL && ds1305->open)
+	
+	if((ds1305 = MPSSE(SPI3, ONE_HUNDRED_KHZ, MSB)) != NULL && ds1305->open)
 	{
-		MPSSE.SPI.SetCSIdle(ds1305, 0);
+		SetCSIdle(ds1305, 0);
 
-		printf("%s initialized at %dHz (SPI mode 3)\n", MPSSE.GetDescription(ds1305), MPSSE.GetClock(ds1305));
+		printf("%s initialized at %dHz (SPI mode 3)\n", GetDescription(ds1305), GetClock(ds1305));
 		
-		MPSSE.SPI.Start(ds1305);
-		MPSSE.SPI.Write(ds1305, "\x0F", 1);
-		control = MPSSE.SPI.Read(ds1305, 1);
-		MPSSE.SPI.Stop(ds1305);
+		Start(ds1305);
+		Write(ds1305, "\x0F", 1);
+		control = Read(ds1305, 1);
+		Stop(ds1305);
 		
 		control[0] &= ~0x80;
 		
-		MPSSE.SPI.Start(ds1305);
-		MPSSE.SPI.Write(ds1305, "\x8F", 1);
-		MPSSE.SPI.Write(ds1305, control, 1);
-		MPSSE.SPI.Stop(ds1305);
+		Start(ds1305);
+		Write(ds1305, "\x8F", 1);
+		Write(ds1305, control, 1);
+		Stop(ds1305);
 
 		free(control);
 
@@ -33,17 +33,17 @@ int main(void)
 		{
 			sleep(1);
 
-			MPSSE.SPI.Start(ds1305);
-			MPSSE.SPI.Write(ds1305, "\x00", 1);
-			seconds = MPSSE.SPI.Read(ds1305, 1);
-			MPSSE.SPI.Stop(ds1305);
+			Start(ds1305);
+			Write(ds1305, "\x00", 1);
+			seconds = Read(ds1305, 1);
+			Stop(ds1305);
 
 			sec = (((seconds[0] >> 4) * 10) + (seconds[0] & 0x0F));
 
-			MPSSE.SPI.Start(ds1305);
-			MPSSE.SPI.Write(ds1305, "\x01", 1);
-			minutes = MPSSE.SPI.Read(ds1305, 1);
-			MPSSE.SPI.Stop(ds1305);
+			Start(ds1305);
+			Write(ds1305, "\x01", 1);
+			minutes = Read(ds1305, 1);
+			Stop(ds1305);
 
 			min = (((minutes[0] >> 4) * 10) + (minutes[0] & 0x0F));
 
@@ -55,10 +55,10 @@ int main(void)
 	}
 	else
 	{
-		printf("Failed to initialize SPI: %s\n", MPSSE.ErrorString(ds1305));
+		printf("Failed to initialize MPSSE: %s\n", ErrorString(ds1305));
 	}
 
-	MPSSE.SPI.Close(ds1305);
+	Close(ds1305);
 
 	return retval;
 }

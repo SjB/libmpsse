@@ -7,18 +7,18 @@ int main(void)
 	struct mpsse_context *io = NULL;
 	int i = 0, retval = EXIT_FAILURE;
 
-	io = MPSSE.GPIO.Open();
+	io = MPSSE(GPIO, 0, 0);
 	
 	if(io && io->open)
 	{
 		for(i=0; i<10; i++)
 		{
-			MPSSE.GPIO.PinHigh(io, GPIOL0);
-			printf("GPIOL0 State: %d\n", MPSSE.GPIO.PinState(io, GPIOL0, -1));
+			PinHigh(io, GPIOL0);
+			printf("GPIOL0 State: %d\n", PinState(io, GPIOL0, -1));
 			sleep(1);
 			
-			MPSSE.GPIO.PinLow(io, GPIOL0);
-			printf("GPIOL0 State: %d\n", MPSSE.GPIO.PinState(io, GPIOL0, -1));
+			PinLow(io, GPIOL0);
+			printf("GPIOL0 State: %d\n", PinState(io, GPIOL0, -1));
 			sleep(1);
 		}
 	
@@ -26,10 +26,10 @@ int main(void)
 	}
 	else
 	{
-		printf("Failed to open MPSSE: %s\n", MPSSE.ErrorString(io));
+		printf("Failed to open MPSSE: %s\n", ErrorString(io));
 	}
 		
-	MPSSE.GPIO.Close(io);
+	Close(io);
 
 	return retval;
 }

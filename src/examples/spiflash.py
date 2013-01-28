@@ -15,9 +15,6 @@ class SPIFlash:
 	PP_PERIOD = .025	# Page program time, in seconds
 
 	def __init__(self, speed=SIX_MHZ):
-
-		if not speed or speed is None:
-			speed = SIX_MHZ
 	
 		self.flash = MPSSE(SPI0, speed, MSB)
 		self.chip = self.flash.GetDescription()

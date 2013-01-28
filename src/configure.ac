@@ -1,5 +1,5 @@
 AC_PREREQ([2.65])
-AC_INIT([libmpsse],[2.0],[http://libmpsse.googlecode.com])
+AC_INIT([libmpsse],[1.2],[http://libmpsse.googlecode.com])
 
 AC_ARG_ENABLE([python],AS_HELP_STRING([--disable-python], [Do not build Python wrappers]))
 AS_IF([test "x$enable_python" != "xno"], [BUILD="swig"], [BUILD=""])

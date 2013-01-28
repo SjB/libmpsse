@@ -4,17 +4,6 @@
 #include <ftdi.h>
 #include <stdint.h>
 
-#ifdef SWIGPYTHON
-#include "swig.h"
-#define MPSSE_READ_FUNCTION_PTR 	swig_string_data (*Read)(struct mpsse_context *mpsse, int size);
-#define MPSSE_MCU_READ_FUNCTION_PTR	swig_string_data (*Read)(struct mpsse_context *mpsse, int size, int address);
-#define MPSSE_TRANSFER_FUNCTION_PTR	swig_string_data (*Transfer)(struct mpsse_context *mpsse, char *data, int size);
-#else
-#define MPSSE_READ_FUNCTION_PTR		char *(*Read)(struct mpsse_context *mpsse, int size);
-#define MPSSE_MCU_READ_FUNCTION_PTR	char *(*Read)(struct mpsse_context *mpsse, int size, int address);
-#define MPSSE_TRANSFER_FUNCTION_PTR	char *(*Transfer)(struct mpsse_context *mpsse, char *data, int size);
-#endif
-
 #define MPSSE_OK		0
 #define MPSSE_FAIL		-1
 
@@ -181,118 +170,51 @@ struct mpsse_context
 	uint8_t rack;
 };
 
-struct mpsse_mcu_t
-{
-	struct mpsse_context *(*Open)(enum modes mode);
-	int (*Write)(struct mpsse_context *mpsse, char *data, int size, int address);
-	MPSSE_MCU_READ_FUNCTION_PTR
-	void (*Close)(struct mpsse_context *mpsse);
-};
-
-struct mpsse_spi_t
-{
-	struct mpsse_context *(*Open)(enum modes mode, int freq, int endianess);
-	int (*Start)(struct mpsse_context *mpsse);
-	int (*Stop)(struct mpsse_context *mpsse);
-	void (*Close)(struct mpsse_context *mpsse);
-	void (*SetCSIdle)(struct mpsse_context *mpsse, int idle);
-	int (*Write)(struct mpsse_context *mpsse, char *data, int size);
-	MPSSE_READ_FUNCTION_PTR
-	MPSSE_TRANSFER_FUNCTION_PTR
-};
-
-struct mpsse_i2c_t
-{
-	struct mpsse_context *(*Open)(int freq);
-	int (*Start)(struct mpsse_context *mpsse);
-	int (*Stop)(struct mpsse_context *mpsse);
-	int (*Write)(struct mpsse_context *mpsse, char *data, int size);
-	MPSSE_READ_FUNCTION_PTR
-	void (*Close)(struct mpsse_context *mpsse);
-	int (*GetAck)(struct mpsse_context *mpsse);
-	void (*SetAck)(struct mpsse_context *mpsse, int ack);
-	void (*SendAcks)(struct mpsse_context *mpsse);
-	void (*SendNacks)(struct mpsse_context *mpsse);
-	int (*Tristate)(struct mpsse_context *mpsse);
-};
-
-struct mpsse_gpio_t
-{
-	struct mpsse_context *(*Open)(void);
-	void (*Close)(struct mpsse_context *mpsse);
-	int (*PinHigh)(struct mpsse_context *mpsse, int pin);
-	int (*PinLow)(struct mpsse_context *mpsse, int pin);
-	int (*ReadPins)(struct mpsse_context *mpsse);
-	int (*PinState)(struct mpsse_context *mpsse, int pin, int state);
-	int (*ClockUntilHigh)(struct mpsse_context *mpsse);
-	int (*ClockUntilLow)(struct mpsse_context *mpsse);
-	int (*ToggleClock)(struct mpsse_context *mpsse, int count);
-	int (*ToggleClockX8)(struct mpsse_context *mpsse, int count, int gpio);
-};
-
-struct mpsse_t
-{
-	struct mpsse_spi_t SPI;
-	struct mpsse_i2c_t I2C;
-	struct mpsse_mcu_t MCU;
-	struct mpsse_gpio_t GPIO;
-	struct mpsse_gpio_t BITBANG;
-	struct mpsse_context *(*Open)(int vid, int pid, enum modes mode, int freq, int endianess, int interface, const char *description, const char *serial);
-	void (*Close)(struct mpsse_context *mpsse);
-	char *(*ErrorString)(struct mpsse_context *mpsse);
-	int (*SetMode)(struct mpsse_context *mpsse, int endianess);
-	int (*SetClock)(struct mpsse_context *mpsse, uint32_t freq);
-	int (*GetClock)(struct mpsse_context *mpsse);
-	int (*GetVid)(struct mpsse_context *mpsse);
-	int (*GetPid)(struct mpsse_context *mpsse);
-	char *(*GetDescription)(struct mpsse_context *mpsse);
-	int (*SetLoopback)(struct mpsse_context *mpsse, int enable);
-	int (*Version)(void);
-} MPSSE;
-
-struct mpsse_context *mpsse_mcu_open(enum modes mode);
-struct mpsse_context *mpsse_i2c_open(int freq);
-struct mpsse_context *mpsse_gpio_open(void);
-struct mpsse_context *mpsse_bitbang_open(void);
-struct mpsse_context *mpsse_easy_open(enum modes mode, int freq, int endianess);
-struct mpsse_context *mpsse_open(int vid, int pid, enum modes mode, int freq, int endianess, int interface, const char *description, const char *serial);
-void mpsse_close(struct mpsse_context *mpsse);
-char *mpsse_error_string(struct mpsse_context *mpsse);
-int mpsse_set_mode(struct mpsse_context *mpsse, int endianess);
-int mpsse_set_clock(struct mpsse_context *mpsse, uint32_t freq);
-int mpsse_get_clock(struct mpsse_context *mpsse);
-int mpsse_get_vid(struct mpsse_context *mpsse);
-int mpsse_get_pid(struct mpsse_context *mpsse);
-char *mpsse_get_description(struct mpsse_context *mpsse);
-int mpsse_set_loopback(struct mpsse_context *mpsse, int enable);
-void mpsse_set_cs_idle(struct mpsse_context *mpsse, int idle);
-int mpsse_start(struct mpsse_context *mpsse);
-int mpsse_write(struct mpsse_context *mpsse, char *data, int size);
-int mpsse_mcu_write(struct mpsse_context *mpsse, char *data, int size, int address);
-int mpsse_stop(struct mpsse_context *mpsse);
-int mpsse_get_ack(struct mpsse_context *mpsse);
-void mpsse_set_ack(struct mpsse_context *mpsse, int ack);
-void mpsse_send_acks(struct mpsse_context *mpsse);
-void mpsse_send_nacks(struct mpsse_context *mpsse);
-int mpsse_pin_high(struct mpsse_context *mpsse, int pin);
-int mpsse_pin_low(struct mpsse_context *mpsse, int pin);
-int mpsse_read_pins(struct mpsse_context *mpsse);
-int mpsse_pin_state(struct mpsse_context *mpsse, int pin, int state);
-int mpsse_clock_until_high(struct mpsse_context *mpsse);
-int mpsse_clock_until_low(struct mpsse_context *mpsse);
-int mpsse_toggle_clock(struct mpsse_context *mpsse, int count);
-int mpsse_toggle_clock_x8(struct mpsse_context *mpsse, int count, int gpio);
-int mpsse_tristate(struct mpsse_context *mpsse);
-int mpsse_version(void);
+struct mpsse_context *MPSSE(enum modes mode, int freq, int endianess);
+struct mpsse_context *Open(int vid, int pid, enum modes mode, int freq, int endianess, int interface, const char *description, const char *serial);
+void Close(struct mpsse_context *mpsse);
+char *ErrorString(struct mpsse_context *mpsse);
+int SetMode(struct mpsse_context *mpsse, int endianess);
+int SetClock(struct mpsse_context *mpsse, uint32_t freq);
+int GetClock(struct mpsse_context *mpsse);
+int GetVid(struct mpsse_context *mpsse);
+int GetPid(struct mpsse_context *mpsse);
+char *GetDescription(struct mpsse_context *mpsse);
+int SetLoopback(struct mpsse_context *mpsse, int enable);
+void SetCSIdle(struct mpsse_context *mpsse, int idle);
+int Start(struct mpsse_context *mpsse);
+int Write(struct mpsse_context *mpsse, char *data, int size);
+int MCUWrite(struct mpsse_context *mpsse, char *data, int size, int address);
+int Stop(struct mpsse_context *mpsse);
+int GetAck(struct mpsse_context *mpsse);
+void SetAck(struct mpsse_context *mpsse, int ack);
+void SendAcks(struct mpsse_context *mpsse);
+void SendNacks(struct mpsse_context *mpsse);
+int PinHigh(struct mpsse_context *mpsse, int pin);
+int PinLow(struct mpsse_context *mpsse, int pin);
+int ReadPins(struct mpsse_context *mpsse);
+int PinState(struct mpsse_context *mpsse, int pin, int state);
+int ClockUntilHigh(struct mpsse_context *mpsse);
+int ClockUntilLow(struct mpsse_context *mpsse);
+int ToggleClock(struct mpsse_context *mpsse, int count);
+int ToggleClockX8(struct mpsse_context *mpsse, int count, int gpio);
+int Tristate(struct mpsse_context *mpsse);
+int Version(void);
 
 #ifdef SWIGPYTHON
-swig_string_data mpsse_read(struct mpsse_context *mpsse, int size);
-swig_string_data mpsse_mcu_read(struct mpsse_context *mpsse, int size, int address);
-swig_string_data mpsse_transfer(struct mpsse_context *mpsse, char *data, int size);
+typedef struct swig_string_data
+{
+        int size;
+        char *data;
+} swig_string_data;
+
+swig_string_data Read(struct mpsse_context *mpsse, int size);
+swig_string_data MCURead(struct mpsse_context *mpsse, int size, int address);
+swig_string_data Transfer(struct mpsse_context *mpsse, char *data, int size);
 #else
-char *mpsse_read(struct mpsse_context *mpsse, int size);
-char *mpsse_mcu_read(struct mpsse_context *mpsse, int size, int address);
-char *mpsse_transfer(struct mpsse_context *mpsse, char *data, int size);
+char *Read(struct mpsse_context *mpsse, int size);
+char *MCURead(struct mpsse_context *mpsse, int size, int address);
+char *Transfer(struct mpsse_context *mpsse, char *data, int size);
 #endif
 
 #endif
