@@ -6,7 +6,13 @@
  */
 
 #include <string.h>
+
+#if LIBFTDI == 1
+#include <libftdi/ftdi.h>
+#else
 #include <ftdi.h>
+#endif
+
 #include "mpsse.h"
 #include "support.h"
 

@@ -7,6 +7,7 @@ FRAMEWORK=@FRAMEWORK@
 BUILD=@BUILD@
 LDFLAGS=@LDFLAGS@
 CFLAGS=@CFLAGS@
+LIBFTDI=@LIBFTDI@
 prefix=@prefix@
 exec_prefix=@exec_prefix@
 LIBDIR=@libdir@
@@ -25,16 +26,16 @@ example-code:
 	make -C examples
 
 mpsse.o: support.o
-	$(CC) $(CFLAGS) $(LDFLAGS) -c mpsse.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -DLIBFTDI=$(LIBFTDI) -c mpsse.c
 
 support.o:
-	$(CC) $(CFLAGS) $(LDFLAGS) -c support.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -DLIBFTDI=$(LIBFTDI) -c support.c
 
 pyswig-build:
-	$(CC) $(CFLAGS) $(LDFLAGS) -DSWIGPYTHON -c support.c
-	$(CC) $(CFLAGS) $(LDFLAGS) -DSWIGPYTHON -c mpsse.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -DSWIGPYTHON -DLIBFTDI=$(LIBFTDI) -c support.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -DSWIGPYTHON -DLIBFTDI=$(LIBFTDI) -c mpsse.c
 	$(SWIG) -python $(TARGET).i
-	$(CC) $(CFLAGS) -c  $(TARGET)_wrap.c  $(INC)
+	$(CC) $(CFLAGS) -c  -DLIBFTDI=$(LIBFTDI) $(TARGET)_wrap.c  $(INC)
 	$(CC) $(CFLAGS) -shared $(FRAMEWORK) $(TARGET)_wrap.o mpsse.o support.o \
 		-o _pylib$(TARGET).so $(LDFLAGS) $(INC)
 

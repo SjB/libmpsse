@@ -15,10 +15,13 @@ AC_FUNC_MALLOC
 LDFLAGS="-lftdi $LDFLAGS"
 CFLAGS="-Wall -fPIC -fno-strict-aliasing $CFLAGS"
 
-AC_CHECK_FUNCS([malloc memset],[],AC_MSG_ERROR(["missing standard functions"]))
 AC_CHECK_LIB([ftdi],[ftdi_init],[],[echo "error: missing libftdi library" && exit 1],[])
-AC_CHECK_HEADERS([stdlib.h stdint.h string.h],[],[echo "error: missing standard header files" && exit 1])
-AC_CHECK_HEADERS([ftdi.h],[],[echo "error: missing libftdi header files" && exit 1])
+AC_CHECK_HEADERS([libftdi/ftdi.h], [LIBFTDI=1], [LIBFTDI=""])
+
+if ! test $LIBFTDI
+then
+	AC_CHECK_HEADERS([ftdi.h],[LIBFTDI=0],[echo "error: missing libftdi header files" && exit 1])
+fi
 
 if test $BUILD
 then
@@ -74,5 +77,6 @@ AC_SUBST(PYDEV, $PYDEV)
 AC_SUBST(PYLIB, $PYLIB)
 AC_SUBST(SONAME, $SONAME)
 AC_SUBST(FRAMEWORK, $FRAMEWORK)
+AC_SUBST(LIBFTDI, $LIBFTDI)
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
