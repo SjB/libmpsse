@@ -224,8 +224,8 @@ void Close(struct mpsse_context *mpsse)
 int SetMode(struct mpsse_context *mpsse, int endianess)
 {
 	int retval = MPSSE_OK, i = 0, setup_commands_size = 0;
-	char buf[CMD_SIZE] = { 0 };
-	char setup_commands[CMD_SIZE*MAX_SETUP_COMMANDS] = { 0 };
+	unsigned char buf[CMD_SIZE] = { 0 };
+	unsigned char setup_commands[CMD_SIZE*MAX_SETUP_COMMANDS] = { 0 };
 
 	/* Do not call is_valid_context() here, as the FTDI chip may not be completely configured when SetMode is called */
 	if(mpsse)
@@ -335,7 +335,7 @@ int SetMode(struct mpsse_context *mpsse, int endianess)
 		/* Send any setup commands to the chip */
 		if(retval == MPSSE_OK && setup_commands_size > 0)
 		{
-			retval = raw_write(mpsse, (unsigned char *) &setup_commands, setup_commands_size);
+			retval = raw_write(mpsse, setup_commands, setup_commands_size);
 		}
 	
 		if(retval == MPSSE_OK)
@@ -351,7 +351,7 @@ int SetMode(struct mpsse_context *mpsse, int endianess)
 	                buf[i++] = mpsse->gpioh;
 	                buf[i++] = mpsse->trish;
 	
-			retval = raw_write(mpsse, (unsigned char *) &buf, i);
+			retval = raw_write(mpsse, buf, i);
 		}
 	}
 	else
@@ -376,7 +376,7 @@ int SetClock(struct mpsse_context *mpsse, uint32_t freq)
 	int retval = MPSSE_FAIL;
 	uint32_t system_clock = 0;
 	uint16_t divisor = 0;
-	char buf[CMD_SIZE] = { 0 };
+	unsigned char buf[CMD_SIZE] = { 0 };
 
 	/* Do not call is_valid_context() here, as the FTDI chip may not be completely configured when SetClock is called */
 	if(mpsse)
@@ -392,7 +392,7 @@ int SetClock(struct mpsse_context *mpsse, uint32_t freq)
 			system_clock = TWELVE_MHZ;
 		}
 		
-		if(raw_write(mpsse, (unsigned char *) &buf, 1) == MPSSE_OK)
+		if(raw_write(mpsse, buf, 1) == MPSSE_OK)
 		{
 			if(freq <= 0)
 			{
@@ -407,7 +407,7 @@ int SetClock(struct mpsse_context *mpsse, uint32_t freq)
 			buf[1] = (divisor & 0xFF);
 			buf[2] = ((divisor >> 8) & 0xFF);
 	
-			if(raw_write(mpsse, (unsigned char *) &buf, 3) == MPSSE_OK)
+			if(raw_write(mpsse, buf, 3) == MPSSE_OK)
 			{
 				mpsse->clock = div2freq(system_clock, divisor);
 				retval = MPSSE_OK;
@@ -522,7 +522,7 @@ char *GetDescription(struct mpsse_context *mpsse)
  */
 int SetLoopback(struct mpsse_context *mpsse, int enable)
 {
-	char buf[1] = { 0 };
+	unsigned char buf[1] = { 0 };
 	int retval = MPSSE_FAIL;
 
 	if(is_valid_context(mpsse))
@@ -536,7 +536,7 @@ int SetLoopback(struct mpsse_context *mpsse, int enable)
 			buf[0] = LOOPBACK_END;
 		}
 
-		retval = raw_write(mpsse, (unsigned char *) &buf, 1);
+		retval = raw_write(mpsse, buf, 1);
 	}
 
 	return retval;
@@ -716,8 +716,8 @@ char *Read(struct mpsse_context *mpsse, int size)
 #endif
 {
 	unsigned char *data = NULL, *buf = NULL;
-	char sbuf[SPI_RW_SIZE] = { 0 };
-	int n = 0, rxsize = 0, data_size = 0;
+	unsigned char sbuf[SPI_RW_SIZE] = { 0 };
+	int n = 0, rxsize = 0, data_size = 0, retval = 0;
 
 	if(is_valid_context(mpsse))
 	{
@@ -736,10 +736,13 @@ char *Read(struct mpsse_context *mpsse, int size)
 						rxsize = mpsse->xsize;
 					}
 	
-					data = build_block_buffer(mpsse, mpsse->rx, (unsigned char *) &sbuf, rxsize, &data_size);
+					data = build_block_buffer(mpsse, mpsse->rx, sbuf, rxsize, &data_size);
 					if(data)
 					{
-						if(raw_write(mpsse, data, data_size) == MPSSE_OK)
+						retval = raw_write(mpsse, data, data_size);
+						free(data);
+						
+						if(retval == MPSSE_OK)
 						{
 							n += raw_read(mpsse, buf+n, rxsize);
 						}
@@ -747,8 +750,6 @@ char *Read(struct mpsse_context *mpsse, int size)
 						{
 							break;
 						}
-						
-						free(data);
 					}
 					else
 					{
@@ -786,7 +787,7 @@ char *Transfer(struct mpsse_context *mpsse, char *data, int size)
 #endif
 {
 	unsigned char *txdata = NULL, *buf = NULL;
-	int n = 0, data_size = 0, rxsize = 0;
+	int n = 0, data_size = 0, rxsize = 0, retval = 0;
 
 	if(is_valid_context(mpsse))
 	{
@@ -810,7 +811,10 @@ char *Transfer(struct mpsse_context *mpsse, char *data, int size)
 					txdata = build_block_buffer(mpsse, mpsse->txrx, (unsigned char *) (data + n), rxsize, &data_size);
 					if(txdata)
 					{
-						if(raw_write(mpsse, txdata, data_size) == MPSSE_OK)
+						retval = raw_write(mpsse, txdata, data_size);
+						free(txdata);
+
+						if(retval == MPSSE_OK)
 						{
 							n += raw_read(mpsse, (buf + n), rxsize);
 						}
@@ -818,8 +822,6 @@ char *Transfer(struct mpsse_context *mpsse, char *data, int size)
 						{
 							break;
 						}
-
-						free(txdata);
 					}
 					else
 					{
@@ -1201,7 +1203,7 @@ int ClockUntilHigh(struct mpsse_context *mpsse)
 {
 	unsigned char cmd[] = { PULSE_CLOCK_IO_HIGH };
 
-	return raw_write(mpsse, (unsigned char *) &cmd, sizeof(cmd));
+	return raw_write(mpsse, cmd, sizeof(cmd));
 }
 
 /*
@@ -1215,7 +1217,7 @@ int ClockUntilLow(struct mpsse_context *mpsse)
 {
 	unsigned char cmd[] = { PULSE_CLOCK_IO_LOW };
 	
-	return raw_write(mpsse, (unsigned char *) &cmd, sizeof(cmd));
+	return raw_write(mpsse, cmd, sizeof(cmd));
 }
 
 /*
@@ -1235,7 +1237,7 @@ int ToggleClock(struct mpsse_context *mpsse, int count)
 	cmd[0] = CLOCK_N_CYCLES;
 	cmd[1] = (uint8_t) (count & 7);
 
-	return raw_write(mpsse, (unsigned char *) &cmd, sizeof(cmd));
+	return raw_write(mpsse, cmd, sizeof(cmd));
 }
 
 /*
@@ -1272,7 +1274,7 @@ int ToggleClockX8(struct mpsse_context *mpsse, int count, int gpio)
 	cmd[1] = (uint8_t) (count & 0xFF);
 	cmd[2] = (uint8_t) ((count >> 8) & 0xFF); 
 
-	return MPSSE_FAIL;
+	return raw_write(mpsse, cmd, sizeof(cmd));
 }
 
 /*
@@ -1291,7 +1293,7 @@ int Tristate(struct mpsse_context *mpsse)
 	cmd[1] = 0xFF;
 	cmd[2] = 0xFF;
 
-	return raw_write(mpsse, (unsigned char *) &cmd, sizeof(cmd));
+	return raw_write(mpsse, cmd, sizeof(cmd));
 }
 
 /* 
