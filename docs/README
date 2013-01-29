@@ -76,5 +76,7 @@ KNOWN LIMITATIONS
 	there are some limitations:
 
 		o All protocols support master mode only.
+		o SPI modes 1 and 3 are only partially supported; see the README.SPI for more information.
 		o In I2C, the SCL and SDA pins are open drain, but the MPSSE implementation explicitly drives these lines high.
 		  Although this is usually fine, it means that some I2C features, such as clock stretching, are not supported.
+
