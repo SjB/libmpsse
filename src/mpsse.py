@@ -44,6 +44,7 @@ FIVE_MHZ = _mpsse.FIVE_MHZ
 SIX_MHZ = _mpsse.SIX_MHZ
 TEN_MHZ = _mpsse.TEN_MHZ
 TWELVE_MHZ = _mpsse.TWELVE_MHZ
+FIFTEEN_MHZ = _mpsse.FIFTEEN_MHZ
 THIRTY_MHZ = _mpsse.THIRTY_MHZ
 
 class MPSSE:

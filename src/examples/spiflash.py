@@ -14,11 +14,11 @@ class SPIFlash:
 	BLOCK_SIZE = 256	# SPI block size, writes must be done in multiples of this size
 	PP_PERIOD = .025	# Page program time, in seconds
 
-	def __init__(self, speed=SIX_MHZ):
+	def __init__(self, speed=FIFTEEN_MHZ):
 
 		# Sanity check on the specified clock speed
 		if not speed or speed is None:
-			speed = SIX_MHZ
+			speed = FIFTEEN_MHZ
 	
 		self.flash = MPSSE(SPI0, speed, MSB)
 		self.chip = self.flash.GetDescription()
@@ -91,7 +91,8 @@ if __name__ == "__main__":
 		print "\t-w, --write=<file>     Write data from file to the chip"
 		print "\t-s, --size=<int>       Set the size of data to read/write"
 		print "\t-a, --address=<int>    Set the starting address for the read/write operation [0]"
-		print "\t-f, --frequency=<int>  Set the SPI clock frequency, in hertz [6,000,000]"
+		print "\t-f, --frequency=<int>  Set the SPI clock frequency, in hertz [15,000,000]"
+		print "\t-v, --verify           Verify data that has been read/written"
 		print "\t-e, --erase            Erase the entire chip"
 		print "\t-h, --help             Show help"
 		print ""
@@ -99,14 +100,16 @@ if __name__ == "__main__":
 		sys.exit(1)
 
 	def main():
-		file = None
+		fname = None
 		freq = None
 		size = None
 		action = None
+		verify = False
 		address = 0
+		data = ""
 
 		try:
-			opts, args = GetOpt(sys.argv[1:], "f:s:a:r:w:eh", ["frequency=", "size=", "address=", "read=", "write=", "erase", "help"])
+			opts, args = GetOpt(sys.argv[1:], "f:s:a:r:w:evh", ["frequency=", "size=", "address=", "read=", "write=", "erase", "verify", "help"])
 		except GetoptError, e:
 			print e
 			usage()
@@ -120,12 +123,14 @@ if __name__ == "__main__":
 				address = int(arg)
 			elif opt in ('-r', '--read'):
 				action = "read"
-				file = arg
+				fname = arg
 			elif opt in ('w', '--write'):
 				action = "write"
-				file = arg
+				fname = arg
 			elif opt in ('-e', '--erase'):
 				action = "erase"
+			elif opt in ('-v', '--verify'):
+				verify = True
 			elif opt in ('-h', '--help'):
 				usage()
 
@@ -137,32 +142,46 @@ if __name__ == "__main__":
 		print "%s initialized at %d hertz" % (spi.chip, spi.speed)
 
 		if action == "read":
-			if file is None or size is None:
+			if fname is None or size is None:
 				print "Please specify an output file and read size!"
 				usage()
 			
-			print "Reading %d bytes starting at address 0x%X..." % (size, address)
-			open(file, 'wb').write(spi.Read(size, address))
-			print "Data saved to %s" % file
+			sys.stdout.write("Reading %d bytes starting at address 0x%X..." % (size, address))
+			sys.stdout.flush()
+			data = spi.Read(size, address)
+			open(fname, 'wb').write(data)
+			print "saved to %s." % fname
 		
 		elif action == "write":
-			if file is None:
+			if fname is None:
 				print "Please specify an input file!"
 				usage()
 
-			data = open(file, 'rb').read()
+			data = open(fname, 'rb').read()
 			if size is None:
 				size = len(data)
 
-			print "Writing %d bytes from %s to the chip starting at address 0x%X..." % (size, file, address)
+			sys.stdout.write("Writing %d bytes from %s to the chip starting at address 0x%X..." % (size, fname, address))
+			sys.stdout.flush()
 			spi.Write(data[0:size], address)
-			print "Done."
+			print "done."
 
 		elif action == "erase":
 			
-			print "Erasing entire chip..."
+			sys.stdout.write("Erasing entire chip...")
+			sys.stdout.flush()
 			spi.Erase()
-			print "Done."
+			print "done."
+
+		if verify and data:
+			sys.stdout.write("Verifying...")
+			sys.stdout.flush()
+
+			vdata = spi.Read(size, address)
+			if vdata == data:
+				print "success."
+			else:
+				print "failure."
 
 		spi.Close()
 
