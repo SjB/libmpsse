@@ -97,6 +97,13 @@ class MPSSE:
 			raise Exception, self.ErrorString()
 		return MPSSE_OK
 
+	def FlushAfterRead(self, tf):
+		"""
+		Enables / disables flushing of the recieve buffer after each read operation.
+		Set tf to 1 to enable (the default), or 0 to disable.
+		"""
+		return _mpsse.FlushAfterRead(self.context, tf)
+
 	def SetClock(self, frequency):
 		"""
 		Sets the appropriate divisor for the desired clock frequency. Frequency must be specified in hertz.

@@ -121,6 +121,13 @@ struct mpsse_context *OpenIndex(int vid, int pid, enum modes mode, int freq, int
 	{
 		memset(mpsse, 0, sizeof(struct mpsse_context));
 
+		/* 
+		 * Default to flushing the read buffer on the FTDI chip after each read operation, as this was necessary at some point.
+		 * Needs more testing to determine if this is still necessary, or if the flushing requirement was merely a symptom of some
+		 * other bug that has since been fixed; initial testing suggests that this is not necessary, at least for SPI.
+		 */
+		FlushAfterRead(mpsse, 1);
+
 		/* ftdilib initialization */
 		if(ftdi_init(&mpsse->ftdi) == 0)
 		{
@@ -331,6 +338,10 @@ int SetMode(struct mpsse_context *mpsse, int endianess)
 			case MCU16:
 				mpsse->rx = CPU_READ_LONG;
 				mpsse->tx = CPU_WRITE_LONG;
+				break;
+			case JTAG:
+				mpsse->rx |= MPSSE_READ_NEG;
+				mpsse->txrx |= MPSSE_READ_NEG;
 				break;
 			case GPIO:
 				break;
@@ -576,6 +587,20 @@ void SetCSIdle(struct mpsse_context *mpsse, int idle)
 		}
 	}
 
+	return;
+}
+
+/* 
+ * Enables or disables flushing of the FTDI chip's RX buffers after each read operation.
+ *
+ * @mpsse - MPSSE context pointer.
+ * @tf    - Set to 1 to enable flushing (the default), or 0 to disable flushing.
+ *
+ * Returns void.
+ */
+void FlushAfterRead(struct mpsse_context *mpsse, int tf)
+{
+	mpsse->flush_after_read = tf;
 	return;
 }
 
@@ -1196,6 +1221,30 @@ int PinState(struct mpsse_context *mpsse, int pin, int state)
 	}
 
 	return ((state & (1 << pin)) >> pin);
+}
+
+/*
+ * Enable or disable adaptive clocking (primarily used for JTAG).
+ * 
+ * @mpsse  - MPSSE context pointer.
+ * @enable - Set to 1 to enable adaptive clocking, 0 to disable adaptive clocking.
+ *
+ * Returns MPSSE_OK on sucess, MPSSE_FAIL on failure.
+ */
+int SetAdaptiveClocking(struct mpsse_context *mpsse, int enable)
+{
+	unsigned char cmd[1] = { 0 };
+
+	if(enable)
+	{
+		cmd[0] = ENABLE_ADAPTIVE_CLOCK;
+	}
+	else
+	{
+		cmd[0] = DISABLE_ADAPTIVE_CLOCK;
+	}
+
+	return raw_write(mpsse, cmd, sizeof(cmd));
 }
 
 /*

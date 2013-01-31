@@ -39,7 +39,7 @@ class SPIFlash:
         	return addr_str[::-1]
 
 	def Read(self, count, address=0):
-		data = None
+		data = ''
 
 		self.flash.Start()
 		self.flash.Write(self.RCMD + self._addr2str(address))
@@ -168,6 +168,7 @@ if __name__ == "__main__":
 
 		elif action == "erase":
 			
+			data = "\xFF" * size
 			sys.stdout.write("Erasing entire chip...")
 			sys.stdout.flush()
 			spi.Erase()
@@ -179,7 +180,12 @@ if __name__ == "__main__":
 
 			vdata = spi.Read(size, address)
 			if vdata == data:
-				print "success."
+				if data == ("\xFF" * size):
+					print "chip is blank."
+				elif data == ("\x00" * size):
+					print "read all 0x00's."
+				else:
+					print "success."
 			else:
 				print "failure."
 

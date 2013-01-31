@@ -76,7 +76,8 @@ enum modes
 	GPIO    = 6,
 	BITBANG = 7,
 	MCU8	= 8,
-	MCU16	= 9
+	MCU16	= 9,
+	JTAG	= 10
 };
 
 enum pins
@@ -119,8 +120,11 @@ enum i2c_ack
 enum mpsse_commands
 {
 	INVALID_COMMAND		= 0xAB,
+	CLOCK_TMS_NO_READ_HIGH	= 0x4A,
+	CLOCK_TMS_NO_READ_LOW	= 0x4B,
 	ENABLE_3_PHASE_CLOCK	= 0x8C,
 	DISABLE_3_PHASE_CLOCK	= 0x8D,
+	ENABLE_ADAPTIVE_CLOCK	= 0x96,
 	DISABLE_ADAPTIVE_CLOCK	= 0x97,
 	TCK_X5			= 0x8A,
 	TCK_D5			= 0x8B,
@@ -157,6 +161,7 @@ struct mpsse_context
 	struct ftdi_context ftdi;
 	enum modes mode;
 	enum low_bits_status status;
+	int flush_after_read;
 	int vid;
 	int pid;
 	int clock;
@@ -197,12 +202,14 @@ int GetAck(struct mpsse_context *mpsse);
 void SetAck(struct mpsse_context *mpsse, int ack);
 void SendAcks(struct mpsse_context *mpsse);
 void SendNacks(struct mpsse_context *mpsse);
+void FlushAfterRead(struct mpsse_context *mpsse, int tf);
 int PinHigh(struct mpsse_context *mpsse, int pin);
 int PinLow(struct mpsse_context *mpsse, int pin);
 int SetDirection(struct mpsse_context *mpsse, uint8_t direction);
 int WritePins(struct mpsse_context *mpsse, uint8_t data);
 int ReadPins(struct mpsse_context *mpsse);
 int PinState(struct mpsse_context *mpsse, int pin, int state);
+int SetAdaptiveClocking(struct mpsse_context *mpsse, int enable);
 int ClockUntilHigh(struct mpsse_context *mpsse);
 int ClockUntilLow(struct mpsse_context *mpsse);
 int ToggleClock(struct mpsse_context *mpsse, int count);

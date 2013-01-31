@@ -46,10 +46,15 @@ int raw_read(struct mpsse_context *mpsse, unsigned char *buf, int size)
 			n += r;
 		}
 
-		/* Make sure the buffers are cleared after a read or subsequent reads may fail */
-		ftdi_usb_purge_rx_buffer(&mpsse->ftdi);
-		ftdi_usb_purge_tx_buffer(&mpsse->ftdi);
-		ftdi_usb_purge_buffers(&mpsse->ftdi);
+		if(mpsse->flush_after_read)
+		{
+			/* 
+			 * Make sure the buffers are cleared after a read or subsequent reads may fail.
+			 * 
+			 * Is this needed anymore? It slows down repetitive read operations by ~8%.
+			 */
+			ftdi_usb_purge_rx_buffer(&mpsse->ftdi);
+		}
 	}
 
 	return n;
