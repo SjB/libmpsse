@@ -17,7 +17,7 @@
 
 #define CHUNK_SIZE		65535
 #define SPI_RW_SIZE		(63 * 1024) 
-#define SPI_TRANSFER_SIZE	1024
+#define SPI_TRANSFER_SIZE	512
 #define I2C_TRANSFER_SIZE	64
 
 #define LATENCY_MS		2

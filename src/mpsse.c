@@ -165,7 +165,14 @@ struct mpsse_context *OpenIndex(int vid, int pid, enum modes mode, int freq, int
 					
 					if(mpsse->mode != BITBANG)
 					{
-						ftdi_set_bitmode(&mpsse->ftdi, 0, BITMODE_MPSSE);
+						if(mpsse->mode == MCU8 || mpsse->mode == MCU16)
+						{
+							ftdi_set_bitmode(&mpsse->ftdi, 0, BITMODE_MCU);
+						}
+						else
+						{
+							ftdi_set_bitmode(&mpsse->ftdi, 0, BITMODE_MPSSE);
+						}
 
 						if(SetClock(mpsse, freq) == MPSSE_OK)
 						{
@@ -830,15 +837,15 @@ char *Transfer(struct mpsse_context *mpsse, char *data, int size)
 			{
 				memset(buf, 0, size);
 
-				/* When sending and recieving, FTDI chips don't seem to like large data blocks. Limit the size of each block to SPI_TRANSFER_SIZE */
-				rxsize = size - n;
-				if(rxsize > SPI_TRANSFER_SIZE)
-				{
-					rxsize = SPI_TRANSFER_SIZE;
-				}
-
 				while(n < size)
 				{
+					/* When sending and recieving, FTDI chips don't seem to like large data blocks. Limit the size of each block to SPI_TRANSFER_SIZE */
+					rxsize = size - n;
+					if(rxsize > SPI_TRANSFER_SIZE)
+					{
+						rxsize = SPI_TRANSFER_SIZE;
+					}
+
 					txdata = build_block_buffer(mpsse, mpsse->txrx, (unsigned char *) (data + n), rxsize, &data_size);
 					if(txdata)
 					{
@@ -1000,12 +1007,14 @@ char *MCURead(struct mpsse_context *mpsse, int size, int address)
 	int i = 0, j = 0, txsize = 0, rxsize = 0;
 	unsigned char *txbuf = NULL, *rxbuf = NULL;
 
+	rxsize = size;
 	rxbuf = malloc(rxsize);
+
 	if(rxbuf)
 	{
 		memset(rxbuf, 0, rxsize);
 	
-		txsize = (size * CMD_SIZE) + 1;
+		txsize = (size * CMD_SIZE);
 		txbuf = malloc(txsize);
 		if(txbuf)
 		{
@@ -1020,8 +1029,6 @@ char *MCURead(struct mpsse_context *mpsse, int size, int address)
 				}
 				txbuf[j++] = (uint8_t) (i & 0xFF);
 			}
-	
-			txbuf[j++] = CPU_SEND_IMMEDIATE;
 	
 			if(raw_write(mpsse, txbuf, j) == MPSSE_OK)
 			{

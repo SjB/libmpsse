@@ -16,6 +16,9 @@ SPI3 = _mpsse.SPI3
 I2C = _mpsse.I2C
 GPIO = _mpsse.GPIO
 BITBANG = _mpsse.BITBANG
+MCU8 = _mpsse.MCU8
+MCU16 = _mpsse.MCU16
+JTAG = _mpsse.JTAG
 
 GPIOL0 = _mpsse.GPIOL0
 GPIOL1 = _mpsse.GPIOL1
