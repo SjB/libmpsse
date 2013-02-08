@@ -165,14 +165,7 @@ struct mpsse_context *OpenIndex(int vid, int pid, enum modes mode, int freq, int
 					
 					if(mpsse->mode != BITBANG)
 					{
-						if(mpsse->mode == MCU8 || mpsse->mode == MCU16)
-						{
-							ftdi_set_bitmode(&mpsse->ftdi, 0, BITMODE_MCU);
-						}
-						else
-						{
-							ftdi_set_bitmode(&mpsse->ftdi, 0, BITMODE_MPSSE);
-						}
+						ftdi_set_bitmode(&mpsse->ftdi, 0, BITMODE_MPSSE);
 
 						if(SetClock(mpsse, freq) == MPSSE_OK)
 						{
@@ -337,18 +330,6 @@ int SetMode(struct mpsse_context *mpsse, int endianess)
 				mpsse->pstop &= ~DO & ~DI;
 				/* Enable three phase clock to ensure that I2C data is available on both the rising and falling clock edges */
 				setup_commands[setup_commands_size++] = ENABLE_3_PHASE_CLOCK;
-				break;
-			case MCU8:
-				mpsse->rx = CPU_READ_SHORT;
-				mpsse->tx = CPU_WRITE_LONG;
-				break;
-			case MCU16:
-				mpsse->rx = CPU_READ_LONG;
-				mpsse->tx = CPU_WRITE_LONG;
-				break;
-			case JTAG:
-				mpsse->rx |= MPSSE_READ_NEG;
-				mpsse->txrx |= MPSSE_READ_NEG;
 				break;
 			case GPIO:
 				break;
@@ -988,109 +969,6 @@ int Stop(struct mpsse_context *mpsse)
 	return retval;
 }
 
-/*
- * Reads the specified number of bytes starting at the given address in MCU emulation mode.
- *
- * @mpsse   - MPSSE context pointer.
- * @size    - Number of bytes to read.
- * @address - Read start address.
- *
- * Returns a pointer to the read data on success.
- * Returns NULL on failure.
- */
-#ifdef SWIGPYTHON
-swig_string_data MCURead(struct mpsse_context *mpsse, int size, int address)
-#else
-char *MCURead(struct mpsse_context *mpsse, int size, int address)
-#endif
-{
-	int i = 0, j = 0, txsize = 0, rxsize = 0;
-	unsigned char *txbuf = NULL, *rxbuf = NULL;
-
-	rxsize = size;
-	rxbuf = malloc(rxsize);
-
-	if(rxbuf)
-	{
-		memset(rxbuf, 0, rxsize);
-	
-		txsize = (size * CMD_SIZE);
-		txbuf = malloc(txsize);
-		if(txbuf)
-		{
-			memset(txbuf, 0, txsize);
-		
-			for(i=address; i<(address+size); i++)
-			{
-				txbuf[j++] = mpsse->rx;
-				if(mpsse->rx == CPU_READ_LONG)
-				{
-					txbuf[j++] = (uint8_t) ((i >> 8) & 0xFF);
-				}
-				txbuf[j++] = (uint8_t) (i & 0xFF);
-			}
-	
-			if(raw_write(mpsse, txbuf, j) == MPSSE_OK)
-			{
-				if(raw_read(mpsse, rxbuf, rxsize) != rxsize)
-				{
-					free(rxbuf);
-					rxbuf = NULL;
-				}
-			}
-	
-			free(txbuf);
-		}
-	}
-
-#ifdef SWIGPYTHON
-        swig_string_data sdata = { 0 };
-        sdata.size = rxsize;
-        sdata.data = (char *) rxbuf;
-        return sdata;
-#else
-        return (char *) rxbuf;
-#endif
-}
-
-/*
- * Writes the given data using MCU emulation mode.
- *
- * @mpsse   - MPSSE context pointer.
- * @data    - Pointer to a buffer of data to write.
- * @size    - Size of data buffer.
- * @address - Start address for writing.
- *
- * Returns MPSSE_OK on success, MPSSE_FAIL on failure.
- */
-int MCUWrite(struct mpsse_context *mpsse, char *data, int size, int address)
-{
-	unsigned char *buf = NULL;
-	int buf_size = 0, i = 0, j = 0, retval = MPSSE_FAIL;
-
-	buf_size = (size * (CMD_SIZE + 1));
-	buf = malloc(buf_size);
-	if(buf)
-	{
-		memset(buf, 0, buf_size);
-
-		for(i=0; i<size; i++)
-		{
-			buf[j++] = mpsse->tx;
-			if(mpsse->tx == CPU_WRITE_LONG)
-			{
-				buf[j++] = (uint8_t) (((address + i) >> 8) & 0xFF);
-			}
-			buf[j++] = (uint8_t) ((address + i) & 0xFF);
-			buf[j++] = data[i];
-		}
-
-		retval = raw_write(mpsse, buf, j);
-	}
-
-	return retval;
-}
-
 /* 
  * Sets the specified pin high. 
  *
@@ -1228,115 +1106,6 @@ int PinState(struct mpsse_context *mpsse, int pin, int state)
 	}
 
 	return ((state & (1 << pin)) >> pin);
-}
-
-/*
- * Enable or disable adaptive clocking (primarily used for JTAG).
- * 
- * @mpsse  - MPSSE context pointer.
- * @enable - Set to 1 to enable adaptive clocking, 0 to disable adaptive clocking.
- *
- * Returns MPSSE_OK on sucess, MPSSE_FAIL on failure.
- */
-int SetAdaptiveClocking(struct mpsse_context *mpsse, int enable)
-{
-	unsigned char cmd[1] = { 0 };
-
-	if(enable)
-	{
-		cmd[0] = ENABLE_ADAPTIVE_CLOCK;
-	}
-	else
-	{
-		cmd[0] = DISABLE_ADAPTIVE_CLOCK;
-	}
-
-	return raw_write(mpsse, cmd, sizeof(cmd));
-}
-
-/*
- * Toggles the clock pin until GPIOL1 is pulled high.
- *
- * @mpsse - MPSSE context pointer.
- *
- * Returns MPSSE_OK on success, MPSSE_FAIL on failure.
- */
-int ClockUntilHigh(struct mpsse_context *mpsse)
-{
-	unsigned char cmd[] = { PULSE_CLOCK_IO_HIGH };
-
-	return raw_write(mpsse, cmd, sizeof(cmd));
-}
-
-/*
- * Toggles the clock pin until GPIOL1 is pulled low.
- *
- * @mpsse - MPSSE context pointer.
- *
- * Returns MPSSE_OK on success, MPSSE_FAIL on failure.
- */
-int ClockUntilLow(struct mpsse_context *mpsse)
-{
-	unsigned char cmd[] = { PULSE_CLOCK_IO_LOW };
-	
-	return raw_write(mpsse, cmd, sizeof(cmd));
-}
-
-/*
- * Toggles the clock 1-8 cycles without transferring any data.
- * 
- * @mpsse - MPSSE context pointer.
- * @count - Number of clock cycles to send (1-8).
- *
- * Returns MPSSE_OK on success, MPSSE_FAIL on failure.
- */
-int ToggleClock(struct mpsse_context *mpsse, int count)
-{
-	unsigned char cmd[CMD_SIZE-1] = { 0 };
-
-	count--;
-
-	cmd[0] = CLOCK_N_CYCLES;
-	cmd[1] = (uint8_t) (count & 7);
-
-	return raw_write(mpsse, cmd, sizeof(cmd));
-}
-
-/*
- * Toggles the clock 8 * count cycles without transferring any data.
- *
- * @mpsse - MPSSE context pointer.
- * @count - Number of clock cycles to send (1-65536); actual number of clock
- *          cycles sent will be eight times this value.
- * @gpio  - If set to 1, the clock cycle loop will be interrupted if GPIOL1 is pulled high.
- *          If set to 0, the clock cycle loop will be interrupted if GPIOL1 is pulled low.
- *          If set to -1, the state of GPIOL1 will be ignored.
- *
- * Returns MPSSE_OK on success, MPSSE_FAIL on failure.
- */
-int ToggleClockX8(struct mpsse_context *mpsse, int count, int gpio)
-{
-	unsigned char cmd[CMD_SIZE] = { 0 };
-
-	count--;
-
-	switch(gpio)
-	{
-		case 0:
-			cmd[0] = CLOCK_N8_CYCLES_IO_LOW;
-			break;
-		case 1:
-			cmd[0] = CLOCK_N8_CYCLES_IO_HIGH;
-			break;
-		default:
-			cmd[0] = CLOCK_N8_CYCLES;
-			break;
-	}
-
-	cmd[1] = (uint8_t) (count & 0xFF);
-	cmd[2] = (uint8_t) ((count >> 8) & 0xFF); 
-
-	return raw_write(mpsse, cmd, sizeof(cmd));
 }
 
 /*

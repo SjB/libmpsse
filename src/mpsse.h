@@ -75,9 +75,6 @@ enum modes
 	I2C     = 5,
 	GPIO    = 6,
 	BITBANG = 7,
-	MCU8	= 8,
-	MCU16	= 9,
-	JTAG	= 10
 };
 
 enum pins
@@ -120,12 +117,10 @@ enum i2c_ack
 enum mpsse_commands
 {
 	INVALID_COMMAND		= 0xAB,
-	CLOCK_TMS_NO_READ_HIGH	= 0x4A,
-	CLOCK_TMS_NO_READ_LOW	= 0x4B,
+	ENABLE_ADAPTIVE_CLOCK   = 0x96,
+	DISABLE_ADAPTIVE_CLOCK  = 0x97,
 	ENABLE_3_PHASE_CLOCK	= 0x8C,
 	DISABLE_3_PHASE_CLOCK	= 0x8D,
-	ENABLE_ADAPTIVE_CLOCK	= 0x96,
-	DISABLE_ADAPTIVE_CLOCK	= 0x97,
 	TCK_X5			= 0x8A,
 	TCK_D5			= 0x8B,
 	CLOCK_N_CYCLES		= 0x8E,
@@ -135,11 +130,6 @@ enum mpsse_commands
 	CLOCK_N8_CYCLES_IO_HIGH	= 0x9C,
 	CLOCK_N8_CYCLES_IO_LOW	= 0x9D,
 	TRISTATE_IO		= 0x9E,
-	CPU_SEND_IMMEDIATE	= 0x87,
-	CPU_READ_SHORT		= 0x90,
-	CPU_READ_LONG		= 0x91,
-	CPU_WRITE_SHORT		= 0x92,
-	CPU_WRITE_LONG		= 0x93
 };
 
 enum low_bits_status
@@ -196,7 +186,6 @@ int SetLoopback(struct mpsse_context *mpsse, int enable);
 void SetCSIdle(struct mpsse_context *mpsse, int idle);
 int Start(struct mpsse_context *mpsse);
 int Write(struct mpsse_context *mpsse, char *data, int size);
-int MCUWrite(struct mpsse_context *mpsse, char *data, int size, int address);
 int Stop(struct mpsse_context *mpsse);
 int GetAck(struct mpsse_context *mpsse);
 void SetAck(struct mpsse_context *mpsse, int ack);
@@ -209,11 +198,6 @@ int SetDirection(struct mpsse_context *mpsse, uint8_t direction);
 int WritePins(struct mpsse_context *mpsse, uint8_t data);
 int ReadPins(struct mpsse_context *mpsse);
 int PinState(struct mpsse_context *mpsse, int pin, int state);
-int SetAdaptiveClocking(struct mpsse_context *mpsse, int enable);
-int ClockUntilHigh(struct mpsse_context *mpsse);
-int ClockUntilLow(struct mpsse_context *mpsse);
-int ToggleClock(struct mpsse_context *mpsse, int count);
-int ToggleClockX8(struct mpsse_context *mpsse, int count, int gpio);
 int Tristate(struct mpsse_context *mpsse);
 int Version(void);
 
@@ -225,12 +209,11 @@ typedef struct swig_string_data
 } swig_string_data;
 
 swig_string_data Read(struct mpsse_context *mpsse, int size);
-swig_string_data MCURead(struct mpsse_context *mpsse, int size, int address);
 swig_string_data Transfer(struct mpsse_context *mpsse, char *data, int size);
 #else
 char *Read(struct mpsse_context *mpsse, int size);
-char *MCURead(struct mpsse_context *mpsse, int size, int address);
 char *Transfer(struct mpsse_context *mpsse, char *data, int size);
 #endif
+
 
 #endif
