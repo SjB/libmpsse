@@ -12,15 +12,17 @@ AC_LANG(C)
 AC_TYPE_SIZE_T
 AC_FUNC_MALLOC
 
-LDFLAGS="-lftdi $LDFLAGS"
 CFLAGS="-Wall -fPIC -fno-strict-aliasing $CFLAGS"
 
-AC_CHECK_LIB([ftdi],[ftdi_init],[],[echo "error: missing libftdi library" && exit 1],[])
-AC_CHECK_HEADERS([libftdi/ftdi.h], [LIBFTDI=1], [LIBFTDI=""])
+AC_CHECK_HEADERS([libftdi1/ftdi.h], [LIBFTDI1=1], [LIBFTDI1=""])
 
-if ! test $LIBFTDI
+if ! test $LIBFTDI1
 then
-	AC_CHECK_HEADERS([ftdi.h],[LIBFTDI=0],[echo "error: missing libftdi header files" && exit 1])
+	AC_CHECK_HEADERS([ftdi.h],[LIBFTDI1=0],[echo "error: missing libftdi header files" && exit 1])
+	AC_CHECK_LIB([ftdi],[ftdi_init],[],[echo "error: missing libftdi library" && exit 1],[])
+	LDFLAGS="-lftdi $LDFLAGS"
+else
+	LDFLAGS="-lftdi1 $LDFLAGS"
 fi
 
 if test $BUILD
@@ -77,6 +79,6 @@ AC_SUBST(PYDEV, $PYDEV)
 AC_SUBST(PYLIB, $PYLIB)
 AC_SUBST(SONAME, $SONAME)
 AC_SUBST(FRAMEWORK, $FRAMEWORK)
-AC_SUBST(LIBFTDI, $LIBFTDI)
+AC_SUBST(LIBFTDI1, $LIBFTDI1)
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT

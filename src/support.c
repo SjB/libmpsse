@@ -7,8 +7,8 @@
 
 #include <string.h>
 
-#if LIBFTDI == 1
-#include <libftdi/ftdi.h>
+#if LIBFTDI1 == 1
+#include <libftdi1/ftdi.h>
 #else
 #include <ftdi.h>
 #endif

@@ -5,12 +5,13 @@
  * 27 December 2011
  */
 
+#include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
 #include <unistd.h>
 
-#if LIBFTDI == 1
-#include <libftdi/ftdi.h>
+#if LIBFTDI1 == 1
+#include <libftdi1/ftdi.h>
 #else
 #include <ftdi.h>
 #endif

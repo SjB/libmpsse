@@ -595,7 +595,7 @@ ac_includes_default="\
 #endif"
 
 ac_subst_vars='LTLIBOBJS
-LIBFTDI
+LIBFTDI1
 FRAMEWORK
 SONAME
 PYLIB
@@ -3348,10 +3348,40 @@ fi
 
 
 
-LDFLAGS="-lftdi $LDFLAGS"
 CFLAGS="-Wall -fPIC -fno-strict-aliasing $CFLAGS"
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ftdi_init in -lftdi" >&5
+for ac_header in libftdi1/ftdi.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "libftdi1/ftdi.h" "ac_cv_header_libftdi1_ftdi_h" "$ac_includes_default"
+if test "x$ac_cv_header_libftdi1_ftdi_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBFTDI1_FTDI_H 1
+_ACEOF
+ LIBFTDI1=1
+else
+  LIBFTDI1=""
+fi
+
+done
+
+
+if ! test $LIBFTDI1
+then
+	for ac_header in ftdi.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "ftdi.h" "ac_cv_header_ftdi_h" "$ac_includes_default"
+if test "x$ac_cv_header_ftdi_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_FTDI_H 1
+_ACEOF
+ LIBFTDI1=0
+else
+  echo "error: missing libftdi header files" && exit 1
+fi
+
+done
+
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ftdi_init in -lftdi" >&5
 $as_echo_n "checking for ftdi_init in -lftdi... " >&6; }
 if test "${ac_cv_lib_ftdi_ftdi_init+set}" = set; then :
   $as_echo_n "(cached) " >&6
@@ -3398,37 +3428,9 @@ else
   echo "error: missing libftdi library" && exit 1
 fi
 
-for ac_header in libftdi/ftdi.h
-do :
-  ac_fn_c_check_header_mongrel "$LINENO" "libftdi/ftdi.h" "ac_cv_header_libftdi_ftdi_h" "$ac_includes_default"
-if test "x$ac_cv_header_libftdi_ftdi_h" = x""yes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBFTDI_FTDI_H 1
-_ACEOF
- LIBFTDI=1
+	LDFLAGS="-lftdi $LDFLAGS"
 else
-  LIBFTDI=""
-fi
-
-done
-
-
-if ! test $LIBFTDI
-then
-	for ac_header in ftdi.h
-do :
-  ac_fn_c_check_header_mongrel "$LINENO" "ftdi.h" "ac_cv_header_ftdi_h" "$ac_includes_default"
-if test "x$ac_cv_header_ftdi_h" = x""yes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_FTDI_H 1
-_ACEOF
- LIBFTDI=0
-else
-  echo "error: missing libftdi header files" && exit 1
-fi
-
-done
-
+	LDFLAGS="-lftdi1 $LDFLAGS"
 fi
 
 if test $BUILD
@@ -3504,7 +3506,7 @@ SONAME=$SONAME
 
 FRAMEWORK=$FRAMEWORK
 
-LIBFTDI=$LIBFTDI
+LIBFTDI1=$LIBFTDI1
 
 ac_config_files="$ac_config_files Makefile"
 
