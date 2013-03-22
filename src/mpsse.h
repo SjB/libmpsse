@@ -177,6 +177,7 @@ struct mpsse_context *OpenIndex(int vid, int pid, enum modes mode, int freq, int
 void Close(struct mpsse_context *mpsse);
 char *ErrorString(struct mpsse_context *mpsse);
 int SetMode(struct mpsse_context *mpsse, int endianess);
+void EnableBitmode(struct mpsse_context *mpsse);
 int SetClock(struct mpsse_context *mpsse, uint32_t freq);
 int GetClock(struct mpsse_context *mpsse);
 int GetVid(struct mpsse_context *mpsse);

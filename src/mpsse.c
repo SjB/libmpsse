@@ -226,6 +226,21 @@ void Close(struct mpsse_context *mpsse)
 	return;
 }
 
+/* Enables bit-wise data transfers.
+ * Must be called after MPSSE() / Open() / OpenIndex().
+ *
+ * Returns void.
+ */
+void EnableBitmode(struct mpsse_context *mpsse)
+{
+	if(is_valid_context(mpsse))
+	{
+		mpsse->tx |= MPSSE_BITMODE;
+		mpsse->rx |= MPSSE_BITMODE;
+		mpsse->txrx |= MPSSE_BITMODE;
+	}
+}
+
 /*
  * Sets the appropriate transmit and receive commands based on the requested mode and byte order.
  *
