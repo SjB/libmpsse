@@ -17,16 +17,19 @@ TARGET=mpsse
 
 all: $(TARGET) py$(BUILD)-build
 
-$(TARGET): mpsse.o
-	$(CC) $(CFLAGS) -shared -Wl,$(SONAME),lib$(TARGET).so $(TARGET).o support.o \
+$(TARGET): mpsse.o fast.o
+	$(CC) $(CFLAGS) -shared -Wl,$(SONAME),lib$(TARGET).so $(TARGET).o fast.o support.o \
 		-o lib$(TARGET).so $(LDFLAGS)
-	ar rcs lib$(TARGET).a $(TARGET).o support.o
+	ar rcs lib$(TARGET).a $(TARGET).o fast.o support.o
 
 example-code:
 	make -C examples
 
 mpsse.o: support.o
 	$(CC) $(CFLAGS) $(LDFLAGS) -DLIBFTDI1=$(LIBFTDI1) -c mpsse.c
+
+fast.o: support.o
+	$(CC) $(CFLAGS) $(LDFLAGS) -c fast.c
 
 support.o:
 	$(CC) $(CFLAGS) $(LDFLAGS) -DLIBFTDI1=$(LIBFTDI1) -c support.c
