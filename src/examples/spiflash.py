@@ -17,7 +17,7 @@ class SPIFlash:
 	def __init__(self, speed=FIFTEEN_MHZ):
 
 		# Sanity check on the specified clock speed
-		if not speed or speed is None:
+		if not speed:
 			speed = FIFTEEN_MHZ
 	
 		self.flash = MPSSE(SPI0, speed, MSB)
@@ -124,7 +124,7 @@ if __name__ == "__main__":
 			elif opt in ('-r', '--read'):
 				action = "read"
 				fname = arg
-			elif opt in ('w', '--write'):
+			elif opt in ('-w', '--write'):
 				action = "write"
 				fname = arg
 			elif opt in ('-e', '--erase'):
@@ -142,7 +142,7 @@ if __name__ == "__main__":
 		print "%s initialized at %d hertz" % (spi.chip, spi.speed)
 
 		if action == "read":
-			if fname is None or size is None:
+			if fname is None or not size:
 				print "Please specify an output file and read size!"
 				usage()
 			
@@ -158,7 +158,7 @@ if __name__ == "__main__":
 				usage()
 
 			data = open(fname, 'rb').read()
-			if size is None:
+			if not size:
 				size = len(data)
 
 			sys.stdout.write("Writing %d bytes from %s to the chip starting at address 0x%X..." % (size, fname, address))

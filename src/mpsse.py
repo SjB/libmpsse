@@ -97,6 +97,12 @@ class MPSSE:
 			raise Exception, self.ErrorString()
 		return MPSSE_OK
 
+	def EnableBitmode(self):
+		"""
+		Enables bitwise data transfers.
+		"""
+		return _mpsse.EnableBitmode(self.context)
+
 	def FlushAfterRead(self, tf):
 		"""
 		Enables / disables flushing of the recieve buffer after each read operation.

@@ -122,12 +122,8 @@ struct mpsse_context *OpenIndex(int vid, int pid, enum modes mode, int freq, int
 	{
 		memset(mpsse, 0, sizeof(struct mpsse_context));
 
-		/* 
-		 * Default to flushing the read buffer on the FTDI chip after each read operation, as this was necessary at some point.
-		 * Needs more testing to determine if this is still necessary, or if the flushing requirement was merely a symptom of some
-		 * other bug that has since been fixed; initial testing suggests that this is not necessary, at least for SPI.
-		 */
-		FlushAfterRead(mpsse, 1);
+		/* Legacy; flushing is no longer needed, so disable it by default. */
+		FlushAfterRead(mpsse, 0);
 
 		/* ftdilib initialization */
 		if(ftdi_init(&mpsse->ftdi) == 0)
@@ -596,9 +592,10 @@ void SetCSIdle(struct mpsse_context *mpsse, int idle)
 
 /* 
  * Enables or disables flushing of the FTDI chip's RX buffers after each read operation.
+ * Flushing is disable by default.
  *
  * @mpsse - MPSSE context pointer.
- * @tf    - Set to 1 to enable flushing (the default), or 0 to disable flushing.
+ * @tf    - Set to 1 to enable flushing, or 0 to disable flushing.
  *
  * Returns void.
  */

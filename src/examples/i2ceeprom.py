@@ -24,6 +24,10 @@ try:
 			data = eeprom.Read(SIZE)
 			eeprom.SendNacks()
 			eeprom.Read(1)
+		else:
+			raise Exception("Received read command NACK!")
+	else:
+		raise Exception("Received write command NACK!")
 
 	eeprom.Stop()
 	
