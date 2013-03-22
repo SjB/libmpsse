@@ -102,10 +102,10 @@ if __name__ == "__main__":
 	def main():
 		fname = None
 		freq = None
-		size = None
 		action = None
 		verify = False
 		address = 0
+		size = 0
 		data = ""
 
 		try:

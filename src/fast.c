@@ -1,5 +1,6 @@
 /*
  * Fast function for libmpsse.
+ * For use only with SPI modes.
  *
  * Paolo Zambotti
  * 20 March 2013
@@ -149,7 +150,6 @@ int FastRead(struct mpsse_context *mpsse, char *data, int size)
 
 /* 
  * Function to perform fast transfers in MPSSE.
- * For use with SPI only.
  *
  * @mpsse - libmpsse context pointer.
  * @wdata - The data to write.

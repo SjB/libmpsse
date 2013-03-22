@@ -1,9 +1,12 @@
 LDFLAGS=-lmpsse
 
-all: spiflash i2ceeprom ds1305 gpio bitbang
+all: spiflash spiflashfast i2ceeprom ds1305 gpio bitbang
 
 spiflash:
 	$(CC) $(CFLAGS) spiflash.c -o spiflash $(LDFLAGS)
+
+spiflashfast:
+	$(CC) $(CFLAGS) spiflashfast.c -o spiflashfast $(LDFLAGS)
 
 i2ceeprom:
 	$(CC) $(CFLAGS) i2ceeprom.c -o i2ceeprom $(LDFLAGS)
@@ -19,6 +22,6 @@ bitbang:
 
 clean:
 	rm -f *.dSYM
-	rm -f bitbang gpio ds1305 i2ceeprom spiflash
+	rm -f bitbang gpio ds1305 i2ceeprom spiflash spiflashfast
 
 distclean: clean
