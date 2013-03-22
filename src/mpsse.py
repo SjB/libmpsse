@@ -97,11 +97,12 @@ class MPSSE:
 			raise Exception, self.ErrorString()
 		return MPSSE_OK
 
-	def EnableBitmode(self):
+	def EnableBitmode(self, tf):
 		"""
-		Enables bitwise data transfers.
+		Enables/disables bitwise data transfers.
+		Set tf to 1 to enable, 0 to disable.
 		"""
-		return _mpsse.EnableBitmode(self.context)
+		return _mpsse.EnableBitmode(self.context, tf)
 
 	def FlushAfterRead(self, tf):
 		"""
@@ -247,6 +248,15 @@ class MPSSE:
 		For use in BITBANG mode only.
 		"""
 		return _mpsse.SetDirection(self.context, direction)
+
+	def WriteBits(self, bits, n):
+		"""
+		Writes n number of bits from byte 'bits'.
+		"""
+		return _mpsse.WriteBits(self.context, bits, n)
+
+	def ReadBits(self, n):
+		return _mpsse.ReadBits(self.context, n)
 
 	def WritePins(self, data):
 		"""

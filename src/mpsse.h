@@ -157,6 +157,7 @@ struct mpsse_context
 	int clock;
 	int xsize;
 	int open;
+	int endianess;
 	uint8_t tris;
 	uint8_t pstart;
 	uint8_t pstop;
@@ -177,7 +178,7 @@ struct mpsse_context *OpenIndex(int vid, int pid, enum modes mode, int freq, int
 void Close(struct mpsse_context *mpsse);
 char *ErrorString(struct mpsse_context *mpsse);
 int SetMode(struct mpsse_context *mpsse, int endianess);
-void EnableBitmode(struct mpsse_context *mpsse);
+void EnableBitmode(struct mpsse_context *mpsse, int tf);
 int SetClock(struct mpsse_context *mpsse, uint32_t freq);
 int GetClock(struct mpsse_context *mpsse);
 int GetVid(struct mpsse_context *mpsse);
@@ -196,6 +197,8 @@ void FlushAfterRead(struct mpsse_context *mpsse, int tf);
 int PinHigh(struct mpsse_context *mpsse, int pin);
 int PinLow(struct mpsse_context *mpsse, int pin);
 int SetDirection(struct mpsse_context *mpsse, uint8_t direction);
+int WriteBits(struct mpsse_context *mpsse, char bits, int size);
+char ReadBits(struct mpsse_context *mpsse, int size);
 int WritePins(struct mpsse_context *mpsse, uint8_t data);
 int ReadPins(struct mpsse_context *mpsse);
 int PinState(struct mpsse_context *mpsse, int pin, int state);

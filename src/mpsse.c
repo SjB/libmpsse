@@ -138,6 +138,7 @@ struct mpsse_context *OpenIndex(int vid, int pid, enum modes mode, int freq, int
 				mpsse->vid = vid;
 				mpsse->pid = pid;
 				mpsse->status = STOPPED;
+				mpsse->endianess = endianess;
 
 				/* Set the appropriate transfer size for the requested protocol */
 				if(mpsse->mode == I2C)
@@ -227,13 +228,22 @@ void Close(struct mpsse_context *mpsse)
  *
  * Returns void.
  */
-void EnableBitmode(struct mpsse_context *mpsse)
+void EnableBitmode(struct mpsse_context *mpsse, int tf)
 {
 	if(is_valid_context(mpsse))
 	{
-		mpsse->tx |= MPSSE_BITMODE;
-		mpsse->rx |= MPSSE_BITMODE;
-		mpsse->txrx |= MPSSE_BITMODE;
+		if(tf)
+		{
+			mpsse->tx |= MPSSE_BITMODE;
+			mpsse->rx |= MPSSE_BITMODE;
+			mpsse->txrx |= MPSSE_BITMODE;
+		}
+		else
+		{
+			mpsse->tx &= ~MPSSE_BITMODE;
+			mpsse->rx &= ~MPSSE_BITMODE;
+			mpsse->txrx &= ~MPSSE_BITMODE;
+		}
 	}
 }
 
@@ -662,6 +672,50 @@ int Start(struct mpsse_context *mpsse)
 	return status;
 }
 
+/* 
+ * Performs a bit-wise write of up to 8 bits at a time.
+ *
+ * @mpsse - MPSSE context pointer.
+ * @bits  - A byte containing the desired bits to write.
+ * @size  - The number of bits from the 'bits' byte to write.
+ *
+ * Returns MPSSE_OK on success, MPSSE_FAIL on failure.
+ */
+int WriteBits(struct mpsse_context *mpsse, char bits, int size)
+{
+	char data[8] = { 0 };
+	int i = 0, retval = MPSSE_OK;
+
+	if(size > sizeof(data))
+	{
+		size = sizeof(data);
+	}
+
+	/* Convert each bit in bits to an array of bytes */
+	for(i=0; i<size; i++)
+	{
+		if(bits & (1 << i))
+		{
+			/* Be sure to honor endianess */
+			if(mpsse->endianess == LSB)
+			{
+				data[i] = '\xFF';
+			}
+			else
+			{
+				data[sizeof(data)-i-1] = '\xFF';
+			}
+		}
+	}
+
+	/* Enable bit mode before writing, then disable it afterwards. */
+	EnableBitmode(mpsse, 1);
+	retval = Write(mpsse, data, size);
+	EnableBitmode(mpsse, 0);
+
+	return retval;
+}
+
 /*
  * Send data out via the selected serial protocol.
  *
@@ -732,20 +786,8 @@ int Write(struct mpsse_context *mpsse, char *data, int size)
 	return retval;
 }
 
-/*
- * Reads data over the selected serial protocol.
- * 
- * @mpsse - MPSSE context pointer.
- * @size  - Number of bytes to read.
- *
- * Returns a pointer to the read data on success.
- * Returns NULL on failure.
- */
-#ifdef SWIGPYTHON
-swig_string_data Read(struct mpsse_context *mpsse, int size)
-#else
-char *Read(struct mpsse_context *mpsse, int size)
-#endif
+/* Performs a read. For internal use only; see Read() and ReadBits(). */
+char *InternalRead(struct mpsse_context *mpsse, int size)
 {
 	unsigned char *data = NULL, *buf = NULL;
 	unsigned char sbuf[SPI_RW_SIZE] = { 0 };
@@ -791,15 +833,83 @@ char *Read(struct mpsse_context *mpsse, int size)
 			}
 		}
 	}
-	
+
+	return (char *) buf;
+}
+
+/*
+ * Reads data over the selected serial protocol.
+ * 
+ * @mpsse - MPSSE context pointer.
+ * @size  - Number of bytes to read.
+ *
+ * Returns a pointer to the read data on success.
+ * Returns NULL on failure.
+ */
+#ifdef SWIGPYTHON
+swig_string_data Read(struct mpsse_context *mpsse, int size)
+#else
+char *Read(struct mpsse_context *mpsse, int size)
+#endif
+{
+	char *buf = NULL;
+
+	buf = InternalRead(mpsse, size);
+
 #ifdef SWIGPYTHON
 	swig_string_data sdata = { 0 };
-	sdata.size = n;
-	sdata.data = (char *) buf;
+	sdata.size = size;
+	sdata.data = buf;
 	return sdata;
 #else
-	return (char *) buf;
+	return buf;
 #endif
+}
+
+/* 
+ * Performs a bit-wise read of up to 8 bits.
+ *
+ * @mpsse - MPSSE context pointer.
+ * @size  - Number of bits to read.
+ *
+ * Returns an 8-bit byte containing the read bits.
+ */
+char ReadBits(struct mpsse_context *mpsse, int size)
+{
+	int i = 0;
+	char bits = 0;
+	char *rdata = NULL;
+
+	if(size > 8)
+	{
+		size = 8;
+	}
+
+	EnableBitmode(mpsse, 1);
+	rdata = InternalRead(mpsse, size);
+	EnableBitmode(mpsse, 0);
+
+	if(rdata)
+	{
+		for(i=0; i<size; i++)
+		{
+			if(rdata[i])
+			{
+				if(mpsse->endianess == LSB)
+				{
+					bits |= (1 << i);
+				}
+				else
+				{
+					bits |= (1 << (size-i-1));
+				}
+			}
+		}               
+                
+		free(rdata);
+	}
+
+	return bits;
 }
 
 /*
