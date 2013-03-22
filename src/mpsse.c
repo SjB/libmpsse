@@ -703,7 +703,7 @@ int WriteBits(struct mpsse_context *mpsse, char bits, int size)
 			}
 			else
 			{
-				data[sizeof(data)-i-1] = '\xFF';
+				data[size-i-1] = '\xFF';
 			}
 		}
 	}
