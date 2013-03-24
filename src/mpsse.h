@@ -176,14 +176,14 @@ struct mpsse_context *MPSSE(enum modes mode, int freq, int endianess);
 struct mpsse_context *Open(int vid, int pid, enum modes mode, int freq, int endianess, int interface, const char *description, const char *serial);
 struct mpsse_context *OpenIndex(int vid, int pid, enum modes mode, int freq, int endianess, int interface, const char *description, const char *serial, int index);
 void Close(struct mpsse_context *mpsse);
-char *ErrorString(struct mpsse_context *mpsse);
+const char *ErrorString(struct mpsse_context *mpsse);
 int SetMode(struct mpsse_context *mpsse, int endianess);
 void EnableBitmode(struct mpsse_context *mpsse, int tf);
 int SetClock(struct mpsse_context *mpsse, uint32_t freq);
 int GetClock(struct mpsse_context *mpsse);
 int GetVid(struct mpsse_context *mpsse);
 int GetPid(struct mpsse_context *mpsse);
-char *GetDescription(struct mpsse_context *mpsse);
+const char *GetDescription(struct mpsse_context *mpsse);
 int SetLoopback(struct mpsse_context *mpsse, int enable);
 void SetCSIdle(struct mpsse_context *mpsse, int idle);
 int Start(struct mpsse_context *mpsse);
@@ -203,7 +203,7 @@ int WritePins(struct mpsse_context *mpsse, uint8_t data);
 int ReadPins(struct mpsse_context *mpsse);
 int PinState(struct mpsse_context *mpsse, int pin, int state);
 int Tristate(struct mpsse_context *mpsse);
-int Version(void);
+char Version(void);
 
 #ifdef SWIGPYTHON
 typedef struct swig_string_data

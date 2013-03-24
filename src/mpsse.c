@@ -33,7 +33,8 @@ struct vid_pid supported_devices[] = {
 			{ 0x0403, 0xCFF8, "Amontec JTAGkey" },
 			{ 0x15BA, 0x0003, "Olimex Ltd. OpenOCD JTAG" },
 			{ 0x15BA, 0x0004, "Olimex Ltd. OpenOCD JTAG TINY" },
-			
+			{ 0x0403, 0x8A98, "TIAO Multi Protocol Adapter"}, 
+
 			{ 0, 0, NULL }
 };
 
@@ -452,7 +453,7 @@ int SetClock(struct mpsse_context *mpsse, uint32_t freq)
  *
  * Returns a pointer to the last error string.
  */
-char *ErrorString(struct mpsse_context *mpsse)
+const char *ErrorString(struct mpsse_context *mpsse)
 {
 	if(mpsse != NULL)
 	{
@@ -526,7 +527,7 @@ int GetPid(struct mpsse_context *mpsse)
  *
  * Returns the description of the FTDI chip.
  */
-char *GetDescription(struct mpsse_context *mpsse)
+const char *GetDescription(struct mpsse_context *mpsse)
 {
 	char *description = NULL;
 	
@@ -1254,10 +1255,10 @@ int Tristate(struct mpsse_context *mpsse)
  * Returns the libmpsse version number. 
  * High nibble is major version, low nibble is minor version.
  */
-int Version(void)
+char Version(void)
 {
-	int major = 0, minor = 0, version = 0;
-	char *version_string = NULL, *decimal_ptr = NULL;
+	int major = 0, minor = 0;
+	char version = 0, *version_string = NULL, *decimal_ptr = NULL;
 
 	version_string = strdup(PACKAGE_VERSION);
 	if(version_string)
@@ -1274,7 +1275,7 @@ int Version(void)
 		free(version_string);
 	}
 
-	version = (major << 4) + (minor & 0x0F);
+	version = (char) ((major << 4) + (minor & 0x0F));
 
 	return version;
 }
