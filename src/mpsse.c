@@ -877,7 +877,6 @@ char *Read(struct mpsse_context *mpsse, int size)
  */
 char ReadBits(struct mpsse_context *mpsse, int size)
 {
-	int i = 0;
 	char bits = 0;
 	char *rdata = NULL;
 
@@ -892,21 +891,26 @@ char ReadBits(struct mpsse_context *mpsse, int size)
 
 	if(rdata)
 	{
-		for(i=0; i<size; i++)
+		/* The last byte in rdata will have all the read bits set or unset as needed. */
+		bits = rdata[size-1];
+
+		if(mpsse->endianess == MSB)
 		{
-			if(rdata[i])
-			{
-				if(mpsse->endianess == LSB)
-				{
-					bits |= (1 << i);
-				}
-				else
-				{
-					bits |= (1 << (size-i-1));
-				}
-			}
-		}               
-                
+			/*
+			 * In MSB mode, bits are sifted in from the left. If less than 8 bits were
+			 * read, we need to shift them left accordingly.
+			 */
+			bits = bits << (8-size);
+		}
+		else if(mpsse->endianess == LSB)
+		{
+			/* 
+			 * In LSB mode, bits are shifted in from the right. If less than 8 bits were
+			 * read, we need to shift them right accordingly.
+			 */
+			bits = bits >> (8-size);
+		}
+		
 		free(rdata);
 	}
 

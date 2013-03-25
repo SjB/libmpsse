@@ -256,7 +256,7 @@ class MPSSE:
 		return _mpsse.WriteBits(self.context, bits, n)
 
 	def ReadBits(self, n):
-		return _mpsse.ReadBits(self.context, n)
+		return ord(_mpsse.ReadBits(self.context, n))
 
 	def WritePins(self, data):
 		"""
