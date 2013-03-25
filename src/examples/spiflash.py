@@ -85,7 +85,7 @@ if __name__ == "__main__":
 
 	def pin_mappings():
 		print """
-           Pin Mappings for Common 8-pin SPI Flash Chips       
+           Common Pin Mappings for 8-pin SPI Flash Chips       
 --------------------------------------------------------------------
 | Description | SPI Flash Pin | FTDI Pin | C232HM Cable Color Code |
 --------------------------------------------------------------------
@@ -112,7 +112,7 @@ if __name__ == "__main__":
 		print "\t-f, --frequency=<int>  Set the SPI clock frequency, in hertz [15,000,000]"
 		print "\t-v, --verify           Verify data that has been read/written"
 		print "\t-e, --erase            Erase the entire chip"
-		print "\t-m, --pin-mappings     Display a table of SPI flash to FTDI pin mappings"
+		print "\t-p, --pin-mappings     Display a table of SPI flash to FTDI pin mappings"
 		print "\t-h, --help             Show help"
 		print ""
 
@@ -128,7 +128,7 @@ if __name__ == "__main__":
 		data = ""
 
 		try:
-			opts, args = GetOpt(sys.argv[1:], "f:s:a:r:w:emvh", ["frequency=", "size=", "address=", "read=", "write=", "erase", "verify", "pin-mappings", "help"])
+			opts, args = GetOpt(sys.argv[1:], "f:s:a:r:w:epvh", ["frequency=", "size=", "address=", "read=", "write=", "erase", "verify", "pin-mappings", "help"])
 		except GetoptError, e:
 			print e
 			usage()
@@ -152,7 +152,7 @@ if __name__ == "__main__":
 				verify = True
 			elif opt in ('-h', '--help'):
 				usage()
-			elif opt in ('-m', '--pin-mappings'):
+			elif opt in ('-p', '--pin-mappings'):
 				pin_mappings()
 
 		if action is None:
