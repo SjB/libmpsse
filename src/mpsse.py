@@ -47,7 +47,7 @@ TWELVE_MHZ = _mpsse.TWELVE_MHZ
 FIFTEEN_MHZ = _mpsse.FIFTEEN_MHZ
 THIRTY_MHZ = _mpsse.THIRTY_MHZ
 
-class MPSSE:
+class MPSSE(object):
 	"""
 	Python class wrapper for libmpsse.
 	"""
@@ -68,6 +68,17 @@ class MPSSE:
 			self.context = _mpsse.MPSSE(mode, frequency, endianess)
 			if self.context.open == 0:
 				raise Exception, self.ErrorString()
+
+	def __enter__(self):
+		return self
+
+	def __exit__(self, t, v, traceback):
+		if self.context:
+			self.Close()
+
+	def __del__(self):
+		if self.context:
+			self.Close()
 
 	def Open(self, vid, pid, mode, frequency=ONE_HUNDRED_KHZ, endianess=MSB, interface=IFACE_A, description=None, serial=None, index=0):
 		"""
