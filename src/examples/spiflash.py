@@ -3,7 +3,7 @@
 from mpsse import *
 from time import sleep
 
-class SPIFlash:
+class SPIFlash(object):
 
 	WCMD = "\x02"		# Standard SPI flash write command (0x02)
 	RCMD = "\x03"		# Standard SPI flash read command (0x03)
@@ -83,6 +83,24 @@ if __name__ == "__main__":
 	import sys
 	from getopt import getopt as GetOpt, GetoptError
 
+	def pin_mappings():
+		print """
+           Pin Mappings for Common 8-pin SPI Flash Chips       
+--------------------------------------------------------------------
+| Description | SPI Flash Pin | FTDI Pin | C232HM Cable Color Code |
+--------------------------------------------------------------------
+| CS          | 1             | ADBUS3   | Brown                   |
+| MISO        | 2             | ADBUS2   | Green                   |
+| WP          | 3             | ADBUS4   | Grey                    |
+| GND         | 4             | N/A      | Black                   |
+| MOSI        | 5             | ADBUS1   | Yellow                  |
+| CLK         | 6             | ADBUS0   | Orange                  |
+| HOLD        | 7             | ADBUS5   | Purple                  |
+| Vcc         | 8             | N/A      | Red                     |
+--------------------------------------------------------------------
+"""
+		sys.exit(0)
+
 	def usage():
 		print ""
 		print "Usage: %s [OPTIONS]" % sys.argv[0]
@@ -94,6 +112,7 @@ if __name__ == "__main__":
 		print "\t-f, --frequency=<int>  Set the SPI clock frequency, in hertz [15,000,000]"
 		print "\t-v, --verify           Verify data that has been read/written"
 		print "\t-e, --erase            Erase the entire chip"
+		print "\t-m, --pin-mappings     Display a table of SPI flash to FTDI pin mappings"
 		print "\t-h, --help             Show help"
 		print ""
 
@@ -109,7 +128,7 @@ if __name__ == "__main__":
 		data = ""
 
 		try:
-			opts, args = GetOpt(sys.argv[1:], "f:s:a:r:w:evh", ["frequency=", "size=", "address=", "read=", "write=", "erase", "verify", "help"])
+			opts, args = GetOpt(sys.argv[1:], "f:s:a:r:w:emvh", ["frequency=", "size=", "address=", "read=", "write=", "erase", "verify", "pin-mappings", "help"])
 		except GetoptError, e:
 			print e
 			usage()
@@ -133,6 +152,8 @@ if __name__ == "__main__":
 				verify = True
 			elif opt in ('-h', '--help'):
 				usage()
+			elif opt in ('-m', '--pin-mappings'):
+				pin_mappings()
 
 		if action is None:
 			print "Please specify an action!"
