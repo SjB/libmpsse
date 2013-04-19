@@ -9,7 +9,9 @@ class SPIFlash(object):
 	RCMD = "\x03"		# Standard SPI flash read command (0x03)
 	WECMD = "\x06"		# Standard SPI flash write enable command (0x06)
 	CECMD = "\xc7"		# Standard SPI flash chip erase command (0xC7)
-	
+	IDCMD = "\x9f"		# Standard SPI flash chip ID command (0x9F)
+
+	ID_LENGTH = 3		# Normal SPI chip ID length, in bytes
 	ADDRESS_LENGTH = 3	# Normal SPI flash address length (24 bits, aka, 3 bytes)
 	BLOCK_SIZE = 256	# SPI block size, writes must be done in multiples of this size
 	PP_PERIOD = .025	# Page program time, in seconds
@@ -74,6 +76,13 @@ class SPIFlash(object):
 		self.flash.Write(self.CECMD)
 		self.flash.Stop()
 
+	def ChipID(self):
+		self.flash.Start()
+		self.flash.Write(self.IDCMD)
+		chipid = self.flash.Read(self.IDLEN)
+		self.flash.Stop()
+		return chipid
+
 	def Close(self):
 		self.flash.Close()
 
@@ -110,6 +119,7 @@ if __name__ == "__main__":
 		print "\t-s, --size=<int>       Set the size of data to read/write"
 		print "\t-a, --address=<int>    Set the starting address for the read/write operation [0]"
 		print "\t-f, --frequency=<int>  Set the SPI clock frequency, in hertz [15,000,000]"
+		print "\t-i, --id               Read the chip ID"
 		print "\t-v, --verify           Verify data that has been read/written"
 		print "\t-e, --erase            Erase the entire chip"
 		print "\t-p, --pin-mappings     Display a table of SPI flash to FTDI pin mappings"
@@ -128,7 +138,7 @@ if __name__ == "__main__":
 		data = ""
 
 		try:
-			opts, args = GetOpt(sys.argv[1:], "f:s:a:r:w:epvh", ["frequency=", "size=", "address=", "read=", "write=", "erase", "verify", "pin-mappings", "help"])
+			opts, args = GetOpt(sys.argv[1:], "f:s:a:r:w:eipvh", ["frequency=", "size=", "address=", "read=", "write=", "id", "erase", "verify", "pin-mappings", "help"])
 		except GetoptError, e:
 			print e
 			usage()
@@ -146,6 +156,8 @@ if __name__ == "__main__":
 			elif opt in ('-w', '--write'):
 				action = "write"
 				fname = arg
+			elif opt in ('-i', '--id'):
+				action = "id"
 			elif opt in ('-e', '--erase'):
 				action = "erase"
 			elif opt in ('-v', '--verify'):
@@ -187,6 +199,12 @@ if __name__ == "__main__":
 			spi.Write(data[0:size], address)
 			print "done."
 
+		elif action == "id":
+
+			for byte in spi.ChipID():
+				print ("%.2X" % ord(byte)),
+			print ""
+
 		elif action == "erase":
 			
 			data = "\xFF" * size
@@ -206,9 +224,9 @@ if __name__ == "__main__":
 				elif data == ("\x00" * size):
 					print "read all 0x00's."
 				else:
-					print "success."
+					print "reads are identical, verification successful."
 			else:
-				print "failure."
+				print "reads are not identical, verification failed."
 
 		spi.Close()
 
