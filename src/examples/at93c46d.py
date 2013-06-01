@@ -1,5 +1,14 @@
 #!/usr/bin/env python
 # Example code for reading from the AT93C46D microwire EEPROM chip.
+#
+# 1   CS     ADBUS3   Brown
+# 2   SK     ADBUS0   Orange
+# 3   MOSI   ADBUS1   Yellow
+# 4   MISO   ADBUS2   Green
+# 5   GND    GND      Black
+# 6   ORG    ADBUS4   Grey
+# 7   NC              
+# 8   Vcc    Vcc      Red
 
 import sys
 import binascii
@@ -10,8 +19,15 @@ try:
 	address = int(sys.argv[2], 0)
 	nbytes = data = sys.argv[3]
 except:
-	print "Usage: %s read  <address> <number of bytes>" % sys.argv[0]
-	print "       %s write <address> <data>" % sys.argv[0]
+	print ""
+	print "Usage:"
+	print "	%s read  <address> <number of bytes>" % sys.argv[0]
+	print "	%s write <address> <data>" % sys.argv[0]
+	print ""
+	print "Examples:"
+	print "	%s read 0 128 > dump.bin" % sys.argv[0]
+	print "	%s write 0 0102030405" % sys.argv[0]
+	print ""
 	sys.exit(1)
 
 def read(address, nbytes):
@@ -72,12 +88,16 @@ def write(address, data):
 # Initialize the FTDI chip
 at93c = MPSSE(SPI0, ONE_MHZ, MSB)
 
+# Connect GPIOL0 to the chip's ORG pin to put it in x8 mode
+at93c.PinLow(GPIOL0)
+
 # Chip select idles low
 at93c.SetCSIdle(0)
 
 if command == 'read':
 	data = read(address, int(nbytes, 0))
-	print "Read %d bytes: %s" % (len(data), binascii.hexlify(data))
+	sys.stderr.write("Read %d bytes.\n" % len(data))
+	sys.stdout.write(data)
 elif command == 'write':
 	write(address, binascii.unhexlify(data))
 	print "Write complete."
