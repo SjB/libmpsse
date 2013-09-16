@@ -157,6 +157,7 @@ struct mpsse_context
 	int clock;
 	int xsize;
 	int open;
+	int ftdi_initialized;
 	int endianess;
 	uint8_t tris;
 	uint8_t pstart;
