@@ -1,17 +1,17 @@
-LDFLAGS=-lmpsse
+CC=@CC@
+TARGET=@TARGET@
+LDFLAGS=@LDFLAGS@ -L.. -l$(TARGET)
+CFLAGS=@CFLAGS@ -I.. -DISMINGW=@ISMINGW@
 
-all: spiflash spiflashfast i2ceeprom ds1305 gpio bitbang
+all: spiflash i2ceeprom bitbang dsl305 gpio
 
 spiflash:
 	$(CC) $(CFLAGS) spiflash.c -o spiflash $(LDFLAGS)
 
-spiflashfast:
-	$(CC) $(CFLAGS) spiflashfast.c -o spiflashfast $(LDFLAGS)
-
 i2ceeprom:
 	$(CC) $(CFLAGS) i2ceeprom.c -o i2ceeprom $(LDFLAGS)
 
-ds1305:
+dsl305:
 	$(CC) $(CFLAGS) ds1305.c -o ds1305 $(LDFLAGS)
 
 gpio:
@@ -21,7 +21,9 @@ bitbang:
 	$(CC) $(CFLAGS) bitbang.c -o bitbang $(LDFLAGS)
 
 clean:
-	rm -f *.dSYM
-	rm -f bitbang gpio ds1305 i2ceeprom spiflash spiflashfast
+	rm -rf *.dSYM
+	rm -rf bitbang gpio dsl305 i2ceeprom spiflash
+	rm -rf bitbang.exe gpio.exe i2ceeprom.exe spiflash.exe
 
-distclean: clean
+.distclean: clean
+

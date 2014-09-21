@@ -180,7 +180,7 @@ void Close(struct mpsse_context *mpsse);
 const char *ErrorString(struct mpsse_context *mpsse);
 int SetMode(struct mpsse_context *mpsse, int endianess);
 void EnableBitmode(struct mpsse_context *mpsse, int tf);
-int SetClock(struct mpsse_context *mpsse, uint32_t freq);
+int SetClock(struct mpsse_context *mpsse, int freq);
 int GetClock(struct mpsse_context *mpsse);
 int GetVid(struct mpsse_context *mpsse);
 int GetPid(struct mpsse_context *mpsse);
